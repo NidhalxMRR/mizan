@@ -11,8 +11,37 @@
  * une donnée dont on ne sait pas d'où elle vient.
  */
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8820';
+/**
+ * L'adresse de l'API.
+ *
+ * Elle est déduite de l'adresse par laquelle la page elle-même a été
+ * ouverte, et non figée à la compilation. Le motif est concret : une valeur
+ * codée en dur sur `127.0.0.1` désigne la machine de celui qui regarde
+ * l'écran. Tant qu'on essaie depuis le serveur, tout fonctionne ; dès qu'un
+ * membre du jury ouvre le lien sur son propre téléphone, son navigateur
+ * cherche l'API chez lui, ne trouve rien, et chaque appel échoue sans que le
+ * serveur n'ait jamais eu connaissance de la tentative.
+ *
+ * On prend donc le nom d'hôte de la page en cours et on y applique le port du
+ * service. Le site ouvert sur l'adresse publique interroge l'API sur cette
+ * même adresse publique ; ouvert en local, il reste en local. Une variable
+ * d'environnement garde le dernier mot lorsqu'elle est fournie, pour les cas
+ * où l'API vit ailleurs que le site.
+ */
+const PORT_API = '8820';
+
+function adresseDeLApi(): string {
+  const impose = process.env.NEXT_PUBLIC_API_URL;
+  if (impose) return impose;
+
+  // Au rendu côté serveur, `window` n'existe pas : on vise la machine locale,
+  // qui est bien celle où tourne l'API pendant ce rendu.
+  if (typeof window === 'undefined') return `http://127.0.0.1:${PORT_API}`;
+
+  return `${window.location.protocol}//${window.location.hostname}:${PORT_API}`;
+}
+
+export const API_URL = adresseDeLApi();
 
 // --- /sante -----------------------------------------------------------------
 
