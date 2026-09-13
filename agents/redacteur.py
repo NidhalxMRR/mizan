@@ -89,6 +89,55 @@ def numeros_cites(texte: str) -> set:
     return trouves
 
 
+# --- Détection du CODE attribué à un article --------------------------------
+# Un numéro juste dans le mauvais code reste une erreur de droit. Le modèle a
+# écrit « Code des Obligations et des Contrats, article 60 » alors que le 60
+# est au Code de procédure civile : le numéro figurait bien dans la liste
+# blanche, donc le contrôle par numéro seul laissait passer la faute. Vu par
+# un magistrat, cette phrase décrédibilise tout le reste.
+_NOMS_DE_CODE = [
+    ("coc", re.compile(
+        r"code\s+des\s+obligations|COC\b|مجلة\s+الالتزامات", re.I)),
+    ("procciv", re.compile(
+        r"code\s+de\s+proc[ée]dure\s+civile|CPCC?\b|مجلة\s+المرافعات", re.I)),
+    ("commerce", re.compile(
+        r"code\s+de\s+commerce|مجلة\s+التجارة", re.I)),
+    ("fiscal", re.compile(
+        r"code\s+des\s+droits|fiscal|مجلة\s+الحقوق", re.I)),
+]
+
+# Un code nommé puis, dans les 60 caractères qui suivent, un numéro d'article.
+_CODE_PUIS_ARTICLE = re.compile(
+    r"(?P<code>code\s+[^,.;()]{3,60}|COC|CPCC?)"
+    r"[^0-9]{0,40}?"
+    r"(?:articles?|art\.?)\s*(?:n[°o]\s*)?(?P<num>\d{1,4})",
+    re.I,
+)
+
+
+def _code_nomme(fragment: str) -> str | None:
+    """Quel code ce fragment de texte désigne-t-il ?"""
+    for code_id, rx in _NOMS_DE_CODE:
+        if rx.search(fragment or ""):
+            return code_id
+    return None
+
+
+def attributions_citees(texte: str) -> set:
+    """Les couples (code_id, numéro) que le texte attribue explicitement.
+
+    On ne retient que les citations où le modèle a NOMMÉ un code : un numéro
+    seul n'affirme rien sur son origine et reste couvert par `numeros_cites`.
+    """
+    couples = set()
+    for m in _CODE_PUIS_ARTICLE.finditer(texte or ""):
+        code_id = _code_nomme(m.group("code"))
+        if code_id:
+            couples.add((code_id, m.group("num").lstrip("0") or m.group("num")))
+    return couples
+
+
+
 @dataclass
 class Redaction:
     """Sortie de l'agent 3."""
@@ -294,6 +343,22 @@ def rediger(faits: dict, recherche, evaluation: dict,
             cites = numeros_cites(candidat)
             hors = sorted(cites - autorises, key=lambda x: int(x))
 
+            # Deuxième garde : le bon numéro dans le mauvais code. Observé en
+            # conditions réelles — « Code des Obligations et des Contrats,
+            # article 60 » alors que le 60 appartient au Code de procédure
+            # civile. Le numéro étant autorisé, le premier contrôle laissait
+            # passer une affirmation juridiquement fausse.
+            attributions_valides = {
+                (
+                    a.get("code_id") if isinstance(a, dict) else a.code_id,
+                    str(a.get("article") if isinstance(a, dict) else a.article),
+                )
+                for a in articles
+            }
+            mal_attribues = sorted(
+                attributions_citees(candidat) - attributions_valides
+            )
+
             if not candidat:
                 motif_repli = "le modèle a renvoyé un texte vide"
             elif hors:
@@ -303,8 +368,16 @@ def rediger(faits: dict, recherche, evaluation: dict,
                     f"liste vérifiée ({', '.join(hors)}) : sa rédaction est "
                     "écartée en entier au profit de la version déterministe"
                 )
+            elif mal_attribues:
+                motif_repli = (
+                    "le modèle a rattaché un article au mauvais code ("
+                    + ", ".join(f"{c} art. {n}" for c, n in mal_attribues)
+                    + ") : le numéro existe mais l'attribution est fausse, "
+                    "la rédaction est écartée en entier"
+                )
             else:
                 texte, origine = candidat, rep.origine
+
 
         except ModeleIndisponible as exc:
             motif_repli = f"aucun modèle disponible ({exc})"
