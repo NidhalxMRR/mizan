@@ -165,8 +165,23 @@ function EtatService({ sante }: { sante: Sante }) {
                 ce serveur
               </code>
               <span className="hebergement-motif">
+                {/*
+                  Un corpus juridique n'est jamais fini : une loi nouvelle,
+                  un décret, un arrêté modifient le texte en vigueur. Le
+                  visiteur qui lit « 4 087 articles » doit savoir ce qui se
+                  passe le jour où le 4 088ᵉ paraît — sans quoi il suppose,
+                  à raison, que le chiffre vieillit.
+
+                  La réponse tient en une phrase : le texte modifié est
+                  réindexé, et la recherche le retrouve immédiatement. Rien
+                  à réentraîner, aucun modèle à reconstruire — c'est
+                  précisément ce que permet une recherche documentaire
+                  plutôt qu'un modèle qui aurait appris le droit par cœur.
+                */}
                 {sante.index_charge
-                  ? 'Actif — recherche dans le texte des articles'
+                  ? 'Actif — recherche dans le texte des articles. Toute loi ' +
+                    'nouvelle ou modifiée est réindexée et immédiatement ' +
+                    'citable, sans réentraînement.'
                   : 'Non chargé'}
               </span>
             </li>
