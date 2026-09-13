@@ -290,7 +290,17 @@ export function BulleAgent() {
           <span className="agent-declencheur-marque" aria-hidden="true">
             ⚖
           </span>
-          <span className="agent-declencheur-texte">Demander à Mizan</span>
+          {/*
+            Le libellé ne nomme pas la plateforme. « Demander à Mizan »
+            s'entend « demander à Mazen » — un prénom courant en Tunisie — et
+            laisse croire qu'on écrit à une personne, au moment précis où le
+            projet veut faire comprendre le contraire : la plateforme calcule,
+            elle ne conseille pas. « Poser une question juridique » dit ce que
+            le bouton fait, sans prêter de visage à un moteur.
+          */}
+          <span className="agent-declencheur-texte">
+            Poser une question juridique
+          </span>
         </button>
       ) : null}
 

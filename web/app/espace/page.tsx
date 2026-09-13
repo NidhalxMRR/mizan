@@ -59,6 +59,14 @@ export default function Espace() {
    */
   const [roleDuCompte, setRoleDuCompte] = useState<Role | null>(null);
 
+  /**
+   * Le nom de l'organisation pour laquelle le compte travaille. Il n'est
+   * connu qu'après lecture de la session, donc jamais au premier rendu :
+   * l'afficher immédiatement provoquerait une différence entre le serveur et
+   * le navigateur, et un avertissement d'hydratation en pleine démonstration.
+   */
+  const [nomOrganisation, setNomOrganisation] = useState('');
+
   useEffect(() => {
     const session = lireSession();
     if (!session) return;
@@ -69,6 +77,7 @@ export default function Espace() {
     if (!trouve) return;
     setRoleDuCompte(trouve);
     setRole(trouve);
+    setNomOrganisation(session.nomOrganisation || '');
   }, []);
 
   const tableau = tableaux[role];
@@ -88,14 +97,32 @@ export default function Espace() {
           <div className="espace-identite-texte">
             <p className="eyebrow">VOTRE ESPACE</p>
             <h1>
-              {roleLabels[role]}
-              <span className="espace-identite-ar">{roleLabelsAr[role]}</span>
+              {roleLabels[role]}{' '}
+              <span className="espace-identite-ar" dir="rtl">
+                {roleLabelsAr[role]}
+              </span>
             </h1>
+            {nomOrganisation ? (
+              // Le nom de l'organisation est la preuve visible du
+              // cloisonnement : il montre à l'écran pour qui la plateforme
+              // travaille. Sans lui, rien ne distingue deux comptes de même
+              // qualité, et la démonstration du multi-organisation repose sur
+              // la parole de l'orateur au lieu de l'écran.
+              <p className="espace-identite-organisation">{nomOrganisation}</p>
+            ) : null}
             <p className="espace-identite-sous">{tableau.accroche}</p>
           </div>
         </div>
 
-        <div className="selecteur-role">
+        {/*
+          Le sélecteur d'affichage sert à montrer les cinq espaces sans créer
+          cinq comptes. Mais dès qu'un compte est réellement connecté, il
+          devient nuisible : il affiche à l'écran le nom des quatre autres
+          qualités, et un jury peut croire que l'utilisateur a accès à toutes.
+          Il ne s'affiche donc que hors connexion.
+        */}
+        {roleDuCompte === null ? (
+          <div className="selecteur-role">
           <p className="selecteur-role-titre">
             Affichage de démonstration — voir l&apos;espace de
           </p>
@@ -133,7 +160,8 @@ export default function Espace() {
               </button>
             </p>
           ) : null}
-        </div>
+          </div>
+        ) : null}
       </header>
 
       {/* --- Les mesures de tête ---------------------------------------- */}

@@ -628,6 +628,22 @@
 	unicode-bidi: isolate;
 	color: var(--teal);
 	font-size: 15px;
+	/* Une marge physique, et non logique : à l'intérieur d'un élément en
+	   écriture droite-à-gauche, `margin-inline-start` se résout du côté droit
+	   et colle le mot arabe au libellé français. */
+	margin-left: 8px;
+}
+
+/* Le nom de l'organisation pour laquelle le compte travaille. Il se lit sous
+   la qualité, en retrait : c'est une précision d'appartenance, pas un titre.
+   Sa présence à l'écran est ce qui prouve le cloisonnement à un jury. */
+.espace-identite-organisation {
+	margin: 2px 0 0;
+	color: var(--ink);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	overflow-wrap: anywhere;
 }
 
 /* Le sélecteur de rôle. Il n'existe QUE parce que la démonstration doit
