@@ -359,7 +359,23 @@ h2 {
 		padding: 11px 9px;
 		flex: 0 0 auto;
 	}
-	.security-note, .brand-caption, .nav-label { display: none; }
+	.brand-caption, .nav-label { display: none; }
+
+	/*
+	 * Le bandeau des trois limites était masqué avec le reste de l'habillage
+	 * de la barre latérale. Or c'est la phrase qui distingue l'outil d'un
+	 * robot promettant de régler un litige à la place d'un avocat — et un
+	 * jury regarde souvent depuis un téléphone. Il reste donc affiché,
+	 * ramassé : le titre en moins, les lignes resserrées.
+	 */
+	.security-note {
+		padding: 12px 4px 0;
+		font-size: 9.5px;
+		gap: 6px;
+	}
+	.note-titre { display: none; }
+	.note-ligne { margin-bottom: 2px; }
+	.note-ligne-fin { margin-top: 5px; padding-top: 5px; }
 	.topbar { padding: 0 20px; }
 	.page-content { padding: 24px 20px 40px; }
 }
