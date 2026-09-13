@@ -85,9 +85,17 @@ function EtatService({ sante }: { sante: Sante }) {
       <div className="etat-entete">
         <div>
           <p className="eyebrow">ÉTAT DU SERVICE — LU À L&apos;INSTANT</p>
-          <h2>
-            {sante.service} v{sante.version}
-          </h2>
+          {/*
+            Le titre portait le nom interne du service et son numéro de
+            version — « mizan-api v1.0.0 ». C'est le vocabulaire de celui
+            qui l'exploite, pas de celui qui s'en sert : un juriste n'a
+            aucune idée de ce qu'une version 1.0.0 lui promet, et le
+            chiffre n'engage rien.
+
+            À la place, ce que le bloc démontre réellement : le service
+            répond, et il a répondu à l'instant où la page s'est ouverte.
+          */}
+          <h2>Le service répond</h2>
         </div>
         <span className="provenance provenance-verified">
           Moteur juridique : {moteurEnFrancais(sante.moteur_juridique)}
