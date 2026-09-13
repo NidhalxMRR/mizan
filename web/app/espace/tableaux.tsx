@@ -108,8 +108,15 @@ export const tableaux: Record<Role, Tableau> = {
       },
       {
         libelle: 'Délai le plus court',
-        valeur: '41 jours',
-        detail: 'Avant prescription du dossier le plus ancien',
+        // Relevé sur capture, confirmé en lisant le DOM : la carte annonçait
+        // « 41 jours » et « dossier le plus ancien », alors que la liste
+        // juste dessous montre 41 / 186 / 9 jours et que le dossier le plus
+        // ancien (2023-064) est celui à 9 jours. La mesure de tête
+        // contredisait donc la liste sur les deux points à la fois. Sur un
+        // produit dont l'argument est la prescription, un jury de juristes
+        // fait le rapprochement en dix secondes.
+        valeur: '9 jours',
+        detail: 'Avant prescription — dossier Ets Mabrouk, ci-dessous',
         etat: 'declared',
       },
     ],
@@ -149,7 +156,10 @@ export const tableaux: Record<Role, Tableau> = {
       { cle: 'open_ecma' },
       { cle: 'choose_professional' },
       { cle: 'accept_settlement' },
-      { cle: 'view_own_case', intitule: 'Ouvrir un dossier' },
+      // « Ouvrir un dossier » annonçait une création là où la portée de la
+      // carte décrit une consultation (« Consulter à tout moment l'état de
+      // vos litiges… »). Titre et corps de la même carte se contredisaient.
+      { cle: 'view_own_case', intitule: 'Consulter un de vos dossiers' },
     ],
     fermees: [
       {

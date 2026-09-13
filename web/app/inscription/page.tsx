@@ -137,8 +137,8 @@ export default function Inscription() {
         <p className="intro">
           Sur Mizan, un compte n&apos;est pas un simple accès : c&apos;est une
           qualité juridique. Choisissez la vôtre ci-dessous — la liste de vos
-          pouvoirs, et de leurs limites, s&apos;affiche immédiatement à droite,
-          avant toute validation.
+          pouvoirs, et de leurs limites, s&apos;affiche immédiatement, avant
+          toute validation.
         </p>
         <p className="entree-bascule">
           Vous avez déjà un compte ?{' '}

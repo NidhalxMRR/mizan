@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { roleLabels, roleLabelsAr, type Role } from '@/lib/auth';
 import {
   IconeRole,
@@ -9,7 +9,8 @@ import {
   IconeVerrou,
   IconeBalance,
 } from '@/components/roles/icones';
-import { ordreInscription } from '@/components/roles/privileges';
+import { deRole, ordreInscription } from '@/components/roles/privileges';
+import { lireSession } from '@/app/components/agent/session';
 import { tableaux, actionsDuRole } from './tableaux';
 import './espace.css';
 
@@ -22,12 +23,22 @@ import './espace.css';
  * bouton pour déposer une facture. Ce n'est pas un choix d'ergonomie, c'est
  * la matrice de `lib/auth.ts` rendue visible.
  *
- * Sur le sélecteur de rôle en haut à droite : il n'existe QUE pour la
- * démonstration. En exploitation, le rôle vient du compte identifié et ne se
- * choisit pas. Il est donc annoncé pour ce qu'il est — « affichage de
- * démonstration » — plutôt que déguisé en fonctionnalité. Sans lui, montrer
- * les cinq espaces à un jury demanderait cinq déconnexions, soit à peu près
- * tout le temps de parole disponible.
+ * Sur le rôle affiché en arrivant : il vient du COMPTE IDENTIFIÉ, lu dans la
+ * session déposée par `/connexion`. Ce point n'est pas cosmétique. L'écran
+ * ouvrait auparavant sur « Entreprise » quel que soit le compte : on se
+ * connectait en huissier de justice et on atterrissait sur le tableau de bord
+ * d'une PME, avec ses factures et ses boutons de dépôt de pièces. Mesuré sur
+ * capture : jeton `role: "huissier"` en session, `data-espace-role="msme"` à
+ * l'écran. Devant un jury à qui l'on promet que la qualité juridique commande
+ * tout, c'est la démonstration qui se contredit elle-même.
+ *
+ * Sur le sélecteur de rôle en haut à droite : il reste, mais il ne décide
+ * plus de l'arrivée. Il n'existe QUE pour la démonstration — montrer les cinq
+ * espaces à un jury demanderait sinon cinq déconnexions, soit à peu près tout
+ * le temps de parole disponible. Il est donc annoncé pour ce qu'il est,
+ * « affichage de démonstration », plutôt que déguisé en fonctionnalité, et
+ * une mention rappelle la qualité réellement portée par le compte dès que
+ * l'on s'en écarte.
  *
  * Sur l'absence d'appel à l'API : cet écran ne dépend d'aucun serveur. C'est
  * délibéré. Le jour de la démonstration, si le service d'identification n'est
@@ -39,9 +50,33 @@ import './espace.css';
 
 export default function Espace() {
   const [role, setRole] = useState<Role>('msme');
+  /**
+   * La qualité portée par le compte identifié. `null` tant que la session
+   * n'a pas été lue — c'est-à-dire au rendu serveur, où `localStorage`
+   * n'existe pas. On ne lit donc PAS la session dans l'état initial : cela
+   * produirait un rendu serveur et un rendu client différents, et React
+   * signalerait une hydratation incohérente en pleine démonstration.
+   */
+  const [roleDuCompte, setRoleDuCompte] = useState<Role | null>(null);
+
+  useEffect(() => {
+    const session = lireSession();
+    if (!session) return;
+    // On revalide contre la liste des rôles connus plutôt que de faire
+    // confiance à ce qui traîne dans le stockage : une valeur inattendue
+    // ferait planter l'indexation de `tableaux` et laisserait un écran blanc.
+    const trouve = ordreInscription.find((r) => r === session.role);
+    if (!trouve) return;
+    setRoleDuCompte(trouve);
+    setRole(trouve);
+  }, []);
 
   const tableau = tableaux[role];
   const actions = actionsDuRole(role);
+  // Vrai quand l'orateur a basculé le sélecteur sur une autre qualité que
+  // celle de son compte. On le dit, plutôt que de laisser croire au jury que
+  // le compte connecté est devenu greffier.
+  const ecartDeDemonstration = roleDuCompte !== null && roleDuCompte !== role;
 
   return (
     <div className="entree" data-espace-role={role}>
@@ -81,6 +116,23 @@ export default function Espace() {
               </button>
             ))}
           </div>
+          {/* Quand l'orateur s'écarte de la qualité de son compte, on le dit.
+              Sans cette ligne, le jury voit un écran de greffier alors que le
+              compte connecté est celui d'un huissier, et rien à l'écran ne le
+              détrompe. */}
+          {ecartDeDemonstration && roleDuCompte ? (
+            <p className="selecteur-role-rappel" data-ecart-demonstration>
+              Votre compte est celui {deRole(roleDuCompte)}. Vous regardez
+              actuellement un autre espace.{' '}
+              <button
+                type="button"
+                className="selecteur-role-retour"
+                onClick={() => setRole(roleDuCompte)}
+              >
+                Revenir au mien
+              </button>
+            </p>
+          ) : null}
         </div>
       </header>
 

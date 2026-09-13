@@ -187,7 +187,13 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
-	gap: 8px;
+	/* Gouttières dissociées. Quand le nom arabe finit malgré tout par passer
+	   à la ligne — cas de « Professionnel accrédité », le plus long des cinq
+	   — une gouttière verticale de 8 px ajoutait 8 px de plus à la hauteur de
+	   cette seule carte, et la pile des cinq se lisait en escalier. Mesuré à
+	   1280 px : carte de 134 px contre 107 px pour ses quatre voisines. */
+	column-gap: 8px;
+	row-gap: 1px;
 	margin: 0 0 4px;
 }
 .carte-role-fr {
@@ -358,13 +364,19 @@
 	display: flex;
 	gap: 8px;
 	align-items: start;
-	color: var(--abstain);
+	/* `--abstain` mesuré à 3,5:1 sur le fond du panneau, en corps 11 px :
+	   sous le seuil de 4,5:1 et illisible au vidéoprojecteur, où le contraste
+	   s'écrase encore. `--muted` tient 4,1:1 et reste un gris — la liste
+	   garde son rang secondaire sans devenir indéchiffrable. L'icône de
+	   cadenas, elle, conserve la teinte d'abstention : c'est elle qui porte
+	   le sens, pas la nuance du texte. */
+	color: var(--muted);
 	font-size: 11px;
 	line-height: 1.6;
 	overflow-wrap: anywhere;
 }
-.contre-item-icone { flex: 0 0 auto; margin-top: 1px; }
-.contre-item strong { color: var(--muted); font-weight: 700; }
+.contre-item-icone { flex: 0 0 auto; margin-top: 1px; color: var(--abstain); }
+.contre-item strong { color: var(--ink); font-weight: 700; }
 
 .justificatif {
 	display: flex;
@@ -657,6 +669,34 @@
 	color: var(--teal);
 }
 
+/* Le rappel de la qualité réelle du compte. Il n'apparaît QUE lorsque
+   l'orateur a basculé le sélecteur sur un autre espace que le sien. Sans
+   lui, un jury voit un tableau de bord de greffier pendant que le compte
+   connecté est celui d'un huissier, et rien à l'écran ne le détrompe. */
+.selecteur-role-rappel {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px;
+	margin: 9px 0 0;
+	max-width: 420px;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.55;
+	overflow-wrap: anywhere;
+}
+.selecteur-role-retour {
+	background: none;
+	border: 0;
+	border-bottom: 1px solid color-mix(in oklab, var(--teal) 40%, transparent);
+	padding: 0;
+	color: var(--teal);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+.selecteur-role-retour:hover { border-bottom-color: var(--teal); }
+
 /* --- Les mesures de tête -------------------------------------------------- */
 
 .espace-mesures {
@@ -829,7 +869,13 @@
 	color: var(--ink);
 	white-space: nowrap;
 }
-.dossier-etat { white-space: normal; }
+/* Une pastille d'état a la largeur de son texte. Sous 780 px la ligne de
+   dossier est une grille à une seule colonne : la pastille s'étirait sur
+   toute la largeur de la carte et se lisait comme un bandeau d'alerte plutôt
+   que comme une étiquette. Mesuré à 479 px : 405 px de pastille pour 200 px
+   de texte, soit 205 px d'aplat coloré vide. `justify-self: start` la ramène
+   à sa taille. */
+.dossier-etat { white-space: normal; justify-self: start; }
 .dossier-delai {
 	display: flex;
 	flex-direction: column;
