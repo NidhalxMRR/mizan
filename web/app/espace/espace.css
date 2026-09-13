@@ -1,0 +1,906 @@
+/* ---------------------------------------------------------------------------
+   MIZAN — entrée dans le service et espaces de travail
+
+   Ce fichier habille trois écrans : /inscription, /connexion, /espace. Il est
+   déposé sous app/espace/ et importé par chacun d'eux ; Next.js accepte
+   l'import d'une feuille depuis un composant client et la fusionne dans le
+   bundle. Le choix d'un fichier séparé plutôt que d'un ajout à globals.css
+   est délibéré : d'autres écrans sont construits en parallèle sur cette
+   feuille commune, et deux mains sur le même fichier finissent par se
+   marcher dessus.
+
+   AUCUNE couleur n'est écrite en dur. Tout vient des jetons déclarés dans
+   globals.css (--teal, --ink, --panel, --line, --paper, --mint, --gold,
+   --danger, --verified, --abstain…), y compris le mode sombre, qui suit donc
+   sans une seule règle supplémentaire ici.
+
+   Deux largeurs ont été mesurées sur un vrai navigateur, parce que la
+   démonstration se fera sur les deux :
+     -  479 px — le téléphone sur lequel le jury regardera de près ;
+     - 1280 px — le projecteur de la salle.
+   Les grilles sont déclarées en `auto-fit` avec un minimum plutôt qu'en
+   nombre fixe de colonnes : elles se replient d'elles-mêmes, sans point de
+   rupture à maintenir à la main.
+--------------------------------------------------------------------------- */
+
+/* ===========================================================================
+   1. Ossature commune aux écrans d'entrée
+   =========================================================================== */
+
+/* Ces écrans ne vivent pas dans la coque applicative : on n'est pas encore
+   identifié, donc la barre latérale n'aurait rien à proposer. On rétablit
+   ici la respiration que .page-content donnait. */
+.entree {
+	max-width: 1180px;
+	margin: 0 auto;
+}
+
+.entree-entete {
+	margin-bottom: 26px;
+}
+
+.entree-marque {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	margin-bottom: 18px;
+	color: var(--teal);
+}
+.entree-marque-nom {
+	margin: 0;
+	color: var(--ink);
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 20px;
+	letter-spacing: -.02em;
+}
+/* Isolation obligatoire : « ميزان » est collé à un mot français sur la même
+   ligne. Sans elle, le point final du nom saute à gauche du bloc arabe. */
+.entree-marque-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	color: var(--teal);
+	font-size: 17px;
+	/* Marge PHYSIQUE et non logique. Piège relevé sur capture réelle : cet
+	   élément porte `direction: rtl`, or `margin-inline-start` se résout
+	   dans la direction de l'élément LUI-MÊME — donc à sa droite. Le nom
+	   arabe se retrouvait collé au mot français qui le précède
+	   (« Entrepriseالمؤسسة »), avec un espace inutile de l'autre côté. */
+	margin-left: 8px;
+}
+/* Même correction partout où un nom arabe suit un mot français sur la
+   même ligne. */
+.espace-identite-ar,
+.privileges-entete .entree-marque-ar { margin-left: 8px; }
+
+.entree-bascule {
+	margin: 16px 0 0;
+	color: var(--muted);
+	font-size: 12px;
+}
+.entree-bascule a {
+	color: var(--teal);
+	font-weight: 700;
+	text-decoration: none;
+	border-bottom: 1px solid color-mix(in oklab, var(--teal) 35%, transparent);
+}
+.entree-bascule a:hover { border-bottom-color: var(--teal); }
+
+/* ===========================================================================
+   2. Inscription — le choix du rôle et ses conséquences
+
+   C'est l'écran central de la démonstration : l'utilisateur doit VOIR ce que
+   son rôle lui donnera le droit de faire AVANT de valider, pas après. D'où
+   une mise en page en deux colonnes sur projecteur — les rôles à gauche, les
+   privilèges à droite, les deux visibles ensemble — qui se replie en une
+   seule colonne sur téléphone, privilèges sous le rôle choisi.
+   =========================================================================== */
+
+.inscription-corps {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 18px;
+	align-items: start;
+}
+
+@media (min-width: 960px) {
+	.inscription-corps {
+		/* 380 px suffisent aux cartes de rôle sans les étirer ; le reste va
+		   au panneau de privilèges, qui porte le texte long. */
+		grid-template-columns: minmax(330px, 380px) minmax(0, 1fr);
+		gap: 22px;
+	}
+	/* C'est la colonne COURTE qui suit le défilement, pas la longue : la
+	   liste des privilèges fait presque le double de hauteur des cartes de
+	   rôle, laissant huit cents pixels de vide à gauche pendant qu'on la
+	   lit. Constaté sur capture à 1280 px. En rendant les cartes collantes,
+	   le rôle sélectionné reste sous les yeux jusqu'au bas de la liste, et
+	   le vide disparaît. */
+	.inscription-choix { position: sticky; top: 22px; }
+}
+
+.choix-roles {
+	list-style: none;
+	margin: 14px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 9px;
+}
+
+/* Une carte de rôle. C'est un vrai <button> : le jury cliquera dessus, et un
+   <div> cliquable n'est ni tabulable ni annoncé. */
+.carte-role {
+	width: 100%;
+	display: flex;
+	align-items: start;
+	gap: 12px;
+	text-align: start;
+	cursor: pointer;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	padding: 13px 14px;
+	color: var(--ink);
+	transition: border-color .18s, background .18s, transform .18s;
+}
+.carte-role:hover {
+	border-color: color-mix(in oklab, var(--teal) 45%, var(--line));
+	transform: translateY(-1px);
+}
+.carte-role-active {
+	border-color: var(--teal);
+	background: color-mix(in oklab, var(--mint) 40%, var(--panel));
+	/* Deux marques plutôt qu'une : la bordure seule ne se voit pas au
+	   vidéoprojecteur, où le contraste s'écrase. Le filet interne teal, si. */
+	box-shadow: inset 3px 0 0 var(--teal);
+}
+
+.carte-role-icone {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 9px;
+	border: 1px solid var(--line);
+	background: color-mix(in oklab, var(--paper) 70%, transparent);
+	color: var(--muted);
+	transition: color .18s, border-color .18s, background .18s;
+}
+.carte-role-active .carte-role-icone {
+	color: var(--teal);
+	border-color: color-mix(in oklab, var(--teal) 40%, transparent);
+	background: var(--panel);
+}
+
+.carte-role-texte { min-width: 0; flex: 1; }
+/* Colonne explicite. Sans elle, les trois enfants sont des <span> inline :
+   le compteur « 6 POUVOIRS » se collait au point final de la description
+   (« …ne vous a pas payé.6 POUVOIRS ») quand la ligne n'était pas pleine,
+   et passait à la ligne quand elle l'était — d'où cinq cartes composées
+   différemment. Constaté sur capture à 479 px comme à 1280 px. */
+.carte-role-texte {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+}
+.carte-role-titre {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 8px;
+	margin: 0 0 4px;
+}
+.carte-role-fr {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: -.01em;
+}
+.carte-role-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	color: var(--teal);
+	font-size: 13px;
+}
+.carte-role-qui {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+.carte-role-nb {
+	display: inline-block;
+	margin-top: 7px;
+	color: var(--muted);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+}
+.carte-role-active .carte-role-nb { color: var(--teal); }
+
+/* --- Le panneau de privilèges --------------------------------------------- */
+
+.privileges-entete {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: start;
+	justify-content: space-between;
+	gap: 12px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid var(--line);
+}
+.privileges-entete-titre { display: flex; align-items: center; gap: 11px; }
+.privileges-entete-icone {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	flex: 0 0 42px;
+	border-radius: 10px;
+	background: color-mix(in oklab, var(--mint) 55%, transparent);
+	color: var(--teal);
+}
+.privileges-destinataire {
+	margin: 12px 0 0;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.liste-privileges {
+	list-style: none;
+	margin: 16px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 11px;
+}
+
+.privilege {
+	border: 1px solid var(--line);
+	border-inline-start: 3px solid var(--verified);
+	border-radius: 0 9px 9px 0;
+	padding: 13px 15px;
+	background: color-mix(in oklab, var(--paper) 45%, transparent);
+}
+/* Un pouvoir que personne d'autre n'a. Il change de couleur parce qu'il
+   change de nature : c'est ce qui rend le choix du rôle irréversible. */
+.privilege-exclusif {
+	border-inline-start-color: var(--gold);
+	background: color-mix(in oklab, var(--gold) 6%, transparent);
+}
+
+.privilege-tete {
+	display: flex;
+	align-items: start;
+	gap: 9px;
+	margin-bottom: 7px;
+}
+.privilege-coche { flex: 0 0 auto; color: var(--verified); margin-top: 1px; }
+.privilege-exclusif .privilege-coche { color: var(--gold); }
+.privilege-intitule {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: -.01em;
+	overflow-wrap: anywhere;
+}
+.privilege-sceau {
+	margin-inline-start: auto;
+	flex: 0 0 auto;
+	background: color-mix(in oklab, var(--gold) 16%, transparent);
+	color: var(--gold);
+	border-radius: 5px;
+	padding: 3px 8px;
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.privilege-portee {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.65;
+	color: var(--ink);
+	overflow-wrap: anywhere;
+}
+
+/* La borne. Elle est volontairement aussi visible que le pouvoir : un
+   privilège affiché sans sa limite se lit comme une promesse, et c'est
+   exactement ce que ce projet refuse de faire devant un juriste. */
+.privilege-borne {
+	display: flex;
+	gap: 8px;
+	align-items: start;
+	margin: 9px 0 0;
+	padding-top: 9px;
+	border-top: 1px dashed var(--line);
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+.privilege-borne-icone { flex: 0 0 auto; color: var(--abstain); margin-top: 1px; }
+
+.privilege-fondement {
+	display: inline-block;
+	margin-top: 9px;
+	color: var(--verified);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+	overflow-wrap: anywhere;
+}
+.privilege-exclusif .privilege-fondement { color: var(--gold); }
+
+/* Ce que le rôle NE PEUT PAS faire. Le bloc existe parce que la démonstration
+   se joue là : montrer qu'un huissier ne dépose pas de facture et qu'une PME
+   ne signifie pas d'acte vaut mieux que l'affirmer. */
+.contre-liste {
+	margin-top: 18px;
+	padding-top: 15px;
+	border-top: 1px solid var(--line);
+}
+.contre-liste-titre {
+	margin: 0 0 9px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+}
+.contre-liste ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.contre-item {
+	display: flex;
+	gap: 8px;
+	align-items: start;
+	color: var(--abstain);
+	font-size: 11px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+.contre-item-icone { flex: 0 0 auto; margin-top: 1px; }
+.contre-item strong { color: var(--muted); font-weight: 700; }
+
+.justificatif {
+	display: flex;
+	gap: 9px;
+	align-items: start;
+	margin-top: 16px;
+	background: color-mix(in oklab, var(--mint) 35%, transparent);
+	border-radius: 8px;
+	padding: 12px 14px;
+	color: var(--ink);
+	font-size: 11px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+/* --- Formulaire d'inscription --------------------------------------------- */
+
+.formulaire-entree {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 15px;
+	margin-top: 16px;
+	align-items: start;
+}
+/* Deux colonnes fixes, et non `auto-fit`. Avec `auto-fit`, la carte faisait
+   trois colonnes à 1280 px : les quatre champs courts se répartissaient en
+   3 + 1, et « Téléphone » restait seul sur sa ligne avec deux tiers de vide
+   à sa droite. Constaté sur capture. En deux colonnes ils forment 2 + 2,
+   quel que soit leur nombre pair. */
+@media (min-width: 700px) {
+	.formulaire-entree { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Certains champs portent un libellé long ou une aide en deux lignes : on
+   leur laisse la largeur entière plutôt que de les serrer en colonne. */
+.champ-large { grid-column: 1 / -1; }
+/* Un mot de passe fait huit caractères : un champ de huit cents pixels pour
+   le saisir paraît disproportionné. Le libellé et l'aide gardent la largeur
+   entière, la boîte de saisie non. */
+@media (min-width: 700px) {
+	/* Exactement une colonne de la grille — soit la moitié de la carte moins
+	   la moitié de la gouttière de 15 px. Une valeur ronde en pixels ne
+	   tombait sur AUCUN bord de la grille et se lisait comme un défaut
+	   d'alignement plutôt que comme une mesure. */
+	.champ-mesure input { max-width: calc(50% - 7.5px); }
+}
+
+.entree-select {
+	width: 100%;
+	min-width: 0;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 7px;
+	padding: 11px 12px;
+	color: var(--ink);
+	font: inherit;
+	font-size: 14px;
+}
+.entree-select:focus-visible {
+	outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+	outline-offset: 1px;
+	border-color: var(--teal);
+}
+
+.entree-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 13px;
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid var(--line);
+}
+.entree-actions .primary-button { padding: 13px 22px; font-size: 12px; }
+/* Sous 520 px le bouton et la mention à côté se chevauchaient : le bouton
+   prend la ligne entière, la mention passe dessous. Mesuré à 479 px. */
+@media (max-width: 520px) {
+	.entree-actions .primary-button { width: 100%; }
+}
+.entree-actions-note {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.55;
+	flex: 1 1 220px;
+	overflow-wrap: anywhere;
+}
+
+/* Le message d'échec. L'API d'inscription est construite en parallèle et
+   peut ne pas répondre : l'écran doit le dire en français, sans URL ni code
+   HTTP, et surtout sans se casser. */
+.entree-message {
+	display: flex;
+	gap: 10px;
+	align-items: start;
+	margin-top: 15px;
+	border-radius: 8px;
+	padding: 13px 15px;
+	font-size: 12px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+.entree-message-erreur {
+	background: color-mix(in oklab, var(--danger) 10%, transparent);
+	border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent);
+	color: var(--danger);
+}
+.entree-message-attente {
+	background: color-mix(in oklab, var(--mint) 45%, transparent);
+	border: 1px solid color-mix(in oklab, var(--teal) 25%, transparent);
+	color: var(--teal);
+}
+.entree-message-succes {
+	background: color-mix(in oklab, var(--verified) 10%, transparent);
+	border: 1px solid color-mix(in oklab, var(--verified) 30%, transparent);
+	color: var(--verified);
+}
+.entree-message strong { display: block; margin-bottom: 3px; }
+
+/* ===========================================================================
+   3. Connexion — sobre, et c'est voulu
+
+   Rien à choisir, rien à comprendre : deux champs et un bouton. Tout le poids
+   pédagogique est à l'inscription ; ici on entre.
+   =========================================================================== */
+
+.connexion-corps {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 18px;
+	align-items: start;
+	max-width: 980px;
+	margin: 0 auto;
+}
+@media (min-width: 900px) {
+	.connexion-corps { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+
+.connexion-panneau { max-width: 520px; }
+.connexion-champs { display: grid; gap: 15px; margin-top: 18px; }
+
+/* La colonne d'appoint : les cinq rôles, en rappel. Elle sert la
+   démonstration — on voit que la plateforme connaît cinq acteurs distincts
+   sans avoir à s'inscrire. */
+.connexion-rappel { padding: 18px; }
+.connexion-rappel-liste {
+	list-style: none;
+	margin: 13px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 9px;
+}
+.connexion-rappel-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--muted);
+	font-size: 12px;
+}
+.connexion-rappel-item svg { color: var(--teal); flex: 0 0 auto; }
+.connexion-rappel-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	/* Physique, pour la même raison : sur un élément rtl,
+	   `margin-inline-start: auto` se résout à droite et ne pousse donc rien
+	   dans une rangée ltr. Le nom arabe restait collé au nom français. */
+	margin-left: auto;
+	color: var(--teal);
+	font-size: 12px;
+}
+
+/* Les comptes de démonstration. Ils évitent de taper une adresse au clavier
+   devant un jury, ce qui rate une fois sur deux. */
+.demo-comptes {
+	margin-top: 16px;
+	padding-top: 15px;
+	border-top: 1px solid var(--line);
+}
+.demo-comptes-titre {
+	margin: 0 0 10px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+}
+.demo-comptes-liste {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+}
+.demo-compte {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 7px;
+	padding: 8px 11px;
+	color: var(--ink);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color .18s, color .18s;
+}
+.demo-compte:hover { border-color: var(--teal); color: var(--teal); }
+.demo-compte svg { color: var(--muted); }
+.demo-compte:hover svg { color: var(--teal); }
+
+/* ===========================================================================
+   4. L'espace de travail — un tableau de bord par rôle
+   =========================================================================== */
+
+.espace-entete {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: start;
+	justify-content: space-between;
+	gap: 18px;
+	margin-bottom: 24px;
+}
+
+.espace-identite { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.espace-identite-icone {
+	display: grid;
+	place-items: center;
+	width: 52px;
+	height: 52px;
+	flex: 0 0 52px;
+	border-radius: 13px;
+	background: color-mix(in oklab, var(--mint) 55%, transparent);
+	border: 1px solid color-mix(in oklab, var(--teal) 22%, transparent);
+	color: var(--teal);
+}
+.espace-identite-texte { min-width: 0; }
+.espace-identite h1 {
+	font-size: clamp(22px, 2.4vw, 31px);
+	margin-bottom: 5px;
+	overflow-wrap: anywhere;
+}
+.espace-identite-sous {
+	margin: 0;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.55;
+	overflow-wrap: anywhere;
+}
+.espace-identite-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	color: var(--teal);
+	font-size: 15px;
+}
+
+/* Le sélecteur de rôle. Il n'existe QUE parce que la démonstration doit
+   montrer les cinq tableaux de bord en trois minutes sans se déconnecter
+   cinq fois. Il est présenté comme ce qu'il est — un affichage de
+   démonstration — et non comme un pouvoir de l'utilisateur. */
+.selecteur-role { flex: 0 0 auto; max-width: 100%; }
+.selecteur-role-titre {
+	margin: 0 0 8px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .13em;
+	text-transform: uppercase;
+}
+.selecteur-role-boutons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.selecteur-bouton {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 7px;
+	padding: 8px 11px;
+	color: var(--muted);
+	font-size: 11px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: border-color .18s, color .18s, background .18s;
+}
+.selecteur-bouton:hover { border-color: var(--teal); color: var(--teal); }
+.selecteur-bouton-actif {
+	background: color-mix(in oklab, var(--mint) 50%, var(--panel));
+	border-color: var(--teal);
+	color: var(--teal);
+}
+
+/* --- Les mesures de tête -------------------------------------------------- */
+
+.espace-mesures {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+	gap: 13px;
+	margin-bottom: 20px;
+}
+
+/* --- Les actions autorisées ----------------------------------------------- */
+
+.espace-section { margin-top: 24px; }
+.espace-section-titre {
+	display: flex;
+	flex-wrap: wrap;
+	/* Aligné en bas et non sur la ligne de base : le bloc de gauche fait
+	   deux lignes (sur-titre + titre) et le badge de droite une seule ;
+	   `baseline` le calait sur la PREMIÈRE ligne, donc il flottait au-dessus
+	   du titre. Constaté sur capture à 1280 px. */
+	align-items: end;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 13px;
+}
+.espace-section-titre p { margin: 0; }
+
+.grille-actions {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 13px;
+}
+
+.action {
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+	text-align: start;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 11px;
+	padding: 16px;
+	color: var(--ink);
+	cursor: pointer;
+	width: 100%;
+	transition: border-color .18s, transform .18s, box-shadow .18s;
+}
+.action:hover {
+	border-color: color-mix(in oklab, var(--teal) 50%, var(--line));
+	transform: translateY(-2px);
+	box-shadow: var(--shadow);
+}
+.action-tete { display: flex; align-items: center; gap: 10px; }
+.action-icone {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	flex: 0 0 34px;
+	border-radius: 8px;
+	background: color-mix(in oklab, var(--mint) 45%, transparent);
+	color: var(--teal);
+}
+.action-intitule {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.35;
+	letter-spacing: -.01em;
+	overflow-wrap: anywhere;
+}
+.action-portee {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11.5px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+.action-borne {
+	margin: 0;
+	padding-top: 9px;
+	border-top: 1px dashed var(--line);
+	color: var(--abstain);
+	font-size: 10.5px;
+	line-height: 1.55;
+	overflow-wrap: anywhere;
+}
+/* Les cartes d'une rangée ont la même hauteur, mais leur contenu est calé
+   en haut : la citation d'article tombait à une hauteur différente sur
+   chacune, et la carte sans citation laissait un vide en pied. On ancre la
+   citation en bas de carte — elle s'aligne alors d'une carte à l'autre. */
+.action > .privilege-fondement { margin-top: auto; padding-top: 9px; }
+
+/* L'action fermée. Elle n'est pas cachée : un jury de juristes doit voir que
+   la barrière existe et POURQUOI elle existe. Une action absente se lit comme
+   un oubli ; une action fermée avec son article se lit comme une règle. */
+.action-fermee {
+	cursor: not-allowed;
+	background: color-mix(in oklab, var(--paper) 55%, transparent);
+	border-style: dashed;
+	opacity: .95;
+}
+.action-fermee:hover {
+	transform: none;
+	box-shadow: none;
+	border-color: var(--line);
+}
+.action-fermee .action-icone {
+	background: color-mix(in oklab, var(--abstain) 12%, transparent);
+	color: var(--abstain);
+}
+.action-fermee .action-intitule { color: var(--muted); }
+.action-motif {
+	display: flex;
+	gap: 8px;
+	align-items: start;
+	margin: 0;
+	padding-top: 9px;
+	border-top: 1px dashed var(--line);
+	color: var(--abstain);
+	font-size: 10.5px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+.action-motif strong { color: var(--muted); font-weight: 700; }
+
+/* --- Les dossiers listés -------------------------------------------------- */
+
+.dossiers { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.dossier-ligne {
+	display: grid;
+	gap: 10px;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	padding: 14px 16px;
+}
+@media (min-width: 780px) {
+	/* Sur projecteur : référence + parties | état | délai. Sous 780 px les
+	   trois blocs s'empilent, ce qui reste lisible à 479 px. */
+	.dossier-ligne {
+		/* Colonnes FIXES pour les deux dernières, pas `auto` : avec `auto`,
+		   la largeur de la pastille d'état et celle du bloc de délai
+		   variaient d'une ligne à l'autre, et la colonne de droite montait
+		   en escalier. Mesuré sur capture à 1280 px. */
+		grid-template-columns: minmax(0, 1fr) 230px 118px;
+		align-items: center;
+		gap: 16px;
+	}
+}
+
+.dossier-identite { min-width: 0; }
+.dossier-reference {
+	margin: 0 0 4px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: -.01em;
+	overflow-wrap: anywhere;
+}
+.dossier-parties {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11.5px;
+	line-height: 1.55;
+	overflow-wrap: anywhere;
+}
+.dossier-montant {
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	color: var(--ink);
+	white-space: nowrap;
+}
+.dossier-etat { white-space: normal; }
+.dossier-delai {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+/* Au-delà de 780 px la colonne est fixe : on aligne tout son contenu à
+   droite pour que le nombre et sa légende partagent le même bord, au lieu
+   d'un chiffre calé à gauche sous une légende trois fois plus large. */
+@media (min-width: 780px) {
+	.dossier-delai { align-items: end; text-align: end; }
+	.dossier-etat { justify-self: start; }
+}
+.dossier-delai-nombre {
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 21px;
+	line-height: 1.05;
+	font-variant-numeric: tabular-nums;
+}
+.dossier-delai-ok { color: var(--verified); }
+.dossier-delai-attention { color: var(--declared); }
+.dossier-delai-critique { color: var(--danger); }
+.dossier-delai-libelle {
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+}
+
+/* --- Le bandeau de limite, en pied de tableau de bord --------------------- */
+
+.limite-role {
+	display: flex;
+	gap: 12px;
+	align-items: start;
+	margin-top: 26px;
+	background: color-mix(in oklab, var(--navy) 5%, transparent);
+	border: 1px solid var(--line);
+	border-radius: 11px;
+	padding: 16px 18px;
+}
+.limite-role-icone { flex: 0 0 auto; color: var(--gold); margin-top: 1px; }
+.limite-role-texte { min-width: 0; }
+.limite-role-titre {
+	margin: 0 0 5px;
+	font-size: 12px;
+	font-weight: 700;
+}
+.limite-role-corps {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11.5px;
+	line-height: 1.65;
+	overflow-wrap: anywhere;
+}
+/* Le nom arabe de l'huissier apparaît au milieu d'une phrase française dans
+   ce bandeau : sans isolation, la virgule qui le suit part à gauche. */
+.limite-role-corps .incise-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	color: var(--teal);
+}
+
+/* --- Repli téléphone ------------------------------------------------------ */
+
+@media (max-width: 560px) {
+	.espace-entete { gap: 14px; }
+	.espace-identite-icone { width: 44px; height: 44px; flex: 0 0 44px; }
+	.privileges-entete-icone { width: 36px; height: 36px; flex: 0 0 36px; }
+	/* À 479 px, un intitulé long passait sous le sceau « exclusif » et le
+	   chevauchait. Le sceau descend sur sa propre ligne. */
+	.privilege-sceau { margin-inline-start: 0; }
+	.privilege-tete { flex-wrap: wrap; }
+}
