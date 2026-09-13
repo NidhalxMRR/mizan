@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mizan — interface web
 
-## Getting Started
+Interface Next.js du parcours PME. Elle ne contient aucune donnée juridique :
+chaque chiffre, chaque article et chaque date affichés proviennent d'un appel
+à l'API FastAPI. Quand l'API ne répond pas, l'écran le dit et n'affiche rien
+d'autre — il n'existe volontairement aucun jeu de données de repli.
 
-First, run the development server:
+## Démarrer
+
+L'API doit tourner d'abord :
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd ~/mizan && .venv/bin/uvicorn api.main:app --port 8820
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Puis l'interface :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd ~/mizan/web
+npm run dev     # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+L'URL de l'API est configurable par `NEXT_PUBLIC_API_URL`
+(défaut : `http://127.0.0.1:8820`, voir `.env.local`).
 
-## Learn More
+## Les trois écrans
 
-To learn more about Next.js, take a look at the following resources:
+| Route      | Ce qu'il démontre                                                                |
+| ---------- | -------------------------------------------------------------------------------- |
+| `/`        | Le principe, et l'état réel du service lu sur `/sante` (nombre d'articles indexés, disponibilité du modèle, hébergements sondés) |
+| `/dossier` | Le parcours PME : `/dossiers/analyser` calcule le régime de prescription, le compte à rebours, les étapes et les articles. L'encart huissier n'apparaît que si `huissier_requis` est vrai. La reformulation par le modèle est un second appel, facultatif et étiqueté |
+| `/corpus`  | La recherche dans le corpus, et surtout l'**abstention** : quand `fonde=false`, le message de l'API est mis en valeur avant tout résultat |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`/dossier` et `/corpus` lisent leurs paramètres dans l'URL et rendent **côté
+serveur**. Conséquence utile : le résultat est dans le HTML, donc vérifiable
+au `curl`, et une URL de démonstration se partage.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Vérifier que rien n'est simulé
 
-## Deploy on Vercel
+```bash
+npm run build                             # doit passer sans erreur
+node --test lib/auth.test.mjs             # 9 tests sur la matrice de rôles
+node scripts/verifier-mise-en-page.mjs    # Chromium : 479 px et 1280 px, RTL
+node scripts/verifier-parcours.mjs        # Chromium : chaque clic appelle l'API
+node scripts/verifier-reformulation.mjs   # Chromium : le LLM répond vraiment
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Les trois derniers pilotent un vrai navigateur. Ils ont déjà attrapé un défaut
+que la lecture du code ne montrait pas : sans `allowedDevOrigins` dans
+`next.config.ts`, React n'était pas hydraté en développement et aucun bouton
+ne répondait, alors que toutes les pages rendaient un HTML parfaitement
+correct.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+La preuve la plus directe reste celle-ci :
+
+```bash
+curl -s 'http://127.0.0.1:3000/dossier?montant=9520&date=2024-05-12&activite=menuiserie' \
+  | grep -o 'الفصل 403 من مجلة الالتزامات والعقود'
+```
+
+L'article sort du corpus indexé, pas du code de l'interface.
+
+## Choix qui ne sont pas négociables
+
+- **Aucune police distante, aucun CDN.** La salle de démonstration peut être
+  sans wifi. Les familles utilisées existent déjà sur la machine.
+- **Aucune donnée codée en dur.** Le compteur d'articles vient de `/sante` ;
+  chercher `4087` dans `app/` ne renvoie qu'un commentaire.
+- **`cache: 'no-store'` sur tous les appels.** Un chiffre juridique périmé
+  affiché avec aplomb est exactement ce que ce projet refuse.
+- **L'abstention est grise, pas rouge** (`--abstain`). Ne pas savoir n'est pas
+  une panne, c'est une décision du système.
+- **L'arabe est isolé** (`unicode-bidi: isolate`), y compris pour les incises
+  au milieu d'une phrase française : sans cela, la ponctuation française part
+  à l'envers.

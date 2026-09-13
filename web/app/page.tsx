@@ -1,69 +1,203 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { lireSante, API_URL, type Sante } from '@/lib/api';
+import { PanneApi } from './components/etats';
+import { roles, roleLabels, roleLabelsAr, permissions } from '@/lib/auth';
 
-export default function Home() {
+/**
+ * Page d'accueil.
+ *
+ * Elle affiche l'état RÉEL du service, lu côté serveur à chaque requête. Si
+ * l'API est éteinte, cette page le dit — elle n'affiche pas « 4087 articles »
+ * en dur. Le chiffre qu'on lit ici a été compté par l'index, pas écrit par
+ * un développeur.
+ */
+export const dynamic = 'force-dynamic';
+
+export default async function Accueil() {
+  const sante = await lireSante();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">HACK4JUSTICE · CHALLENGE B</p>
+          <h1>
+            L&apos;IA propose. <em>Le droit dispose.</em>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="intro">
+            Mizan aide une PME tunisienne à savoir où elle en est sur un
+            impayé : quel délai court, quel article l&apos;impose, et qui a le
+            droit d&apos;agir. Les délais sont calculés par un moteur
+            déterministe. Le modèle de langage ne fait que reformuler — il ne
+            décide de rien.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {sante.ok ? (
+        <EtatService sante={sante.valeur} />
+      ) : (
+        <PanneApi echec={sante.echec} />
+      )}
+
+      <section className="grille-deux">
+        <article className="panel">
+          <p className="eyebrow">CE QUE MIZAN CALCULE</p>
+          <h2>Le parcours de la PME</h2>
+          <p className="intro bloc-espace">
+            Un montant, une date de facture, une activité. Le moteur en déduit
+            le régime de prescription applicable, l&apos;échéance exacte, et si
+            la sommation doit passer par un huissier de justice. Chaque
+            affirmation arrive avec l&apos;article qui la fonde, cité en arabe.
+          </p>
+          <Link href="/dossier" className="primary-button">
+            Analyser un impayé
+          </Link>
+        </article>
+
+        <article className="panel">
+          <p className="eyebrow">CE QUE MIZAN REFUSE DE FAIRE</p>
+          <h2>L&apos;abstention comme fonctionnalité</h2>
+          <p className="intro bloc-espace">
+            Quand la question posée ne trouve pas de fondement dans le corpus,
+            Mizan ne propose pas l&apos;article le moins éloigné. Elle dit
+            qu&apos;elle ne sait pas. C&apos;est le comportement qu&apos;on
+            attend d&apos;un outil dont la sortie peut finir dans un dossier
+            de tribunal.
+          </p>
+          <Link href="/corpus" className="primary-button">
+            Interroger le corpus
+          </Link>
+        </article>
+      </section>
+
+      <MatriceRoles />
+    </>
+  );
+}
+
+function EtatService({ sante }: { sante: Sante }) {
+  const indexOk = sante.index_charge && sante.articles_indexes > 0;
+
+  return (
+    <section className="panel bloc-espace" aria-label="État réel du service">
+      <div className="etat-entete">
+        <div>
+          <p className="eyebrow">ÉTAT DU SERVICE — LU À L&apos;INSTANT</p>
+          <h2>
+            {sante.service} v{sante.version}
+          </h2>
         </div>
-      </main>
+        <span className="provenance provenance-verified">
+          Moteur juridique : {sante.moteur_juridique}
+        </span>
+      </div>
+
+      <div className="etat-grille">
+        <Mesure
+          libelle="Articles indexés"
+          valeur={sante.articles_indexes.toLocaleString('fr-FR')}
+          detail={
+            indexOk
+              ? 'Index BM25 chargé en mémoire'
+              : "L'index n'est pas chargé"
+          }
+          etat={indexOk ? 'verified' : 'abstain'}
+        />
+        <Mesure
+          libelle="Reformulation"
+          valeur={sante.modele_disponible ? 'Disponible' : 'Indisponible'}
+          detail={sante.motif_modele}
+          etat={sante.modele_disponible ? 'verified' : 'declared'}
+        />
+        <Mesure
+          libelle="Calcul des délais"
+          valeur="Indépendant du modèle"
+          detail="Si le modèle tombe, le droit reste calculable"
+          etat="verified"
+        />
+      </div>
+
+      {sante.hebergements.length > 0 ? (
+        <div className="hebergements">
+          <p className="eyebrow">HÉBERGEMENTS SONDÉS</p>
+          <ul className="liste-nue">
+            {sante.hebergements.map((h) => (
+              <li key={`${h.nom}-${h.base_url}`} className="hebergement">
+                <span
+                  className={`pastille ${
+                    h.disponible ? 'pastille-ok' : 'pastille-ko'
+                  }`}
+                  aria-hidden="true"
+                />
+                <span className="hebergement-nom">{h.nom}</span>
+                <code className="hebergement-modele">{h.modele}</code>
+                <span className="hebergement-motif">{h.motif}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <p className="etat-source">
+        Données lues sur <code>{API_URL}/sante</code> au rendu de cette page.
+        Principe déclaré par l&apos;API : « {sante.principe} »
+      </p>
+    </section>
+  );
+}
+
+function Mesure({
+  libelle,
+  valeur,
+  detail,
+  etat,
+}: {
+  libelle: string;
+  valeur: string;
+  detail: string;
+  etat: 'verified' | 'declared' | 'abstain';
+}) {
+  return (
+    <div className="mesure">
+      <p className="mesure-libelle">{libelle}</p>
+      <p className={`mesure-valeur mesure-${etat}`}>{valeur}</p>
+      <p className="mesure-detail">{detail}</p>
     </div>
+  );
+}
+
+/**
+ * Les cinq acteurs, lus depuis `lib/auth.ts`.
+ *
+ * Le nombre de permissions n'est pas recopié à la main : il est compté sur la
+ * matrice testée par `auth.test.mjs`. Si la matrice change, cet écran change
+ * avec elle.
+ */
+function MatriceRoles() {
+  return (
+    <section className="panel bloc-espace">
+      <p className="eyebrow">QUI FAIT QUOI</p>
+      <h2>Cinq acteurs, des pouvoirs séparés</h2>
+      <p className="intro bloc-espace">
+        La plateforme ne peut pas signifier un acte : c&apos;est un monopole
+        légal du عدل منفذ. Elle lui livre un projet complet, qu&apos;il
+        contrôle et signifie lui-même.
+      </p>
+      <ul className="liste-roles">
+        {roles.map((r) => (
+          <li key={r} className="role">
+            <span className="role-fr">{roleLabels[r]}</span>
+            <span lang="ar" dir="rtl" className="role-ar">
+              {roleLabelsAr[r]}
+            </span>
+            <span className="role-nb">
+              {permissions[r].length} permission
+              {permissions[r].length > 1 ? 's' : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

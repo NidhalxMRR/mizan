@@ -270,3 +270,625 @@ h2 {
 	.topbar { padding: 0 20px; }
 	.page-content { padding: 24px 20px 40px; }
 }
+
+/* ===========================================================================
+   COUCHE APPLICATIVE — écrans /, /dossier, /corpus
+
+   Tout ce qui suit s'appuie sur les jetons déclarés plus haut ; aucune
+   couleur n'est écrite en dur. Deux contraintes ont guidé ces règles :
+
+   1. L'arabe doit pouvoir apparaître AU MILIEU d'une phrase française sans
+      entraîner la ponctuation avec lui. D'où `unicode-bidi: isolate` sur
+      chaque incise, et non seulement sur les blocs.
+   2. La démonstration se fait dans une fenêtre étroite. Les grilles sont
+      donc déclarées en `auto-fit` avec un minimum, pas en nombre fixe de
+      colonnes : elles se replient sans point de rupture à écrire.
+   =========================================================================== */
+
+.bloc-espace { margin-top: 20px; }
+
+/* --- Accueil : état réel du service -------------------------------------- */
+
+.etat-entete {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.etat-grille {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 14px;
+	margin-top: 18px;
+}
+
+.mesure {
+	background: color-mix(in oklab, var(--paper) 60%, transparent);
+	border: 1px solid var(--line);
+	border-radius: 9px;
+	padding: 14px;
+}
+.mesure-libelle {
+	margin: 0 0 6px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+.mesure-valeur {
+	margin: 0 0 5px;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 25px;
+	line-height: 1.1;
+	/* Le compteur d'articles peut atteindre cinq chiffres : sans cette
+	   coupure il déborde de sa carte à 479 px. */
+	overflow-wrap: anywhere;
+}
+.mesure-verified { color: var(--verified); }
+.mesure-declared { color: var(--declared); }
+.mesure-abstain  { color: var(--abstain); }
+.mesure-detail {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.hebergements { margin-top: 20px; }
+.liste-nue { list-style: none; margin: 0; padding: 0; }
+
+.hebergement {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 9px;
+	padding: 9px 0;
+	border-top: 1px solid var(--line);
+	font-size: 12px;
+}
+.pastille { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 8px; }
+.pastille-ok { background: var(--verified); }
+.pastille-ko { background: var(--danger); }
+.hebergement-nom { font-weight: 700; }
+.hebergement-modele {
+	background: color-mix(in oklab, var(--mint) 40%, transparent);
+	border-radius: 4px;
+	padding: 2px 7px;
+	font-size: 11px;
+	overflow-wrap: anywhere;
+}
+.hebergement-motif { color: var(--muted); font-size: 11px; }
+
+.etat-source {
+	margin: 18px 0 0;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+.etat-source code, .panne-url code {
+	background: color-mix(in oklab, var(--line) 40%, transparent);
+	border-radius: 4px;
+	padding: 1px 5px;
+}
+
+.grille-deux {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+	gap: 16px;
+	margin-top: 20px;
+}
+
+.liste-roles {
+	list-style: none;
+	margin: 16px 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 10px;
+}
+.role {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 8px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 11px 13px;
+}
+.role-fr { font-weight: 700; font-size: 12px; }
+/* Isolation obligatoire : ce nom arabe est voisin d'un texte français sur la
+   même ligne. Sans elle, le compte de permissions saute à gauche. */
+.role-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	color: var(--teal);
+	font-size: 13px;
+}
+.role-nb {
+	margin-inline-start: auto;
+	color: var(--muted);
+	font-size: 10px;
+	font-weight: 700;
+}
+
+/* --- Formulaires ---------------------------------------------------------- */
+
+.formulaire {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 16px;
+	align-items: start;
+	margin-top: 14px;
+}
+.champ { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.champ label {
+	color: var(--ink);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .02em;
+}
+.champ input {
+	width: 100%;
+	min-width: 0;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 7px;
+	padding: 11px 12px;
+	color: var(--ink);
+	font: inherit;
+	font-size: 14px;
+}
+.champ input:focus-visible {
+	outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+	outline-offset: 1px;
+	border-color: var(--teal);
+}
+.champ-aide { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.champ-action { justify-content: end; }
+/* Le bouton s'aligne sur la ligne de base des champs, pas sur celle des
+   étiquettes : 20 px correspondent à la hauteur du label + son écart. */
+.champ-action .primary-button { margin-top: 20px; width: 100%; }
+
+.formulaire-attente {
+	margin: 14px 0 0;
+	color: var(--teal);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+/* --- Compte à rebours de prescription ------------------------------------ */
+
+.rebours { border-inline-start: 4px solid var(--line); }
+.rebours-ok        { border-inline-start-color: var(--verified); }
+.rebours-attention { border-inline-start-color: var(--declared); }
+.rebours-critique  { border-inline-start-color: var(--danger); }
+.rebours-expire    { border-inline-start-color: var(--abstain); }
+
+.rebours-nombre {
+	margin: 6px 0 0;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: clamp(46px, 9vw, 76px);
+	font-weight: 400;
+	letter-spacing: -.05em;
+	line-height: 1;
+}
+.rebours-ok .rebours-nombre        { color: var(--verified); }
+.rebours-attention .rebours-nombre { color: var(--declared); }
+.rebours-critique .rebours-nombre  { color: var(--danger); }
+.rebours-expire .rebours-nombre    { color: var(--abstain); }
+
+.rebours-unite {
+	margin: 4px 0 12px;
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 600;
+}
+.rebours-phrase {
+	margin: 0 0 14px;
+	max-width: 62ch;
+	font-size: 14px;
+	line-height: 1.65;
+}
+
+/* --- Faits et régime ------------------------------------------------------ */
+
+.motif-regime {
+	margin: 10px 0 0;
+	max-width: 70ch;
+	font-size: 14px;
+	line-height: 1.7;
+}
+.faits {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 12px;
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid var(--line);
+}
+.fait-libelle {
+	margin: 0 0 4px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+.fait-valeur {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+/* --- Encart huissier ------------------------------------------------------ */
+
+.encart-huissier {
+	border-inline-start: 4px solid var(--gold);
+	background: color-mix(in oklab, var(--gold) 5%, var(--panel));
+}
+.eyebrow-or { color: var(--gold); }
+
+/* Une incise arabe DANS une phrase française. L'isolation est le point
+   central : sans elle, le point final français se retrouve à gauche du mot
+   arabe et la phrase devient illisible. */
+.incise-ar {
+	direction: rtl;
+	unicode-bidi: isolate;
+	font-family: "Segoe UI", "Traditional Arabic", "Amiri", serif;
+	color: var(--gold);
+	font-weight: 600;
+}
+
+/* --- Étapes --------------------------------------------------------------- */
+
+.etapes { list-style: none; margin: 16px 0 0; padding: 0; }
+.etape {
+	display: flex;
+	gap: 14px;
+	padding: 16px 0;
+	border-top: 1px solid var(--line);
+}
+.etape-numero {
+	flex: 0 0 27px;
+	height: 27px;
+	border-radius: 50%;
+	background: color-mix(in oklab, var(--teal) 12%, transparent);
+	color: var(--teal);
+	display: grid;
+	place-items: center;
+	font-size: 12px;
+	font-weight: 800;
+}
+.etape-corps { min-width: 0; flex: 1; }
+.etape-titre {
+	margin: 2px 0 6px;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 16px;
+	font-weight: 400;
+}
+.etape-detail { margin: 0; font-size: 13px; line-height: 1.7; max-width: 70ch; }
+.etape-citation {
+	margin: 10px 0 0;
+	padding-inline-start: 11px;
+	border-inline-start: 2px solid var(--verified);
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.citation-fr {
+	margin: 8px 0 0;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+/* --- Corpus : recherche --------------------------------------------------- */
+
+.recherche { margin-top: 14px; }
+.recherche-label {
+	display: block;
+	margin-bottom: 7px;
+	font-size: 11px;
+	font-weight: 700;
+}
+.recherche-ligne { display: flex; flex-wrap: wrap; gap: 9px; }
+.recherche-input {
+	flex: 1 1 200px;
+	min-width: 0;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 7px;
+	padding: 12px 13px;
+	color: var(--ink);
+	font: inherit;
+	font-size: 15px;
+}
+.recherche-input:focus-visible {
+	outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+	outline-offset: 1px;
+	border-color: var(--teal);
+}
+
+.exemples { margin-top: 16px; }
+.exemples-titre {
+	margin: 0 0 8px;
+	color: var(--muted);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+}
+.exemples-liste { display: flex; flex-wrap: wrap; gap: 7px; }
+.exemple {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 7px;
+	border: 1px solid var(--line);
+	border-radius: 20px;
+	background: var(--panel);
+	color: var(--ink);
+	padding: 7px 13px;
+	cursor: pointer;
+	font-size: 13px;
+	transition: border-color .2s, background .2s;
+}
+.exemple:hover:not(:disabled) {
+	border-color: var(--teal);
+	background: color-mix(in oklab, var(--mint) 30%, transparent);
+}
+.exemple:disabled { opacity: .5; cursor: not-allowed; }
+.exemple-q { unicode-bidi: isolate; font-weight: 600; }
+.exemple-note { color: var(--muted); font-size: 10px; }
+
+/* --- Corpus : abstention -------------------------------------------------- */
+
+/* Le bloc le plus important de l'application. Gris et non rouge : ne pas
+   savoir n'est pas une panne, c'est une décision — et la couleur doit le
+   dire avant que le texte ne soit lu. */
+.bloc-abstention {
+	border-inline-start: 4px solid var(--abstain);
+	background: color-mix(in oklab, var(--abstain) 6%, var(--panel));
+}
+.abstention-message {
+	margin: 14px 0 0;
+	max-width: 58ch;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: clamp(19px, 2.6vw, 26px);
+	font-weight: 400;
+	letter-spacing: -.02em;
+	line-height: 1.4;
+	color: var(--ink);
+}
+.abstention-motif {
+	margin: 14px 0 0;
+	color: var(--muted);
+	font-size: 12px;
+}
+.abstention-motif strong { color: var(--abstain); }
+.abstention-explication {
+	margin: 14px 0 0;
+	max-width: 68ch;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.7;
+}
+.abstention-requete {
+	margin: 16px 0 0;
+	padding-top: 13px;
+	border-top: 1px solid var(--line);
+	color: var(--muted);
+	font-size: 12px;
+}
+.abstention-requete-texte {
+	unicode-bidi: isolate;
+	color: var(--ink);
+	font-weight: 600;
+}
+
+.avert-non-fonde {
+	margin: 0 0 14px;
+	max-width: 70ch;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.7;
+}
+.avert-non-fonde strong { color: var(--abstain); }
+
+/* --- Corpus : un article -------------------------------------------------- */
+
+.article { margin-bottom: 14px; }
+.article-fonde { border-inline-start: 3px solid var(--verified); }
+/* Rapproché sans être retenu : pointillé, pour qu'on ne le confonde jamais
+   avec une citation validée. */
+.article-doute { border-inline-start: 3px dashed var(--abstain); opacity: .93; }
+
+.article-entete {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: start;
+	justify-content: space-between;
+	gap: 12px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--line);
+}
+.article-identite { min-width: 0; }
+/* La citation arabe sert de titre à la carte : elle doit être isolée et
+   alignée à droite sans emporter le reste de l'en-tête. */
+.article-identite .citation-ref {
+	direction: rtl;
+	unicode-bidi: isolate;
+	text-align: start;
+	font-size: 13px;
+	letter-spacing: 0;
+	text-transform: none;
+	margin-bottom: 6px;
+}
+.article-code-fr { margin: 0; font-size: 11px; color: var(--muted); }
+.article-code-ar {
+	margin: 3px 0 0;
+	direction: rtl;
+	unicode-bidi: isolate;
+	text-align: start;
+	font-size: 11px;
+	color: var(--muted);
+}
+.article-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+	gap: 5px;
+	flex-shrink: 0;
+}
+.article-score {
+	background: color-mix(in oklab, var(--teal) 10%, transparent);
+	border-radius: 5px;
+	padding: 3px 8px;
+	color: var(--teal);
+	font-size: 10px;
+	font-weight: 800;
+}
+.article-id { color: var(--muted); font-size: 10px; }
+.article-texte { margin: 14px 0 0; white-space: pre-wrap; }
+
+/* --- Reformulation par le modèle ------------------------------------------ */
+
+.reformulation { margin-top: 16px; }
+.reformulation-texte {
+	margin: 12px 0 0;
+	max-width: 68ch;
+	white-space: pre-wrap;
+	font-size: 14px;
+	line-height: 1.8;
+}
+.reformulation-avertissement {
+	margin: 14px 0 16px;
+	padding-top: 12px;
+	border-top: 1px solid var(--line);
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+}
+.degradation-motif {
+	margin: 10px 0 0;
+	color: var(--abstain);
+	font-size: 11px;
+	overflow-wrap: anywhere;
+}
+
+/* --- Panne de l'API ------------------------------------------------------- */
+
+.bloc-panne {
+	border-inline-start: 4px solid var(--danger);
+	background: color-mix(in oklab, var(--danger) 5%, var(--panel));
+}
+.panne-motif {
+	margin: 10px 0 0;
+	max-width: 66ch;
+	font-size: 14px;
+	line-height: 1.7;
+}
+.panne-remede { margin-top: 16px; }
+.panne-remede-titre {
+	margin: 0 0 7px;
+	font-size: 11px;
+	font-weight: 700;
+}
+.panne-commande {
+	display: block;
+	background: var(--navy);
+	border-radius: 7px;
+	padding: 12px 14px;
+	color: #d9eee7;
+	font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+	font-size: 12px;
+	/* La commande est longue : elle se coupe plutôt que de créer une barre
+	   de défilement horizontale sur toute la page à 479 px. */
+	overflow-wrap: anywhere;
+}
+.panne-url { margin: 14px 0 0; color: var(--muted); font-size: 11px; }
+.panne-serment {
+	margin: 12px 0 0;
+	padding-top: 12px;
+	border-top: 1px solid var(--line);
+	color: var(--muted);
+	font-size: 12px;
+	font-style: italic;
+	line-height: 1.6;
+}
+
+/* --- Attente -------------------------------------------------------------- */
+
+/* Des barres neutres, jamais des chiffres en attente : annoncer une forme de
+   résultat avant de l'avoir, c'est déjà mentir un peu. */
+.attente { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.attente-ligne {
+	display: block;
+	height: 12px;
+	border-radius: 6px;
+	background: linear-gradient(
+		90deg,
+		var(--line) 0%,
+		color-mix(in oklab, var(--line) 45%, transparent) 50%,
+		var(--line) 100%
+	);
+	background-size: 200% 100%;
+	animation: attente-glisse 1.4s ease-in-out infinite;
+}
+.attente-ligne:nth-child(2) { width: 86%; }
+.attente-ligne:nth-child(3) { width: 68%; }
+.attente-ligne:nth-child(4) { width: 78%; }
+
+@keyframes attente-glisse {
+	from { background-position: 200% 0; }
+	to   { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.attente-ligne { animation: none; }
+	.primary-button:hover { transform: none; }
+}
+
+/* --- Barre supérieure ----------------------------------------------------- */
+
+.topbar-principe {
+	margin: 0;
+	color: var(--teal);
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 13px;
+	font-style: italic;
+}
+
+/* --- Fenêtre étroite ------------------------------------------------------
+   Testé à 479 px : c'est la largeur sur laquelle la démonstration est faite.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 560px) {
+	/* Le principe disparaît de la barre du haut — il est déjà le titre de la
+	   page d'accueil, et il pousserait le fil d'Ariane hors de l'écran. */
+	.topbar-principe { display: none; }
+	.topbar { height: 56px; }
+
+	.formulaire { grid-template-columns: 1fr; }
+	.champ-action .primary-button { margin-top: 4px; }
+
+	.page-heading { flex-direction: column; align-items: stretch; }
+
+	.etat-entete { flex-direction: column; }
+	.article-meta { align-items: start; flex-direction: row; }
+
+	.recherche-ligne { flex-direction: column; }
+	.recherche-ligne .primary-button { width: 100%; }
+
+	.grille-deux, .etat-grille, .faits, .liste-roles { grid-template-columns: 1fr; }
+
+	.role-nb { margin-inline-start: 0; }
+
+	.etape { gap: 10px; }
+	.panel { padding: 16px; }
+}
