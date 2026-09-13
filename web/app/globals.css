@@ -437,7 +437,19 @@ h2 {
 	overflow-wrap: anywhere;
 }
 .mesure-verified { color: var(--verified); }
-.mesure-declared { color: var(--declared); }
+/*
+ * Les valeurs déclarées passent au rouge.
+ *
+ * L'ambre servait déjà à trois choses à l'écran : les termes arabes en
+ * apposition, les délais qui approchent, et ces montants. Trois sens pour
+ * une même couleur, et le lecteur ne sait plus laquelle réclame son
+ * attention.
+ *
+ * Le rouge est celui du délai critique, déjà présent sur la page — pas une
+ * teinte de plus dans le thème, la même.
+ */
+.mesure-declared { color: var(--danger); }
+
 .mesure-abstain  { color: var(--abstain); }
 .mesure-detail {
 	margin: 0;
