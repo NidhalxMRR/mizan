@@ -1302,3 +1302,13 @@ h2 {
 	.acte-declare-retirer { margin-inline-start: 0; }
 	.acte-article { white-space: normal; }
 }
+
+/* Le motif de rejet, lisible sous le titre et non trois écrans plus bas :
+   une conclusion sans sa raison n'est pas citable dans des conclusions. */
+.interruption-motif-tete {
+	margin: 8px 0 0;
+	max-width: 62ch;
+	color: var(--ink);
+	font-size: 14px;
+	line-height: 1.62;
+}

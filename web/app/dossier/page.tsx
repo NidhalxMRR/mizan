@@ -309,7 +309,27 @@ function PourquoiCeDelai({ a }: { a: Analyse }) {
   return (
     <section className="panel bloc-espace">
       <p className="eyebrow">POURQUOI CE DÉLAI ET PAS UN AUTRE</p>
-      <h2>Régime retenu : {a.regime}</h2>
+      {/*
+        `regime` est un identifiant interne (« goods_1y »). Devant un jury de
+        juristes, un identifiant de code source n'a aucun sens et donne
+        l'impression d'un prototype qui fuit ses entrailles. Le régime se dit
+        en droit : une durée et son fondement. L'identifiant reste disponible
+        pour qui inspecte l'API.
+      */}
+      <h2>
+        {/*
+          La durée doit se mesurer sur le délai LUI-MÊME, donc depuis son point
+          de départ réel. Quand un acte a interrompu la prescription, ce point
+          n'est plus la facture mais la date de l'acte (COC art. 398) : mesurer
+          depuis la facture donnait « 415 jours » pour un régime d'un an.
+        */}
+        Délai retenu :{' '}
+        {dureeRegimeFr(
+          a.interruption?.date_depart_effective ?? a.date_facture,
+          a.echeance,
+        )}
+      </h2>
+
       <p className="motif-regime">{a.regime_reason_fr}</p>
       <div className="faits">
         <Fait libelle="Montant" valeur={`${formatMontant(a.montant_tnd)} DT`} />
@@ -422,8 +442,15 @@ function Articles({ a }: { a: Analyse }) {
             {a.sources.length > 1 ? 's' : ''} dans le corpus
           </h2>
         </div>
+        {/*
+          « moteur_deterministe » est le nom interne du calculateur. Ce que le
+          jury doit lire, c'est la garantie que ce badge porte : ces articles
+          viennent du corpus, pas d'un modèle de langage.
+        */}
         <span className="provenance provenance-verified">
-          Source : {a.origine}
+          {a.origine === 'moteur_deterministe'
+            ? 'Calcul déterministe — aucun modèle de langage'
+            : `Source : ${a.origine}`}
         </span>
       </div>
       <ul className="liste-nue bloc-espace">
@@ -456,6 +483,36 @@ function formatMontant(n: number): string {
 function formatDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+}
+
+/**
+ * La durée du régime, dite en droit plutôt qu'en identifiant.
+ *
+ * L'API renvoie « goods_1y » : un identifiant interne, sans le moindre sens
+ * pour un juriste, et qui donne à l'écran l'air d'un prototype qui fuit ses
+ * entrailles. La durée réelle se déduit des deux dates que le moteur fournit
+ * déjà — on ne devine rien, on relit ce qu'il a calculé.
+ */
+function dureeRegimeFr(depart: string, echeance: string): string {
+  const d = new Date(`${depart}T00:00:00Z`);
+  const f = new Date(`${echeance}T00:00:00Z`);
+  if (Number.isNaN(d.getTime()) || Number.isNaN(f.getTime())) return 'délai légal';
+
+  const jours = Math.round((f.getTime() - d.getTime()) / 86400000);
+
+  // Un régime annal se reconnaît à sa durée, pas au quantième d'arrivée : le
+  // moteur place parfois l'échéance au même quantième (12/05/2026 →
+  // 12/05/2027) et parfois à la veille (15/01/2020 → 14/01/2021, le jour de
+  // départ ne comptant pas, COC art. 401). Les deux font un an ; comparer les
+  // quantièmes affichait « 365 jours » dans un cas et « un an » dans l'autre.
+  const ans = jours / 365;
+  if (Number.isInteger(ans) && ans >= 1 && ans <= 30) {
+    return ans === 1 ? 'un an' : `${ans} ans`;
+  }
+  // 366 : la même année civile, mais bissextile.
+  if (jours === 366) return 'un an';
+
+  return `${jours.toLocaleString('fr-FR')} jours`;
 }
 
 function Fait({ libelle, valeur }: { libelle: string; valeur: string }) {

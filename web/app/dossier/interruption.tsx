@@ -50,6 +50,16 @@ export function BlocInterruption({ a }: { a: Analyse }) {
               ? 'Le délai a été interrompu : il repart en entier'
               : "Aucun acte n'a interrompu le délai"}
           </h2>
+          {/*
+            Quand aucun acte n'a produit d'effet, le MOTIF doit se lire ici,
+            sous le titre, et non trois écrans plus bas. Mesuré à 479 px : le
+            juriste voyait « aucun acte retenu » sans la phrase qui l'explique,
+            et devait rapprocher lui-même deux dates situées dans deux cartes
+            différentes. Une conclusion sans sa raison n'est pas citable.
+          */}
+          {!i.interrompu && i.actes_sans_effet.length > 0 ? (
+            <p className="interruption-motif-tete">{i.resume_fr}</p>
+          ) : null}
         </div>
         <span
           className={`provenance ${
