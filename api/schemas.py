@@ -246,3 +246,35 @@ class Explication(BaseModel):
     analyse: Analyse
     sources: list[Source]
     avertissement: str
+
+
+class EtapeAgent(BaseModel):
+    """Une étape de la chaîne, avec sa durée mesurée.
+
+    Le jury doit pouvoir lire où la chaîne s'est arrêtée, et combien de temps
+    chaque agent a pris. Un agent qui échoue interrompt la suite : c'est
+    voulu. Produire une explication juridique sans avoir lu la pièce
+    reviendrait à fabriquer une créance.
+    """
+    agent: str
+    ok: bool
+    duree_s: float
+    resume: str
+    detail: dict = {}
+
+
+class ChaineAgents(BaseModel):
+    """Le résultat complet des quatre agents sur une pièce déposée."""
+    ok: bool
+    arret: str | None = None
+    piece: str
+    sha256: str
+    etapes: list[EtapeAgent] = []
+    faits: dict = {}
+    articles: list[dict] = []
+    evaluation: dict | None = None
+    explication: str = ""
+    origine_texte: str | None = None
+    verification: dict = {}
+    duree_totale_s: float = 0.0
+    version_chaine: str = ""

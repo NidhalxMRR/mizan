@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { lireSante, API_URL, type Sante } from '@/lib/api';
 import { PanneApi } from './components/etats';
 import { roles, roleLabels, roleLabelsAr, permissions } from '@/lib/auth';
+import { pannEnFrancais, moteurEnFrancais, modeleEnClair } from '@/lib/panne';
 
 /**
  * Page d'accueil.
@@ -89,7 +90,7 @@ function EtatService({ sante }: { sante: Sante }) {
           </h2>
         </div>
         <span className="provenance provenance-verified">
-          Moteur juridique : {sante.moteur_juridique}
+          Moteur juridique : {moteurEnFrancais(sante.moteur_juridique)}
         </span>
       </div>
 
@@ -131,8 +132,10 @@ function EtatService({ sante }: { sante: Sante }) {
                   aria-hidden="true"
                 />
                 <span className="hebergement-nom">{h.nom}</span>
-                <code className="hebergement-modele">{h.modele}</code>
-                <span className="hebergement-motif">{h.motif}</span>
+                <code className="hebergement-modele" title={h.modele}>
+                  {modeleEnClair(h.modele)}
+                </code>
+                <span className="hebergement-motif">{pannEnFrancais(h.motif)}</span>
               </li>
             ))}
           </ul>
@@ -140,7 +143,8 @@ function EtatService({ sante }: { sante: Sante }) {
       ) : null}
 
       <p className="etat-source">
-        Données lues sur <code>{API_URL}/sante</code> au rendu de cette page.
+        Données lues en direct depuis l'API Mizan au rendu de cette page,
+        et non figées dans le code.
         Principe déclaré par l&apos;API : « {sante.principe} »
       </p>
     </section>
@@ -162,7 +166,7 @@ function Mesure({
     <div className="mesure">
       <p className="mesure-libelle">{libelle}</p>
       <p className={`mesure-valeur mesure-${etat}`}>{valeur}</p>
-      <p className="mesure-detail">{detail}</p>
+      <p className="mesure-detail">{pannEnFrancais(detail)}</p>
     </div>
   );
 }

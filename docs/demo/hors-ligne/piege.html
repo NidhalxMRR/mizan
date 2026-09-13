@@ -1,0 +1,2246 @@
+<!DOCTYPE html><html lang="fr" dir="ltr"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>/* [project]/app/globals.css [app-client] (css) */
+@layer theme {
+  :root, :host {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+
+@layer base {
+  *, :after, :before, ::backdrop {
+    box-sizing: border-box;
+    border: 0 solid;
+    margin: 0;
+    padding: 0;
+  }
+
+  ::file-selector-button {
+    box-sizing: border-box;
+    border: 0 solid;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, :host {
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    line-height: 1.5;
+    font-family: var(--default-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+
+  b, strong {
+    font-weight: bolder;
+  }
+
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+
+  small {
+    font-size: 80%;
+  }
+
+  sub, sup {
+    vertical-align: baseline;
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+  }
+
+  sub {
+    bottom: -.25em;
+  }
+
+  sup {
+    top: -.5em;
+  }
+
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  :-moz-focusring:where(:not(iframe)) {
+    outline: auto;
+  }
+
+  progress {
+    vertical-align: baseline;
+  }
+
+  summary {
+    display: list-item;
+  }
+
+  ol, ul, menu {
+    list-style: none;
+  }
+
+  img, svg, video, canvas, audio, iframe, embed, object {
+    vertical-align: middle;
+    display: block;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  button, input, select, optgroup, textarea {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    opacity: 1;
+    background-color: #0000;
+    border-radius: 0;
+  }
+
+  ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    opacity: 1;
+    background-color: #0000;
+    border-radius: 0;
+  }
+
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+
+  ::placeholder {
+    opacity: 1;
+  }
+
+  @supports (not ((-webkit-appearance: -apple-pay-button))) or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentColor;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      ::placeholder {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+
+  ::-webkit-datetime-edit {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-year-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-month-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-day-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-hour-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-minute-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-second-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-millisecond-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+
+  button, input:where([type="button"], [type="reset"], [type="submit"]) {
+    appearance: button;
+  }
+
+  ::file-selector-button {
+    appearance: button;
+  }
+
+  ::-webkit-inner-spin-button {
+    height: auto;
+  }
+
+  ::-webkit-outer-spin-button {
+    height: auto;
+  }
+
+  [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+
+@layer components;
+
+@layer utilities {
+  .visible {
+    visibility: visible;
+  }
+
+  .isolate {
+    isolation: isolate;
+  }
+
+  .block {
+    display: block;
+  }
+}
+
+:root {
+  --ink: #1f2d2b;
+  --muted: #71807b;
+  --paper: #f5f6f1;
+  --panel: #fffefa;
+  --line: #e3e8e0;
+  --navy: #203c48;
+  --teal: #2f8d82;
+  --mint: #d9eee7;
+  --gold: #c28c3a;
+  --rose: #bf6d68;
+  --shadow: 0 18px 50px #233d3814;
+  --verified: #2f8d82;
+  --declared: #c28c3a;
+  --abstain: #7a8b94;
+  --danger: #bf6d68;
+}
+
+[data-theme="dark"], .dark {
+  --ink: #e2ebe7;
+  --muted: #8ea29c;
+  --paper: #111a19;
+  --panel: #172422;
+  --line: #243533;
+  --navy: #152226;
+  --teal: #3cb3a4;
+  --mint: #1c3d38;
+  --gold: #dfa857;
+  --rose: #d97d77;
+  --shadow: 0 18px 50px #00000073;
+  --verified: #3cb3a4;
+  --declared: #dfa857;
+  --abstain: #8ea29c;
+  --danger: #d97d77;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  letter-spacing: 0;
+  margin: 0;
+  font-family: Segoe UI, system-ui, -apple-system, sans-serif;
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  button:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+  }
+}
+
+button:focus-visible {
+  outline-offset: 2px;
+}
+
+h1, h2, p {
+  margin-top: 0;
+}
+
+h1 {
+  color: var(--ink);
+  letter-spacing: -.04em;
+  margin-bottom: 11px;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: clamp(31px, 3vw, 43px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+h1 em {
+  color: var(--teal);
+  font-style: italic;
+}
+
+h2 {
+  color: var(--ink);
+  letter-spacing: -.025em;
+  margin-bottom: 0;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.eyebrow {
+  color: var(--muted);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  margin: 0 0 9px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.intro {
+  color: var(--muted);
+  margin: 0;
+  font-size: 13px;
+}
+
+.legal-ar {
+  text-align: right;
+  color: var(--ink);
+  direction: rtl;
+  unicode-bidi: isolate;
+  font-family: Segoe UI, Traditional Arabic, Amiri, serif;
+  font-size: 15px;
+  line-height: 2;
+}
+
+.citation {
+  background: var(--mint);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .citation {
+    background: color-mix(in oklab, var(--mint) 45%, transparent);
+  }
+}
+
+.citation {
+  border-inline-start: 3px solid var(--verified);
+  border-radius: 0 8px 8px 0;
+  margin: 12px 0;
+  padding: 14px 16px;
+}
+
+.citation-ref {
+  color: var(--verified);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  display: block;
+}
+
+.provenance {
+  border-radius: 6px;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+}
+
+.provenance-verified {
+  background: var(--verified);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .provenance-verified {
+    background: color-mix(in oklab, var(--verified) 12%, transparent);
+  }
+}
+
+.provenance-verified {
+  color: var(--verified);
+}
+
+.provenance-declared {
+  background: var(--declared);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .provenance-declared {
+    background: color-mix(in oklab, var(--declared) 14%, transparent);
+  }
+}
+
+.provenance-declared {
+  color: var(--declared);
+}
+
+.provenance-abstain {
+  background: var(--abstain);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .provenance-abstain {
+    background: color-mix(in oklab, var(--abstain) 14%, transparent);
+  }
+}
+
+.provenance-abstain {
+  color: var(--abstain);
+}
+
+.provenance-danger {
+  background: var(--danger);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .provenance-danger {
+    background: color-mix(in oklab, var(--danger) 13%, transparent);
+  }
+}
+
+.provenance-danger {
+  color: var(--danger);
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  background: var(--navy);
+  color: #ecf4ee;
+  z-index: 10;
+  flex-direction: column;
+  flex: 0 0 258px;
+  width: 258px;
+  padding: 27px 16px 18px;
+  display: flex;
+  position: relative;
+}
+
+.brand-lockup {
+  align-items: center;
+  gap: 11px;
+  padding: 0 10px 27px;
+  display: flex;
+}
+
+.brand-mark {
+  color: #d9eee7;
+  letter-spacing: .08em;
+  border: 1px solid #9ecdc2;
+  border-radius: 10px 10px 10px 3px;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+}
+
+.brand-name {
+  letter-spacing: -.02em;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.brand-name span {
+  color: #7cc8b9;
+}
+
+.brand-caption {
+  color: #9db4ae;
+  letter-spacing: .16em;
+  margin: 3px 0 0;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.nav-label {
+  color: #829d96;
+  letter-spacing: .14em;
+  margin: 0 12px 9px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.nav-label-spaced {
+  margin-top: 28px;
+}
+
+.main-nav {
+  flex: 1;
+}
+
+.nav-item {
+  color: #a8beb7;
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 2px 0;
+  padding: 11px 12px;
+  font-size: 12px;
+  text-decoration: none;
+  transition: background .2s, color .2s;
+  display: flex;
+}
+
+.nav-item:hover {
+  color: #f2f7f2;
+  background: #ffffff12;
+}
+
+.nav-item-active {
+  color: #f4fbf5;
+  background: #2f5a63;
+  box-shadow: inset 3px 0 #7cc8b9;
+}
+
+.security-note {
+  color: #94b1a9;
+  border-top: 1px solid #ffffff1f;
+  align-items: center;
+  gap: 9px;
+  padding: 18px 8px 0;
+  font-size: 10px;
+  line-height: 1.45;
+  display: flex;
+}
+
+.security-note strong {
+  color: #d5ece3;
+  font-weight: 600;
+}
+
+.content-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  background: var(--panel);
+  justify-content: space-between;
+  align-items: center;
+  height: 73px;
+  padding: 0 42px;
+  display: flex;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .topbar {
+    background: color-mix(in oklab, var(--panel) 75%, transparent);
+  }
+}
+
+.topbar {
+  border-bottom: 1px solid var(--line);
+}
+
+.breadcrumb {
+  color: var(--muted);
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  display: flex;
+}
+
+.breadcrumb strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.page-content {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 43px 42px 56px;
+}
+
+.page-heading {
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 32px;
+  display: flex;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.primary-button, .secondary-button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 17px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: transform .2s, box-shadow .2s;
+  display: inline-flex;
+}
+
+.primary-button {
+  background: var(--teal);
+  color: #fff;
+  box-shadow: 0 8px 18px var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .primary-button {
+    box-shadow: 0 8px 18px color-mix(in oklab, var(--teal) 17%, transparent);
+  }
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+}
+
+.primary-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondary-button {
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: none;
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    flex: none;
+    align-items: center;
+    width: 100%;
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+
+  .main-nav {
+    gap: 4px;
+    display: flex;
+  }
+
+  .nav-item {
+    white-space: nowrap;
+  }
+
+  .security-note, .brand-caption, .nav-label {
+    display: none;
+  }
+
+  .topbar {
+    padding: 0 20px;
+  }
+
+  .page-content {
+    padding: 24px 20px 40px;
+  }
+}
+
+.bloc-espace {
+  margin-top: 20px;
+}
+
+.etat-entete {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  display: flex;
+}
+
+.etat-grille {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  display: grid;
+}
+
+.mesure {
+  background: var(--paper);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .mesure {
+    background: color-mix(in oklab, var(--paper) 60%, transparent);
+  }
+}
+
+.mesure {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 14px;
+}
+
+.mesure-libelle {
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.mesure-valeur {
+  overflow-wrap: anywhere;
+  margin: 0 0 5px;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 25px;
+  line-height: 1.1;
+}
+
+.mesure-verified {
+  color: var(--verified);
+}
+
+.mesure-declared {
+  color: var(--declared);
+}
+
+.mesure-abstain {
+  color: var(--abstain);
+}
+
+.mesure-detail {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.hebergements {
+  margin-top: 20px;
+}
+
+.liste-nue {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hebergement {
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 0;
+  font-size: 12px;
+  display: flex;
+}
+
+.pastille {
+  border-radius: 50%;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+}
+
+.pastille-ok {
+  background: var(--verified);
+}
+
+.pastille-ko {
+  background: var(--danger);
+}
+
+.hebergement-nom {
+  font-weight: 700;
+}
+
+.hebergement-modele {
+  background: var(--mint);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .hebergement-modele {
+    background: color-mix(in oklab, var(--mint) 40%, transparent);
+  }
+}
+
+.hebergement-modele {
+  overflow-wrap: anywhere;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+}
+
+.hebergement-motif {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.etat-source {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  margin: 18px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.etat-source code, .panne-url code {
+  background: var(--line);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .etat-source code, .panne-url code {
+    background: color-mix(in oklab, var(--line) 40%, transparent);
+  }
+}
+
+.etat-source code, .panne-url code {
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.grille-deux {
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+  display: grid;
+}
+
+.liste-roles {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+
+.role {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 13px;
+  display: flex;
+}
+
+.role-fr {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.role-ar {
+  color: var(--teal);
+  direction: rtl;
+  unicode-bidi: isolate;
+  font-size: 13px;
+}
+
+.role-nb {
+  color: var(--muted);
+  margin-inline-start: auto;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.formulaire {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  align-items: start;
+  gap: 16px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.champ {
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  display: flex;
+}
+
+.champ label {
+  color: var(--ink);
+  letter-spacing: .02em;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.champ input {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  width: 100%;
+  min-width: 0;
+  color: var(--ink);
+  font: inherit;
+  border-radius: 7px;
+  padding: 11px 12px;
+  font-size: 14px;
+}
+
+.champ input:focus-visible {
+  outline: 3px solid var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .champ input:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+  }
+}
+
+.champ input:focus-visible {
+  outline-offset: 1px;
+  border-color: var(--teal);
+}
+
+.champ-aide {
+  color: var(--muted);
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.champ-action {
+  justify-content: end;
+}
+
+.champ-action .primary-button {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.formulaire-attente {
+  color: var(--teal);
+  margin: 14px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rebours {
+  border-inline-start: 4px solid var(--line);
+}
+
+.rebours-ok {
+  border-inline-start-color: var(--verified);
+}
+
+.rebours-attention {
+  border-inline-start-color: var(--declared);
+}
+
+.rebours-critique {
+  border-inline-start-color: var(--danger);
+}
+
+.rebours-expire {
+  border-inline-start-color: var(--abstain);
+}
+
+.rebours-nombre {
+  letter-spacing: -.05em;
+  margin: 6px 0 0;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: clamp(46px, 9vw, 76px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.rebours-ok .rebours-nombre {
+  color: var(--verified);
+}
+
+.rebours-attention .rebours-nombre {
+  color: var(--declared);
+}
+
+.rebours-critique .rebours-nombre {
+  color: var(--danger);
+}
+
+.rebours-expire .rebours-nombre {
+  color: var(--abstain);
+}
+
+.rebours-unite {
+  color: var(--muted);
+  margin: 4px 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rebours-note {
+  max-width: 52ch;
+  color: var(--muted);
+  margin: -6px 0 12px;
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.rebours-phrase {
+  max-width: 62ch;
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.motif-regime {
+  max-width: 70ch;
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.faits {
+  border-top: 1px solid var(--line);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  display: grid;
+}
+
+.fait-libelle {
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.fait-valeur {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.encart-huissier {
+  border-inline-start: 4px solid var(--gold);
+  background: var(--gold);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .encart-huissier {
+    background: color-mix(in oklab, var(--gold) 5%, var(--panel));
+  }
+}
+
+.eyebrow-or {
+  color: var(--gold);
+}
+
+.incise-ar {
+  color: var(--gold);
+  direction: rtl;
+  unicode-bidi: isolate;
+  font-family: Segoe UI, Traditional Arabic, Amiri, serif;
+  font-weight: 600;
+}
+
+.etapes {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etape {
+  border-top: 1px solid var(--line);
+  gap: 14px;
+  padding: 16px 0;
+  display: flex;
+}
+
+.etape-numero {
+  background: var(--teal);
+  border-radius: 50%;
+  flex: 0 0 27px;
+  height: 27px;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .etape-numero {
+    background: color-mix(in oklab, var(--teal) 12%, transparent);
+  }
+}
+
+.etape-numero {
+  color: var(--teal);
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+}
+
+.etape-corps {
+  flex: 1;
+  min-width: 0;
+}
+
+.etape-titre {
+  margin: 2px 0 6px;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.etape-detail {
+  max-width: 70ch;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.etape-citation {
+  border-inline-start: 2px solid var(--verified);
+  margin: 10px 0 0;
+  padding-inline-start: 11px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.citation-fr {
+  color: var(--muted);
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.recherche {
+  margin-top: 14px;
+}
+
+.recherche-label {
+  margin-bottom: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  display: block;
+}
+
+.recherche-ligne {
+  flex-wrap: wrap;
+  gap: 9px;
+  display: flex;
+}
+
+.recherche-input {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  min-width: 0;
+  color: var(--ink);
+  font: inherit;
+  border-radius: 7px;
+  flex: 200px;
+  padding: 12px 13px;
+  font-size: 15px;
+}
+
+.recherche-input:focus-visible {
+  outline: 3px solid var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .recherche-input:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+  }
+}
+
+.recherche-input:focus-visible {
+  outline-offset: 1px;
+  border-color: var(--teal);
+}
+
+.exemples {
+  margin-top: 16px;
+}
+
+.exemples-titre {
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.exemples-liste {
+  flex-wrap: wrap;
+  gap: 7px;
+  display: flex;
+}
+
+.exemple {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 20px;
+  align-items: baseline;
+  gap: 7px;
+  padding: 7px 13px;
+  font-size: 13px;
+  transition: border-color .2s, background .2s;
+  display: inline-flex;
+}
+
+.exemple:hover:not(:disabled) {
+  border-color: var(--teal);
+  background: var(--mint);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .exemple:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--mint) 30%, transparent);
+  }
+}
+
+.exemple:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.exemple-q {
+  unicode-bidi: isolate;
+  font-weight: 600;
+}
+
+.exemple-note {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.bloc-abstention {
+  border-inline-start: 4px solid var(--abstain);
+  background: var(--abstain);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .bloc-abstention {
+    background: color-mix(in oklab, var(--abstain) 6%, var(--panel));
+  }
+}
+
+.abstention-message {
+  letter-spacing: -.02em;
+  max-width: 58ch;
+  color: var(--ink);
+  margin: 14px 0 0;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: clamp(19px, 2.6vw, 26px);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.abstention-motif {
+  color: var(--muted);
+  margin: 14px 0 0;
+  font-size: 12px;
+}
+
+.abstention-motif strong {
+  color: var(--abstain);
+}
+
+.abstention-explication {
+  max-width: 68ch;
+  color: var(--muted);
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.abstention-requete {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  margin: 16px 0 0;
+  padding-top: 13px;
+  font-size: 12px;
+}
+
+.abstention-requete-texte {
+  color: var(--ink);
+  unicode-bidi: isolate;
+  font-weight: 600;
+}
+
+.avert-non-fonde {
+  max-width: 70ch;
+  color: var(--muted);
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.avert-non-fonde strong {
+  color: var(--abstain);
+}
+
+.article {
+  margin-bottom: 14px;
+}
+
+.article-fonde {
+  border-inline-start: 3px solid var(--verified);
+}
+
+.article-doute {
+  border-inline-start: 3px dashed var(--abstain);
+  opacity: .93;
+}
+
+.article-entete {
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  padding-bottom: 12px;
+  display: flex;
+}
+
+.article-identite {
+  min-width: 0;
+}
+
+.article-identite .citation-ref {
+  text-align: start;
+  letter-spacing: 0;
+  text-transform: none;
+  direction: rtl;
+  unicode-bidi: isolate;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.article-code-fr {
+  color: var(--muted);
+  margin: 0;
+  font-size: 11px;
+}
+
+.article-code-ar {
+  text-align: start;
+  color: var(--muted);
+  direction: rtl;
+  unicode-bidi: isolate;
+  margin: 3px 0 0;
+  font-size: 11px;
+}
+
+.article-meta {
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: end;
+  gap: 5px;
+  display: flex;
+}
+
+.article-score {
+  background: var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .article-score {
+    background: color-mix(in oklab, var(--teal) 10%, transparent);
+  }
+}
+
+.article-score {
+  color: var(--teal);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.article-id {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.article-texte {
+  white-space: pre-wrap;
+  margin: 14px 0 0;
+}
+
+.reformulation {
+  margin-top: 16px;
+}
+
+.reformulation-texte {
+  white-space: pre-wrap;
+  max-width: 68ch;
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.reformulation-avertissement {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  margin: 14px 0 16px;
+  padding-top: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.degradation-motif {
+  color: var(--abstain);
+  overflow-wrap: anywhere;
+  margin: 10px 0 0;
+  font-size: 11px;
+}
+
+.bloc-panne {
+  border-inline-start: 4px solid var(--danger);
+  background: var(--danger);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .bloc-panne {
+    background: color-mix(in oklab, var(--danger) 5%, var(--panel));
+  }
+}
+
+.panne-motif {
+  max-width: 66ch;
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.panne-remede {
+  margin-top: 16px;
+}
+
+.panne-remede-titre {
+  margin: 0 0 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.panne-commande {
+  background: var(--navy);
+  color: #d9eee7;
+  overflow-wrap: anywhere;
+  border-radius: 7px;
+  padding: 12px 14px;
+  font-family: ui-monospace, Cascadia Mono, Consolas, monospace;
+  font-size: 12px;
+  display: block;
+}
+
+.panne-url {
+  color: var(--muted);
+  margin: 14px 0 0;
+  font-size: 11px;
+}
+
+.panne-serment {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  margin: 12px 0 0;
+  padding-top: 12px;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.attente {
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  display: flex;
+}
+
+.attente-ligne {
+  background: linear-gradient(90deg,
+		var(--line) 0%,
+		var(--line) 50%,
+		var(--line) 100%);
+  border-radius: 6px;
+  height: 12px;
+  display: block;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .attente-ligne {
+    background: linear-gradient(90deg,
+		var(--line) 0%,
+		color-mix(in oklab, var(--line) 45%, transparent) 50%,
+		var(--line) 100%);
+  }
+}
+
+.attente-ligne {
+  background-size: 200% 100%;
+  animation: 1.4s ease-in-out infinite attente-glisse;
+}
+
+.attente-ligne:nth-child(2) {
+  width: 86%;
+}
+
+.attente-ligne:nth-child(3) {
+  width: 68%;
+}
+
+.attente-ligne:nth-child(4) {
+  width: 78%;
+}
+
+@keyframes attente-glisse {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attente-ligne {
+    animation: none;
+  }
+
+  .primary-button:hover {
+    transform: none;
+  }
+}
+
+.topbar-principe {
+  color: var(--teal);
+  margin: 0;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 13px;
+  font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .topbar-principe {
+    display: none;
+  }
+
+  .topbar {
+    height: 56px;
+  }
+
+  .formulaire {
+    grid-template-columns: 1fr;
+  }
+
+  .champ-action .primary-button {
+    margin-top: 4px;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .etat-entete {
+    flex-direction: column;
+  }
+
+  .article-meta {
+    flex-direction: row;
+    align-items: start;
+  }
+
+  .recherche-ligne {
+    flex-direction: column;
+  }
+
+  .recherche-ligne .primary-button {
+    width: 100%;
+  }
+
+  .grille-deux, .etat-grille, .faits, .liste-roles {
+    grid-template-columns: 1fr;
+  }
+
+  .role-nb {
+    margin-inline-start: 0;
+  }
+
+  .etape {
+    gap: 10px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+}
+
+.interruption {
+  border-inline-start: 4px solid var(--line);
+}
+
+.interruption-retenue {
+  border-inline-start-color: var(--verified);
+}
+
+.interruption-nulle {
+  border-inline-start-color: var(--abstain);
+}
+
+.eyebrow-teal {
+  color: var(--verified);
+}
+
+.balance {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 10px;
+  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) minmax(0, 150px);
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 18px;
+  display: grid;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .balance {
+    background: color-mix(in oklab, var(--paper) 55%, transparent);
+  }
+}
+
+.balance-borne {
+  min-width: 0;
+}
+
+.balance-libelle {
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.balance-date {
+  letter-spacing: -.03em;
+  overflow-wrap: anywhere;
+  margin: 0 0 6px;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: clamp(23px, 3.4vw, 31px);
+  line-height: 1.05;
+}
+
+.balance-date-avant {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.balance-date-apres {
+  color: var(--verified);
+}
+
+.balance-date-inchangee {
+  color: var(--abstain);
+}
+
+.balance-note {
+  color: var(--muted);
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.balance-fleche {
+  place-items: center;
+  display: grid;
+}
+
+.balance-fleche-trait {
+  background: var(--verified);
+  width: 30px;
+  height: 2px;
+  display: block;
+  position: relative;
+}
+
+.balance-fleche-trait:after {
+  content: "";
+  border-top: 5px solid #0000;
+  border-bottom: 5px solid #0000;
+  border-inline-start: 8px solid var(--verified);
+  position: absolute;
+  top: -4px;
+  right: -1px;
+}
+
+.balance-gain {
+  text-align: center;
+  border-radius: 9px;
+  min-width: 0;
+  padding: 12px 14px;
+}
+
+.balance-gain-positif {
+  background: var(--verified);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .balance-gain-positif {
+    background: color-mix(in oklab, var(--verified) 12%, transparent);
+  }
+}
+
+.balance-gain-positif {
+  color: var(--verified);
+}
+
+.balance-gain-nul {
+  background: var(--abstain);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .balance-gain-nul {
+    background: color-mix(in oklab, var(--abstain) 12%, transparent);
+  }
+}
+
+.balance-gain-nul {
+  color: var(--abstain);
+}
+
+.balance-gain-nombre {
+  letter-spacing: -.04em;
+  margin: 0;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: clamp(30px, 4.4vw, 40px);
+  line-height: 1;
+}
+
+.balance-gain-unite {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.interruption-resume {
+  max-width: 72ch;
+  margin: 18px 0 0;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.interruption-liste {
+  margin-top: 22px;
+}
+
+.interruption-soustitre {
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.interruption-soustitre-alerte {
+  color: var(--danger);
+}
+
+.acte {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  padding: 16px;
+}
+
+.acte-retenu {
+  border-inline-start: 3px solid var(--verified);
+  background: var(--mint);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .acte-retenu {
+    background: color-mix(in oklab, var(--mint) 18%, transparent);
+  }
+}
+
+.acte-sans-effet {
+  border-inline-start: 3px solid var(--danger);
+  background: var(--danger);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .acte-sans-effet {
+    background: color-mix(in oklab, var(--danger) 5%, transparent);
+  }
+}
+
+.acte-entete {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: start;
+  gap: 10px;
+  display: flex;
+}
+
+.acte-identite {
+  min-width: 0;
+}
+
+.acte-titre {
+  margin: 0 0 5px;
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.acte-date {
+  color: var(--muted);
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.acte-date strong {
+  color: var(--ink);
+}
+
+.acte-article {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.acte-fondement {
+  max-width: 70ch;
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.acte-effet {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-width: 70ch;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.acte-effet-libelle {
+  color: var(--verified);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  display: block;
+}
+
+.acte-motif {
+  max-width: 70ch;
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.acte-citations {
+  margin-top: 6px;
+}
+
+.acte-citations .citation {
+  margin-bottom: 0;
+}
+
+.interruption-sources {
+  margin-top: 20px;
+}
+
+.interruption-sources-titre {
+  cursor: pointer;
+  color: var(--muted);
+  padding: 8px 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.interruption-sources-titre:focus-visible {
+  outline: 3px solid var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .interruption-sources-titre:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+  }
+}
+
+.interruption-sources-titre:focus-visible {
+  outline-offset: 2px;
+}
+
+.champ-select {
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--ink);
+  font: inherit;
+  border-radius: 7px;
+  padding: 11px 12px;
+  font-size: 14px;
+}
+
+.champ-select:focus-visible {
+  outline: 3px solid var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .champ-select:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+  }
+}
+
+.champ-select:focus-visible {
+  outline-offset: 1px;
+  border-color: var(--teal);
+}
+
+.formulaire-acte {
+  grid-template-columns: minmax(240px, 1.6fr) minmax(140px, .7fr) minmax(180px, 1.2fr) auto;
+  margin-top: 16px;
+}
+
+.formulaire-acte .champ-action {
+  align-self: start;
+  padding-top: 25px;
+}
+
+@media (max-width: 560px) {
+  .formulaire-acte .champ-action {
+    padding-top: 0;
+  }
+}
+
+.actes-declares {
+  margin-top: 16px;
+}
+
+.acte-declare {
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--teal);
+  background: var(--mint);
+  border-radius: 8px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  display: flex;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .acte-declare {
+    background: color-mix(in oklab, var(--mint) 22%, transparent);
+  }
+}
+
+.acte-declare-type {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.acte-declare-date {
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.acte-declare-desc {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.acte-declare-retirer {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+  margin-inline-start: auto;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.acte-declare-retirer:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.acte-declare-retirer:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.formulaire-erreur {
+  color: var(--danger);
+  margin: 14px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.acte-illisible {
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+}
+
+.acte-illisible-brut {
+  background: var(--line);
+  margin-bottom: 5px;
+  display: block;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .acte-illisible-brut {
+    background: color-mix(in oklab, var(--line) 40%, transparent);
+  }
+}
+
+.acte-illisible-brut {
+  overflow-wrap: anywhere;
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-family: ui-monospace, Cascadia Mono, Consolas, monospace;
+  font-size: 12px;
+}
+
+.acte-illisible-motif {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.cas-demo {
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.cas {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  min-width: 0;
+  color: var(--ink);
+  border-radius: 9px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  text-decoration: none;
+  transition: border-color .2s, transform .2s, background .2s;
+  display: flex;
+}
+
+.cas:hover {
+  border-color: var(--teal);
+  background: var(--mint);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .cas:hover {
+    background: color-mix(in oklab, var(--mint) 28%, transparent);
+  }
+}
+
+.cas:hover {
+  transform: translateY(-2px);
+}
+
+.cas:focus-visible {
+  outline: 3px solid var(--teal);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .cas:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+  }
+}
+
+.cas:focus-visible {
+  outline-offset: 2px;
+}
+
+.cas-titre {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.cas-detail {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .balance {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .balance-fleche {
+    justify-self: start;
+  }
+
+  .balance-fleche-trait {
+    width: 2px;
+    height: 26px;
+  }
+
+  .balance-fleche-trait:after {
+    border-top: 8px solid var(--verified);
+    border-bottom: 0;
+    border-inline: 5px solid #0000;
+    inset: auto auto -8px -4px;
+  }
+
+  .balance-gain {
+    text-align: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .formulaire-acte, .cas-demo {
+    grid-template-columns: 1fr;
+  }
+
+  .acte {
+    padding: 13px;
+  }
+
+  .acte-declare-retirer {
+    margin-inline-start: 0;
+  }
+
+  .acte-article {
+    white-space: normal;
+  }
+}
+
+.interruption-motif-tete {
+  max-width: 62ch;
+  color: var(--ink);
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+/*# sourceMappingURL=app_globals_0yg4wg8.css.map*/</style><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js"/><title>Mon impayé — Mizan</title><meta name="description" content="Plateforme tunisienne d&#x27;aide aux PME en litige commercial. Le moteur juridique est déterministe : l&#x27;IA propose, le droit dispose."/><link rel="icon" href="/favicon.ico?favicon.2vob68tjqpejf.ico" sizes="256x256" type="image/x-icon"/></head><body><div hidden=""><!--$--><!--/$--></div><div class="app-shell"><aside class="sidebar"><div class="brand-lockup"><div class="brand-mark" aria-hidden="true">⚖</div><div><p class="brand-name">Mizan <span>ميزان</span></p><p class="brand-caption">RÉSOLUTION DES LITIGES</p></div></div><nav class="main-nav" aria-label="Navigation principale"><p class="nav-label">PARCOURS</p><a class="nav-item" href="#">Principe</a><a class="nav-item nav-item-active" aria-current="page" href="#">Mon impayé</a><a class="nav-item" href="#">Le corpus</a></nav><div class="security-note"><span aria-hidden="true">🔒</span><span>Seul un <strong>عدل منفذ</strong> peut signifier un acte. Mizan prépare le dossier, elle ne le signifie pas.</span></div></aside><div class="content-area"><header class="topbar"><div class="breadcrumb"><span>Mizan</span><span aria-hidden="true">/</span><strong>Mon impayé</strong></div><p class="topbar-principe">L&#x27;IA propose. Le droit dispose.</p></header><main class="page-content"><div class="page-heading"><div><p class="eyebrow">PARCOURS PME</p><h1>Où en est <em>mon impayé</em> ?</h1><p class="intro">Le moteur calcule le délai de prescription applicable, la date d&#x27;échéance et les suites possibles. Chaque conclusion est rattachée à l&#x27;article qui la fonde. Rien n&#x27;est estimé, rien n&#x27;est arrondi.</p></div></div><section class="panel bloc-espace"><p class="eyebrow">DEUX CAS PRÊTS — AUCUNE SAISIE NÉCESSAIRE</p><div class="cas-demo"><a class="cas" href="/dossier?montant=9520&amp;date=2026-05-12&amp;activite=menuiserie&amp;acte=sommation_huissier%3A2026-07-01%3ASommation%20de%20payer%20signifi%C3%A9e%20%C3%A0%20la%20soci%C3%A9t%C3%A9%20d%C3%A9bitrice"><span class="cas-titre">Ahmed, menuisier à Sfax — avec une sommation</span><span class="cas-detail">9 520,000 DT, facture du 12/05/2026, sommation par huissier du 01/07/2026.</span></a><a class="cas" href="/dossier?montant=9520&amp;date=2020-01-15&amp;activite=menuiserie&amp;acte=sommation_huissier%3A2026-01-01%3ASommation%20signifi%C3%A9e%20apr%C3%A8s%20l%27expiration%20du%20d%C3%A9lai"><span class="cas-titre">Le piège — une créance de 2020 et une sommation de 2026</span><span class="cas-detail">9 520,000 DT, facture du 15/01/2020, sommation du 01/01/2026 : elle arrive après la prescription.</span></a></div></section><section class="panel"><p class="eyebrow">LES TROIS SEULES CHOSES DEMANDÉES</p><form class="formulaire"><div class="champ"><label for="montant">Montant réclamé (DT)</label><input id="montant" type="number" inputMode="decimal" min="0.001" step="0.001" required="" name="montant" value="9520"/><p class="champ-aide">Au-delà de 150 DT, la sommation change de nature.</p></div><div class="champ"><label for="date">Date de la facture</label><input id="date" type="date" required="" name="date" value="2020-01-15"/><p class="champ-aide">Lue par le moteur : <strong>15 janvier 2020</strong>. C&#x27;est elle qui fait courir le délai.</p></div><div class="champ"><label for="activite">Votre activité</label><input id="activite" list="activites-connues" autoComplete="off" name="activite" value="menuiserie"/><datalist id="activites-connues"><option value="menuiserie"></option><option value="textile"></option><option value="imprimerie"></option><option value="agroalimentaire"></option><option value="quincaillerie"></option><option value="transport"></option><option value="conseil"></option><option value="informatique"></option><option value="maintenance"></option><option value="architecture"></option></datalist><p class="champ-aide">Livrer un bien ou rendre un service ne se prescrit pas pareil.</p></div><div class="champ champ-action"><button type="submit" class="primary-button">Analyser</button></div></form></section><section class="panel bloc-espace"><p class="eyebrow">UN ACTE A-T-IL INTERROMPU LE DÉLAI ? — COC ART. 396 ET 397</p><h2>Déclarer une sommation, une action en justice, un acompte reçu</h2><p class="intro bloc-espace">Un acte interruptif annule tout le temps déjà écoulé : le délai repart en entier à compter de sa date (COC art. 398). Déclarez-le ici — le moteur dira lui-même s&#x27;il produit cet effet, ou s&#x27;il arrive trop tard pour produire quoi que ce soit.</p><ul class="liste-nue actes-declares"><li class="acte-declare"><span class="acte-declare-type">Sommation de payer par huissier</span><span class="acte-declare-date">01/01/2026</span><button type="button" class="acte-declare-retirer" aria-label="Retirer l&#x27;acte du 01/01/2026">Retirer</button></li></ul><form class="formulaire formulaire-acte"><div class="champ"><label for="acte-type">Nature de l&#x27;acte</label><select id="acte-type" name="acte-type" class="champ-select"><optgroup label="Acte du créancier — COC art. 396"><option value="sommation_huissier" selected="">Sommation de payer par huissier</option><option value="demande_justice">Demande en justice</option><option value="saisie_conservatoire">Saisie conservatoire</option></optgroup><optgroup label="Fait du débiteur — COC art. 397"><option value="reconnaissance_dette">Reconnaissance de dette écrite</option><option value="paiement_partiel">Paiement partiel (acompte)</option><option value="arrete_compte">Arrêté de compte signé</option></optgroup></select><p class="champ-aide">Un simple acompte du débiteur vaut reconnaissance de dette.</p></div><div class="champ"><label for="acte-date">Date de l&#x27;acte</label><input id="acte-date" type="date" name="acte-date" value=""/><p class="champ-aide">Un acte postérieur à l&#x27;expiration n&#x27;interrompt rien.</p></div><div class="champ"><label for="acte-description">Précision (facultative)</label><input id="acte-description" type="text" placeholder="Nom de l&#x27;huissier…" autoComplete="off" name="acte-description" value=""/><p class="champ-aide">Elle est reprise telle quelle dans le dossier.</p></div><div class="champ champ-action"><button type="submit" class="primary-button">Ajouter l&#x27;acte</button></div></form></section><section class="panel bloc-espace rebours rebours-expire"><p class="eyebrow">DÉLAI DE PRESCRIPTION</p><p class="rebours-nombre">2 068</p><p class="rebours-unite">jours depuis l&#x27;expiration du délai</p><p class="rebours-phrase">Le délai est <strong>dépassé</strong> depuis le<!-- --> <!-- -->14/01/2021<!-- -->. Une action reste matériellement possible, mais le débiteur peut opposer la prescription et l&#x27;affaire s&#x27;arrête là.</p><span class="provenance provenance-abstain">Niveau : <!-- -->délai expiré</span></section><section class="panel bloc-espace interruption interruption-nulle" aria-label="Interruption de la prescription"><div class="etat-entete"><div><p class="eyebrow ">INTERRUPTION DE LA PRESCRIPTION — COC ART. 396 À 398</p><h2>Aucun acte n&#x27;a interrompu le délai</h2><p class="interruption-motif-tete">Aucune interruption retenue. Le ou les actes produits (1) sont postérieurs à l&#x27;expiration du délai : ils n&#x27;ont rien interrompu, et l&#x27;échéance reste fixée au 14/01/2021.</p></div><span class="provenance provenance-abstain">aucun acte retenu</span></div><div class="balance"><div class="balance-borne"><p class="balance-libelle">Échéance sans interruption</p><p class="balance-date balance-date-inchangee">14/01/2021</p><p class="balance-note">Délai courant depuis la facture du <!-- -->15/01/2020</p></div><div class="balance-fleche" aria-hidden="true"><span class="balance-fleche-trait"></span></div><div class="balance-borne"><p class="balance-libelle">Échéance retenue par le moteur</p><p class="balance-date balance-date-inchangee">14/01/2021</p><p class="balance-note">Inchangée : le point de départ reste la date de la facture</p></div><div class="balance-gain balance-gain-nul"><p class="balance-gain-nombre">0</p><p class="balance-gain-unite">jour de report</p></div></div><p class="interruption-resume">Aucune interruption retenue. Le ou les actes produits (1) sont postérieurs à l&#x27;expiration du délai : ils n&#x27;ont rien interrompu, et l&#x27;échéance reste fixée au 14/01/2021.</p><div class="interruption-liste"><p class="interruption-soustitre interruption-soustitre-alerte">1<!-- --> acte<!-- --> produit<!-- --> mais sans aucun effet</p><article class="acte acte-sans-effet"><div class="acte-entete"><div class="acte-identite"><h3 class="acte-titre">Sommation de payer signifiée par huissier de justice</h3><p class="acte-date">Acte du <strong>01/01/2026</strong></p></div><span class="provenance provenance-danger acte-article">n&#x27;a rien interrompu</span></div><p class="acte-motif">Acte accompli le 01/01/2026, soit 1813 jour(s) APRÈS l&#x27;expiration du délai le 14/01/2021. La prescription était déjà acquise : il n&#x27;y avait plus de délai à interrompre. Une créance éteinte ne se ranime pas par une sommation tardive, et le débiteur peut opposer la prescription malgré cet acte.</p><ul class="liste-nue acte-citations"><li class="citation"><span class="citation-ref">COC art. 398</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 398 من مجلة الالتزامات والعقود</p><p class="citation-fr">Effet de l&#x27;interruption — le temps écoulé est annulé et le délai recommence à courir en entier</p></li></ul></article></div><details class="interruption-sources"><summary class="interruption-sources-titre">L’article mobilisé pour ce calcul d’interruption</summary><ul class="liste-nue"><li class="citation"><span class="citation-ref">COC art. 398</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 398 من مجلة الالتزامات والعقود</p><p class="citation-fr">Effet de l&#x27;interruption — le temps écoulé est annulé et le délai recommence à courir en entier</p></li></ul></details></section><section class="panel bloc-espace"><p class="eyebrow">POURQUOI CE DÉLAI ET PAS UN AUTRE</p><h2>Délai retenu :<!-- --> <!-- -->un an</h2><p class="motif-regime">Meubles fabriqués puis livrés au client : la créance porte sur le prix de marchandises livrées, non sur une simple prestation de service. C&#x27;est le délai d&#x27;un an qui s&#x27;applique, et non celui de quinze ans.</p><div class="faits"><div class="fait"><p class="fait-libelle">Montant</p><p class="fait-valeur">9 520,000 DT</p></div><div class="fait"><p class="fait-libelle">Facture du</p><p class="fait-valeur">15/01/2020</p></div><div class="fait"><p class="fait-libelle">Échéance</p><p class="fait-valeur">14/01/2021</p></div><div class="fait"><p class="fait-libelle">Calculé le</p><p class="fait-valeur">13/09/2026</p></div></div></section><section class="panel bloc-espace encart-huissier"><div class="etat-entete"><div><p class="eyebrow eyebrow-or">ACTE RÉSERVÉ — MIZAN NE PEUT PAS LE FAIRE À VOTRE PLACE</p><h2>La sommation doit être signifiée par un<!-- --> <span lang="ar" dir="rtl" class="incise-ar">عدل منفذ</span></h2></div><span class="provenance provenance-declared">5<!-- --> jours francs</span></div><p class="intro bloc-espace">Votre créance de <!-- -->9 520,000<!-- --> DT dépasse le seuil légal. L&#x27;huissier de justice signifie la mise en demeure et laisse<!-- --> <!-- -->5<!-- --> jours francs au débiteur pour payer. Ce n&#x27;est qu&#x27;ensuite qu&#x27;une injonction de payer peut être demandée.</p><p class="intro">Mizan prépare le projet d&#x27;acte — parties identifiées, montant calculé, articles cités et relus — puis le lui transmet. Elle ne le signifie pas : un logiciel n&#x27;a pas ce pouvoir, et prétendre le contraire exposerait la PME à voir son acte annulé.</p></section><section class="panel bloc-espace"><p class="eyebrow">CE QUE VOUS POUVEZ FAIRE, DANS L&#x27;ORDRE</p><h2>3<!-- --> étape<!-- -->s<!-- --> calculée<!-- -->s<!-- --> par le moteur</h2><ol class="etapes"><li class="etape"><span class="etape-numero" aria-hidden="true">1</span><div class="etape-corps"><h3 class="etape-titre">Mise en demeure</h3><p class="etape-detail">Votre créance dépasse 150 DT : la sommation doit être signifiée par huissier de justice. Le débiteur dispose alors de 5 jours francs pour payer.</p><p lang="ar" dir="rtl" class="legal-ar etape-citation">الفصل 60 من مجلة المرافعات المدنية والتجارية</p></div></li><li class="etape"><span class="etape-numero" aria-hidden="true">2</span><div class="etape-corps"><h3 class="etape-titre">Injonction de payer</h3><p class="etape-detail">Passé le délai, vous pouvez demander une injonction de payer : la dette est déterminée et d&#x27;origine contractuelle.</p><p lang="ar" dir="rtl" class="legal-ar etape-citation">الفصل 59 من مجلة المرافعات المدنية والتجارية</p></div></li><li class="etape"><span class="etape-numero" aria-hidden="true">3</span><div class="etape-corps"><h3 class="etape-titre">Réparation du préjudice</h3><p class="etape-detail">Le retard ouvre droit à réparation : perte subie et gain manqué, même sans mauvaise foi du débiteur.</p><p lang="ar" dir="rtl" class="legal-ar etape-citation">الفصل 278 من مجلة الالتزامات والعقود</p></div></li></ol></section><section class="panel bloc-espace"><div class="etat-entete"><div><p class="eyebrow">LES ARTICLES QUI FONDENT CE QUI PRÉCÈDE</p><h2>6<!-- --> référence<!-- -->s<!-- --> relue<!-- -->s<!-- --> dans le corpus</h2></div><span class="provenance provenance-verified">Calcul déterministe — aucun modèle de langage</span></div><ul class="liste-nue bloc-espace"><li class="citation"><span class="citation-ref">COC art. 403</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 403 من مجلة الالتزامات والعقود</p><p class="citation-fr">Prescription d&#x27;un an — prix des marchandises livrées</p></li><li class="citation"><span class="citation-ref">CPCC art. 60</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 60 من مجلة المرافعات المدنية والتجارية</p><p class="citation-fr">Mise en demeure par huissier — créances supérieures à 150 DT</p></li><li class="citation"><span class="citation-ref">COC art. 277</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 277 من مجلة الالتزامات والعقود</p><p class="citation-fr">L&#x27;inexécution ou le retard ouvre droit à réparation</p></li><li class="citation"><span class="citation-ref">COC art. 278</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 278 من مجلة الالتزامات والعقود</p><p class="citation-fr">Réparation du préjudice — perte subie et gain manqué</p></li><li class="citation"><span class="citation-ref">CPCC art. 59</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 59 من مجلة المرافعات المدنية والتجارية</p><p class="citation-fr">Procédure d&#x27;injonction de payer</p></li><li class="citation"><span class="citation-ref">COC art. 398</span><p lang="ar" dir="rtl" class="legal-ar">الفصل 398 من مجلة الالتزامات والعقود</p><p class="citation-fr">Effet de l&#x27;interruption — le temps écoulé est annulé et le délai recommence à courir en entier</p></li></ul></section><section class="panel bloc-espace"><p class="eyebrow">FACULTATIF — ET SÉPARÉ DU CALCUL</p><h2>Faire reformuler en français simple</h2><p class="intro bloc-espace">Le modèle de langage reçoit le résultat ci-dessus et le réécrit. Il n&#x27;a pas le droit de citer un article : les références restent celles affichées plus haut, et l&#x27;API retire toute référence qu&#x27;il tenterait de produire.</p><button type="button" class="secondary-button">Demander la reformulation</button></section><!--$--><!--/$--></main></div></div></body></html>

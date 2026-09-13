@@ -36,11 +36,13 @@ from packages.legal import doc_gate, gate, invoice, retrieve
 from packages.legal.interruption import ActeImpossible
 from packages.legal.legal_engine import DateImpossible, assess
 from packages.models.client import ClientLLM, ModeleIndisponible
+from agents import chaine
 
 from api.documents import routeur as routeur_documents
 from api.schemas import (
     Analyse,
     ArticleTrouve,
+    ChaineAgents,
     DemandeAnalyse,
     DemandeExplication,
     EtatHebergement,
@@ -427,6 +429,46 @@ async def deposer_piece(fichier: UploadFile = File(...)) -> PieceDeposee:
         client=donnees["client"],
         avertissement=AVERTISSEMENT_SOURCES,
     )
+
+
+@app.post("/dossiers/traiter-piece", response_model=ChaineAgents,
+          summary="Chaîne d'agents : lecteur, chercheur, moteur juridique, rédacteur")
+async def traiter_piece(fichier: UploadFile = File(...)) -> ChaineAgents:
+    """Passe une facture aux quatre agents et rend leur trace complète.
+
+    La différence avec /dossiers/deposer-piece : cette route ne s'arrête pas à
+    l'extraction. Elle enchaîne les agents jusqu'à l'explication rédigée, et
+    renvoie le détail de CHAQUE étape — durée, succès, résumé.
+
+    C'est ce que le jury doit pouvoir vérifier : que le montant vient du
+    document, que les articles viennent du corpus, et qu'un arrêt à n'importe
+    quelle étape interrompt la chaîne au lieu de produire une réponse inventée.
+    """
+    contenu = await fichier.read()
+    if not contenu:
+        raise HTTPException(status_code=400, detail="Le fichier reçu est vide.")
+    if len(contenu) > TAILLE_MAX_PIECE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Fichier trop volumineux ({len(contenu)} octets) : "
+                   f"la limite est de {TAILLE_MAX_PIECE // (1024 * 1024)} Mo.",
+        )
+
+    nom = fichier.filename or "piece.pdf"
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as tmp:
+        tmp.write(contenu)
+        tmp.flush()
+        try:
+            # utiliser_modele=False : le modèle ne fait que reformuler. Sur une
+            # machine sans GPU — le cas pendant la démonstration — la chaîne
+            # doit rendre le même droit, seulement moins joliment dit.
+            resultat = chaine.traiter(tmp.name, utiliser_modele=False)
+        except FileNotFoundError:
+            raise HTTPException(status_code=400, detail="Pièce illisible.")
+
+    brut = resultat.to_dict()
+    brut["piece"] = nom  # jamais le chemin temporaire du serveur
+    return ChaineAgents(**brut)
 
 
 @app.get("/corpus/rechercher", response_model=Recherche,
