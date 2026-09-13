@@ -42,6 +42,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from packages.agent.dossiers import DepotDossiers
+from packages.agent.extraction import completer, corriger_outil
 from packages.agent.identite import Identite, Refus
 from packages.agent.outils import (
     CATALOGUE,
@@ -653,6 +654,20 @@ class Agent:
                     # évidemment, et on retombe sur les mots-clés.
                     logger.info("outil inconnu proposé par le modèle : %s", outil_nom)
                     outil_nom, parametres = deviner_outil(message, self.identite)
+
+        # -- Le filet déterministe -------------------------------------------
+        # Le modèle a choisi, le code relit. Cette relecture ne remplace jamais
+        # une valeur que le modèle a correctement extraite : elle COMPLÈTE ce
+        # qu'il a oublié, à partir du message lui-même, sans réseau ni
+        # inférence. Elle est nécessaire parce qu'une exécution contre le vrai
+        # modèle a montré que « Calcule la prescription : montant 9520, date de
+        # facture 2026-05-12 » appelait le bon outil avec des paramètres vides,
+        # et que l'agent redemandait un montant écrit en toutes lettres deux
+        # lignes plus haut. Si la relecture n'est sûre de rien, elle ne pose
+        # rien et l'agent redemande, exactement comme avant.
+        if outil_nom and outil_nom != "aucun":
+            outil_nom = corriger_outil(message, outil_nom, parametres)
+            parametres = completer(message, outil_nom, parametres)
 
         if outil_nom in ("", "aucun"):
             texte = MESSAGE_HORS_CHAMP
