@@ -381,6 +381,15 @@ async def deposer_piece(fichier: UploadFile = File(...)) -> PieceDeposee:
 
         donnees = invoice.parse_invoice(tmp.name)
 
+    # Le contrôle a d'abord tourné sans connaître le montant, pour pouvoir
+    # refuser un document qui n'est pas une facture. Maintenant qu'il est
+    # extrait, on redemande la ligne d'ancrage : sur une facture tunisienne
+    # ordinaire, « TOTAL HT » précède « NET A PAYER », et c'est le net qui est
+    # réclamé. Afficher le HT en regard d'une créance TTC se lit comme une
+    # contradiction de la pièce elle-même.
+    if donnees["amount_tnd"] is not None:
+        verdict = doc_gate.inspect(texte, montant=donnees["amount_tnd"])
+
     return PieceDeposee(
         acceptee=True, nom_fichier=nom, sha256=empreinte,
         taille_octets=len(contenu), methode_extraction=donnees["method"],

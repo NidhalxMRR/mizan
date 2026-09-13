@@ -57,20 +57,61 @@ MIN_SIGNALS = 3          # sur 5 preuves positives
 NEEDS_ANCHORED_AMOUNT = True
 
 
-def _anchored_amount(text):
+def _anchored_amount(text, montant=None):
     """Un montant posé sur une ligne qui parle de total — pas un nombre isolé.
 
     C'est la différence entre « Total TTC : 9 520,000 DT » et le « 34848 »
     qui traînait dans un PDF d'agenda.
+
+    Quand on sait déjà quel montant a été retenu (`montant`), on renvoie la
+    ligne qui le PORTE, et non la première ligne de total venue. Sur la
+    facture d'Ahmed, les deux diffèrent :
+
+        TOTAL HT      8,000.000     <- première ligne de total
+        TVA 19%       1,520.000
+        NET A PAYER   9,520.000     <- le montant réclamé
+
+    Les deux chiffres sont exacts, mais afficher « TOTAL HT 8,000.000 » comme
+    justification d'une créance de 9 520 DT donne à lire une incohérence là
+    où il n'y en a pas. Devant un juge comme devant un jury, une pièce qui
+    semble se contredire ne se discute plus : elle se rejette.
     """
-    for line in text.splitlines():
-        if TOTAL_HINT.search(line) and re.search(r'\d', line):
-            return True, line.strip()[:90]
-    return False, None
+    lignes = [l for l in text.splitlines()
+              if TOTAL_HINT.search(l) and re.search(r'\d', l)]
+    if not lignes:
+        return False, None
+
+    if montant is not None:
+        # Une facture tunisienne écrit indifféremment « 9,520.000 » (virgule
+        # de milliers) ou « 9 520,000 » (espace de milliers, virgule
+        # décimale). Les deux désignent la même somme : il faut donc essayer
+        # les deux lectures avant de conclure qu'un nombre ne correspond pas.
+        for ligne in lignes:
+            for brut in re.findall(r'\d[\d\s.,]*\d|\d', ligne):
+                compact = brut.replace(' ', '')
+                lectures = {
+                    compact.replace(',', ''),          # 9,520.000 -> 9520.000
+                    compact.replace(',', '.'),         # 9520,000  -> 9520.000
+                }
+                if compact.count(',') == 1 and '.' not in compact:
+                    # « 9 520,000 » : la virgule est décimale.
+                    lectures.add(compact.replace(',', '.'))
+                for lecture in lectures:
+                    try:
+                        if abs(float(lecture) - float(montant)) < 0.01:
+                            return True, ligne.strip()[:90]
+                    except ValueError:
+                        continue
+
+    return True, lignes[0].strip()[:90]
 
 
-def inspect(text):
-    """Renvoie le verdict d'entrée. Aucun effet de bord, testable seul."""
+def inspect(text, montant=None):
+    """Renvoie le verdict d'entrée. Aucun effet de bord, testable seul.
+
+    `montant` est facultatif : quand l'appelant a déjà extrait le montant
+    retenu, la ligne d'ancrage renvoyée est celle qui le porte.
+    """
     t = text or ''
 
     for rx, why in NOT_INVOICE:
@@ -95,7 +136,7 @@ def inspect(text):
     present = [n for n, ok in checks if ok]
     missing = [n for n, ok in checks if not ok]
 
-    anchored, line = _anchored_amount(t)
+    anchored, line = _anchored_amount(t, montant)
 
     ok = len(present) >= MIN_SIGNALS and (anchored or not NEEDS_ANCHORED_AMOUNT)
 
