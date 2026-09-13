@@ -23,9 +23,9 @@ est déjà rendue, vous ne perdrez pas une seconde devant le jury :
 
 | Onglet | URL | Ce qu'il montre |
 |---|---|---|
-| 1 | `http://127.0.0.1:3000/` | L'état réel du service + le principe |
-| 2 | `http://127.0.0.1:3000/dossier?montant=9520&date=2026-05-12&activite=menuiserie` | Le cas Ahmed, déjà calculé |
-| 3 | `http://127.0.0.1:3000/corpus?q=recette%20de%20couscous%20au%20poisson` | L'abstention |
+| 1 | `http://161.97.134.3:3000/` | L'état réel du service + le principe |
+| 2 | `http://161.97.134.3:3000/dossier?montant=9520&date=2026-05-12&activite=menuiserie` | Le cas Ahmed, déjà calculé |
+| 3 | `http://161.97.134.3:3000/corpus?q=recette%20de%20couscous%20au%20poisson` | L'abstention |
 
 > **Pourquoi l'onglet 2 porte des paramètres dans l'URL.** La page `/dossier`
 > sans paramètres part sur une facture du **2025-11-03** (51 jours restants,
@@ -47,7 +47,7 @@ est déjà rendue, vous ne perdrez pas une seconde devant le jury :
 
 ## 0:00 – 0:35 · Le problème d'Ahmed
 
-**Onglet 1 — `http://127.0.0.1:3000/`**
+**Onglet 1 — `http://161.97.134.3:3000/`**
 
 Ne lisez pas l'écran. Regardez le jury.
 
