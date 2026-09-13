@@ -494,6 +494,16 @@ h2 {
 	font-size: 13px;
 	font-weight: 600;
 }
+/* Lève le doute quand deux cartes affichent la même échéance : le décompte
+   intègre déjà le report. Discret, mais lisible sur vidéoprojecteur. */
+.rebours-note {
+	margin: -6px 0 12px;
+	max-width: 52ch;
+	color: var(--muted);
+	font-size: 12.5px;
+	font-style: italic;
+	line-height: 1.5;
+}
 .rebours-phrase {
 	margin: 0 0 14px;
 	max-width: 62ch;

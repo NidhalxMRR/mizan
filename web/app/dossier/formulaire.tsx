@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { urlDossier } from '@/lib/actes';
 import type { ActeInterruptifEntree } from '@/lib/api';
+import { dateEnClair } from '@/lib/date-fr';
 
 /**
  * Le formulaire du parcours PME.
@@ -55,6 +56,10 @@ export function FormulaireDossier({
   const [date, setDate] = useState(dateInitiale);
   const [activite, setActivite] = useState(activiteInitiale);
 
+  // La date relue en toutes lettres, pour lever l'ambiguïté jj/mm vs mm/jj
+  // que le champ natif introduit selon la locale du système.
+  const dateLisible = dateEnClair(date);
+
   function soumettre(evt: React.FormEvent) {
     evt.preventDefault();
     demarrer(() => {
@@ -102,7 +107,22 @@ export function FormulaireDossier({
             onChange={(e) => setDate(e.target.value)}
             required
           />
-          <p className="champ-aide">C&apos;est elle qui fait courir le délai.</p>
+          {/*
+            Le format affiché par un champ date natif suit la locale du
+            SYSTÈME, pas l'attribut lang de la page : un poste configuré en
+            anglais écrit « 05/12/2026 » là où la fiche du cas annonce
+            « facture du 12/05/2026 ». Même jour, lecture inverse — et un
+            artisan qui croit s'être trompé ressaisit à l'envers.
+
+            On ne peut pas imposer le format au navigateur. On affiche donc
+            la date TELLE QUE LE MOTEUR LA LIT, en toutes lettres : aucune
+            ambiguïté ne survit à « 12 mai 2026 ».
+          */}
+          <p className="champ-aide">
+            {dateLisible
+              ? <>Lue par le moteur : <strong>{dateLisible}</strong>. C&apos;est elle qui fait courir le délai.</>
+              : <>C&apos;est elle qui fait courir le délai.</>}
+          </p>
         </div>
 
         <div className="champ">

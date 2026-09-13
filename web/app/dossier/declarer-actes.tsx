@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { TYPES_ACTES, urlDossier } from '@/lib/actes';
 import type { ActeInterruptifEntree, TypeActeInterruptif } from '@/lib/api';
+import { dateEnClair } from '@/lib/date-fr';
 
 /**
  * La déclaration des actes interruptifs.
@@ -151,8 +152,15 @@ export function DeclarerActes({
             onChange={(e) => setDateActe(e.target.value)}
           />
           <p className="champ-aide">
-            Jour/mois/année. Un acte postérieur à l&apos;expiration
-            n&apos;interrompt rien.
+            {/*
+              Ne JAMAIS annoncer « Jour/mois/année » ici : le champ natif suit
+              la locale du système et peut afficher mm/jj/aaaa. Promettre un
+              format qu'on ne contrôle pas, c'est induire en erreur. On relit
+              la date en toutes lettres à la place.
+            */}
+            {dateEnClair(dateActe)
+              ? <>Lue par le moteur : <strong>{dateEnClair(dateActe)}</strong>. Un acte postérieur à l&apos;expiration n&apos;interrompt rien.</>
+              : <>Un acte postérieur à l&apos;expiration n&apos;interrompt rien.</>}
           </p>
         </div>
 

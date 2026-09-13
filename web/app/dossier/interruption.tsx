@@ -168,9 +168,13 @@ function Balance({ i }: { i: Interruption }) {
           )}`}
         </p>
         <p className="balance-gain-unite">
-          {`jour${Math.abs(i.jours_gagnes) > 1 ? 's' : ''} ${
-            i.jours_gagnes > 0 ? 'gagnés' : 'gagné'
-          }`}
+          {/*
+            « Gagnés » est parlant pour un artisan, mais juridiquement faux :
+            rien n'est gagné, le délai est RECOMMENCÉ (COC art. 398). Devant
+            un juriste, le mot exact est « report ». On garde donc la lecture
+            simple du chiffre et on énonce la règle juste en dessous.
+          */}
+          {`jour${Math.abs(i.jours_gagnes) > 1 ? 's' : ''} de report`}
         </p>
       </div>
     </div>

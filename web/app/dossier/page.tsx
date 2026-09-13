@@ -256,6 +256,18 @@ function CompteARebours({ a }: { a: Analyse }) {
           ? `jour${jours > 1 ? 's' : ''} depuis l'expiration du délai`
           : `jour${jours > 1 ? 's' : ''} avant l'expiration du délai`}
       </p>
+      {/*
+        Quand un acte a interrompu le délai, ce décompte le prend DÉJÀ en
+        compte : il est calculé sur l'échéance reportée, pas sur celle de la
+        facture. Sans cette phrase, un juriste voit deux cartes afficher la
+        même date sans savoir si l'une additionne l'autre.
+      */}
+      {a.interruption?.jours_gagnes ? (
+        <p className="rebours-note">
+          Ce décompte tient déjà compte de l&apos;interruption détaillée
+          ci-dessous.
+        </p>
+      ) : null}
       <p className="rebours-phrase">
         {a.est_prescrit ? (
           <>

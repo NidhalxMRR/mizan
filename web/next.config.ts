@@ -14,6 +14,17 @@ const nextConfig: NextConfig = {
    * celles du poste de démonstration, et ne concernent que `next dev`.
    */
   allowedDevOrigins: ['127.0.0.1', 'localhost'],
+
+  /**
+   * Le badge de développement de Next.js — le rond sombre en bas à gauche —
+   * se superpose au contenu de la page. Constaté à 479 px de large sur une
+   * capture réelle : il recouvre le coin du bloc « +50 jours gagnés », c'est
+   * à dire précisément le chiffre que la démonstration doit montrer.
+   *
+   * Il disparaît en production, mais la démonstration tourne avec `next dev`.
+   * On le retire donc explicitement, plutôt que de compter dessus.
+   */
+  devIndicators: false,
 };
 
 export default nextConfig;
