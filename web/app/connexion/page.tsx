@@ -7,6 +7,11 @@ import { API_URL } from '@/lib/api';
 import { roleLabels, roleLabelsAr, type Role } from '@/lib/auth';
 import { ordreInscription } from '@/components/roles/privileges';
 import { IconeRole, IconeBalance } from '@/components/roles/icones';
+import {
+  enregistrerSession,
+  sessionDepuisConnexion,
+} from '@/app/components/agent/session';
+import { annoncerLaSession } from '@/app/components/agent/pont-connexion';
 import '../espace/espace.css';
 
 /**
@@ -58,7 +63,12 @@ export default function Connexion() {
         cache: 'no-store',
         signal: AbortSignal.timeout(15000),
         body: JSON.stringify({
-          courriel: formulaire.get('courriel'),
+          // Le service attend « email ». L'écran nommait ce champ
+          // « courriel », par souci de français : la requête partait donc
+          // sans l'adresse, et toute connexion échouait, y compris avec le
+          // bon mot de passe. Le nom visible par l'utilisateur reste
+          // « Adresse électronique » ; seul le nom technique est corrigé.
+          email: formulaire.get('courriel'),
           mot_de_passe: formulaire.get('motdepasse'),
         }),
       });
@@ -73,8 +83,22 @@ export default function Connexion() {
         return;
       }
 
-      // Le service répond : on se rend dans l'espace. Le rôle réel est
-      // déterminé côté serveur ; l'écran ne le devine pas.
+      // Le service répond : on enregistre la session avant de partir. Sans
+      // cela le jeton était lu puis jeté, et l'agent conversationnel se
+      // retrouvait sans identité sur l'écran suivant — il refusait de
+      // travailler alors que la connexion venait de réussir.
+      try {
+        const charge = await reponse.json();
+        const session = sessionDepuisConnexion(charge);
+        if (session) {
+          enregistrerSession(session);
+          annoncerLaSession(session);
+        }
+      } catch {
+        // Une réponse illisible ne doit pas retenir l'utilisateur sur cet
+        // écran : l'espace de travail sait se présenter sans session, et
+        // l'agent redemandera lui-même de se connecter.
+      }
       router.push('/espace');
     } catch {
       // Le service de connexion est construit en parallèle et peut ne pas
