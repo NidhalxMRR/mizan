@@ -382,9 +382,9 @@ function EncartHuissier({ a }: { a: Analyse }) {
             ACTE RÉSERVÉ — MIZAN NE PEUT PAS LE FAIRE À VOTRE PLACE
           </p>
           <h2>
-            La sommation doit être signifiée par un{' '}
+            La sommation doit être signifiée par un huissier de justice{' '}
             <span lang="ar" dir="rtl" className="incise-ar">
-              عدل منفذ
+              (عدل منفذ)
             </span>
           </h2>
         </div>
@@ -415,9 +415,9 @@ function EncartSansHuissier() {
       <h2>Sommation par huissier non exigée à ce montant</h2>
       <p className="intro bloc-espace">
         En dessous du seuil légal, la mise en demeure n&apos;a pas à être
-        signifiée par un{' '}
+        signifiée par un huissier de justice{' '}
         <span lang="ar" dir="rtl" className="incise-ar">
-          عدل منفذ
+          (عدل منفذ)
         </span>
         . Une lettre recommandée avec accusé de réception suffit à faire courir
         les effets du retard.

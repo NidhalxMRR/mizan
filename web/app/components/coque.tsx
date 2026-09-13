@@ -65,8 +65,20 @@ export function Coque({ children }: { children: React.ReactNode }) {
         <div className="security-note">
           <span aria-hidden="true">🔒</span>
           <span>
-            Seul un <strong>عدل منفذ</strong> peut signifier un acte. Mizan
-            prépare le dossier, elle ne le signifie pas.
+            {/*
+              La phrase se tient en français seul. Le terme arabe consacré
+              vient en apposition, entre parenthèses, et non comme sujet ou
+              complément : un lecteur francophone doit pouvoir lire la ligne
+              d'un trait sans buter sur un mot qu'il ne déchiffre pas. Le
+              segment arabe est isolé pour que les parenthèses restent de
+              part et d'autre et ne basculent pas de l'autre côté.
+            */}
+            Seul un <strong>huissier de justice</strong>{' '}
+            <span className="incise-ar" dir="rtl">
+              (عدل منفذ)
+            </span>{' '}
+            peut signifier un acte. Mizan prépare le dossier, elle ne le
+            signifie pas.
           </span>
         </div>
       </aside>

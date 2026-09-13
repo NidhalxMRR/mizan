@@ -248,8 +248,12 @@ function MatriceRoles() {
       <h2>Cinq acteurs, des pouvoirs séparés</h2>
       <p className="intro bloc-espace">
         La plateforme ne peut pas signifier un acte : c&apos;est un monopole
-        légal du عدل منفذ. Elle lui livre un projet complet, qu&apos;il
-        contrôle et signifie lui-même.
+        légal de l&apos;huissier de justice{' '}
+        <span className="incise-ar" dir="rtl">
+          (عدل منفذ)
+        </span>
+        . Elle lui livre un projet complet, qu&apos;il contrôle et signifie
+        lui-même.
       </p>
       <ul className="liste-roles">
         {roles.map((r) => (
