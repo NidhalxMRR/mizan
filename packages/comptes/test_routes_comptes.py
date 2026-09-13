@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from api.comptes import registre, routeur
+from packages.comptes import roles
 from packages.comptes.registre import Registre
 
 MOT_DE_PASSE = "Hack4Justice2026!"
@@ -152,8 +153,15 @@ def test_la_matrice_des_roles_est_publique_et_complete(client: TestClient) -> No
     reponse = client.get("/comptes/roles")
     assert reponse.status_code == 200
     donnees = reponse.json()["roles"]
-    assert len(donnees) == 5
+    # On compare à la matrice, pas à un nombre écrit à la main : le jour où une
+    # sixième qualité est ajoutée — l'avocat l'a été — un nombre figé fait
+    # échouer un test qui n'avait rien à dire sur la nouveauté, et masque les
+    # vraies régressions derrière un rouge sans intérêt.
+    assert [r["role"] for r in donnees] == list(roles.ROLES)
     huissier = next(r for r in donnees if r["role"] == "huissier")
+    avocat = next(r for r in donnees if r["role"] == "avocat")
+    assert "représenter son client en justice" in avocat["permissions_libelles"]
+    assert avocat["libelle"] == "Avocat"
     assert "signifier une mise en demeure" in huissier["permissions_libelles"]
     # Les libellés sont fournis pour l'écran d'inscription : autant de libellés
     # que de privilèges, sinon l'interface afficherait des identifiants bruts.

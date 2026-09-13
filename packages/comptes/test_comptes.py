@@ -333,6 +333,88 @@ def test_les_privileges_ne_se_chevauchent_pas_entre_les_deux_signataires() -> No
 
 
 # ---------------------------------------------------------------------------
+# L'avocat : ce qui le distingue des cinq autres qualités
+# ---------------------------------------------------------------------------
+
+def test_l_avocat_existe_et_porte_ses_libelles_francais_et_arabe() -> None:
+    """Un rôle sans libellé afficherait son identifiant technique à l'écran."""
+    assert "avocat" in roles.ROLES
+    assert roles.LIBELLES["avocat"] == "Avocat"
+    assert roles.LIBELLES_AR["avocat"] == "محام"
+
+
+def test_seul_l_avocat_represente_son_client_et_signe_les_ecritures() -> None:
+    """CDPF art. 57 et 35 : la représentation et la signature sont à lui seul.
+
+    Art. 57 : « تكون إنابة المحامي وجوبية إذا تجاوز مبلغ الأداء الموظف إجباريا
+    أو المبلغ المطلوب استرجاعه خمسة وعشرين ألف دينار » — au-delà de 25 000
+    dinars la représentation est obligatoire. Art. 35 : la requête et les
+    mémoires en réponse sont signés par un avocat auprès de la cassation ou de
+    l'appel. Si une autre qualité venait à porter ces deux clés, la plateforme
+    promettrait une recevabilité que la loi refuse.
+    """
+    assert [r for r in roles.ROLES if roles.peut(r, "represent_client")] == ["avocat"]
+    assert [r for r in roles.ROLES if roles.peut(r, "sign_pleading")] == ["avocat"]
+    assert [r for r in roles.ROLES if roles.peut(r, "draft_pleading")] == ["avocat"]
+
+
+def test_l_avocat_ne_signifie_pas_et_ne_concilie_pas() -> None:
+    """Les deux confusions à écarter : l'huissier et le tiers neutre.
+
+    L'avocat plaide pour une partie. Il n'a donc ni le monopole de la
+    signification (CPCC art. 5 et 60), ni l'office du conciliateur — on ne
+    concilie pas deux parties dont on défend l'une.
+    """
+    assert not roles.peut("avocat", "issue_formal_notice")
+    assert not roles.peut("avocat", "record_service")
+    assert not roles.peut("avocat", "conduct_ecma")
+    assert not roles.peut("avocat", "sign_settlement")
+    assert not roles.peut("avocat", "approve_dossier")
+    assert not roles.peut("avocat", "manage_users")
+
+
+def test_l_avocat_n_est_pas_une_copie_du_professionnel_accredite() -> None:
+    """Deux listes identiques signaleraient qu'on a recopié au lieu de penser."""
+    assert roles.PERMISSIONS["avocat"] != roles.PERMISSIONS["accredited_pro"]
+    propres = set(roles.PERMISSIONS["avocat"]) - set(roles.PERMISSIONS["accredited_pro"])
+    assert propres == {"represent_client", "draft_pleading", "sign_pleading"}
+
+
+def test_un_avocat_inscrit_recoit_bien_ses_privileges_et_aucun_autre(
+    reg: Registre,
+) -> None:
+    """Le parcours complet : inscription, connexion, jeton, privilèges."""
+    reg.inscrire("cabinet@avocat-tunis.tn", BON_MOT_DE_PASSE, "avocat",
+                 "Cabinet d'avocats de Tunis")
+    jeton, compte = reg.connexion("cabinet@avocat-tunis.tn", BON_MOT_DE_PASSE)
+    session = lire_jeton(jeton)
+
+    assert compte.libelle_role == "Avocat"
+    assert session.role == "avocat"
+    assert session.peut("represent_client")
+    assert session.peut("sign_pleading")
+    assert not session.peut("issue_formal_notice")
+    assert set(session.permissions) == set(roles.PERMISSIONS["avocat"])
+
+
+def test_chaque_privilege_de_chaque_role_porte_un_libelle_francais() -> None:
+    """Une clé sans traduction atteindrait l'écran en anglais technique.
+
+    Le dictionnaire TypeScript est vérifié par le compilateur ; celui-ci ne
+    l'est par rien, sauf par ce test. Un privilège nouveau oublié ici
+    s'afficherait « represent_client » dans un message de refus adressé à un
+    juriste.
+    """
+    for role in roles.ROLES:
+        for permission in roles.PERMISSIONS[role]:
+            libelle = roles.libelle_permission(permission)
+            assert libelle != permission, (
+                f"le privilège « {permission} » du rôle « {role} » n'a pas de "
+                f"libellé français dans LIBELLES_PERMISSIONS"
+            )
+
+
+# ---------------------------------------------------------------------------
 # Cloisonnement multi-organisations
 # ---------------------------------------------------------------------------
 
@@ -476,6 +558,44 @@ def test_la_matrice_serveur_est_identique_a_celle_du_navigateur() -> None:
         assert list(roles.PERMISSIONS[role]) == privileges, (
             f"le rôle « {role} » diverge entre web/lib/auth.ts et roles.py"
         )
+
+
+def _libelles_du_navigateur(nom_de_la_table: str) -> dict[str, str]:
+    """Relit une table de libellés dans `web/lib/auth.ts`.
+
+    Même lecture naïve que pour la matrice : on isole le bloc entre l'ouverture
+    de l'objet et son accolade fermante, puis on ramasse les paires. C'est
+    suffisant parce que le fichier est écrit à la main, avec une paire par
+    ligne, et c'est préférable à l'exécution d'un interpréteur TypeScript
+    depuis la suite Python.
+    """
+    source = (RACINE / "web" / "lib" / "auth.ts").read_text(encoding="utf-8")
+    bloc = source.split(f"export const {nom_de_la_table}: Record<Role, string> = {{", 1)[1]
+    bloc = bloc.split("};", 1)[0]
+
+    lus: dict[str, str] = {}
+    for ligne in bloc.splitlines():
+        paire = re.match(r"^\s*(\w+)\s*:\s*'([^']*)'\s*,\s*$", ligne)
+        if paire:
+            lus[paire.group(1)] = paire.group(2)
+    return lus
+
+
+def test_les_libelles_francais_sont_identiques_des_deux_cotes() -> None:
+    """Un rôle nommé différemment ici et là donne deux produits, pas un.
+
+    Le test de la matrice ci-dessus ne voit que les privilèges : on pouvait
+    ajouter une qualité des deux côtés et n'écrire son nom français que d'un
+    seul, auquel cas l'écran afficherait « avocat » — l'identifiant technique —
+    là où le serveur dit « Avocat ». C'est exactement le jargon que la
+    plateforme s'interdit de montrer à un juriste.
+    """
+    assert _libelles_du_navigateur("roleLabels") == roles.LIBELLES
+
+
+def test_les_libelles_arabes_sont_identiques_des_deux_cotes() -> None:
+    """Le nom officiel de la qualité est une donnée juridique, pas un ornement."""
+    assert _libelles_du_navigateur("roleLabelsAr") == roles.LIBELLES_AR
 
 
 def test_le_fichier_de_base_par_defaut_est_bien_hors_du_code_source() -> None:

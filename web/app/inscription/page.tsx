@@ -153,7 +153,15 @@ export default function Inscription() {
           aria-label="Choisir votre qualité"
         >
           <p className="eyebrow">EN QUELLE QUALITÉ VOUS INSCRIVEZ-VOUS ?</p>
-          <h2>Cinq acteurs, cinq espaces</h2>
+          {/* Le nombre n'est pas écrit à la main : il se compte sur la liste
+              affichée juste en dessous. Une sixième qualité — l'avocat — a été
+              ajoutée alors que ce titre annonçait encore « Cinq acteurs », et
+              l'écran se contredisait donc lui-même sous les yeux du lecteur :
+              cinq annoncés, six cartes visibles. Un jury de juristes compte. */}
+          <h2>
+            {ordreInscription.length === 6 ? 'Six' : ordreInscription.length}{' '}
+            acteurs, autant d&apos;espaces
+          </h2>
 
           <ul className="choix-roles">
             {ordreInscription.map((candidat) => {

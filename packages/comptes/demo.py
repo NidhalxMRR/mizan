@@ -1,9 +1,9 @@
 """
-Démonstration en ligne de commande : les cinq rôles, de l'inscription au refus.
+Démonstration en ligne de commande : les six qualités, de l'inscription au refus.
 
     ./.venv/bin/python -m packages.comptes.demo
 
-Inscrit les cinq rôles, connecte chacun, puis montre ce que chacun peut et ne
+Inscrit les six qualités, connecte chacune, puis montre ce que chacune peut et ne
 peut pas faire. La dernière section met en scène le cloisonnement : deux
 entreprises en litige, chacune cliente de Mizan, et l'impossibilité pour l'une
 de lire le dossier de l'autre.
@@ -30,6 +30,7 @@ from packages.comptes.registre import (
 ACTEURS = [
     ("admin@mizan.tn", "platform_admin", "Mizan"),
     ("ahmed@menuiserie-sfax.tn", "msme", "Menuiserie Ahmed"),
+    ("maitre@barreau-sfax.tn", "avocat", "Cabinet Maître Trabelsi"),
     ("wassila@mediation.tn", "accredited_pro", "Cabinet Wassila Médiation"),
     ("greffe@tribunal-sfax.tn", "court_clerk", "Tribunal de Commerce de Sfax"),
     ("adl@bensalah.tn", "huissier", "Étude Ben Salah"),
@@ -95,6 +96,11 @@ def _privileges(sessions: dict) -> None:
         ("issue_formal_notice", "signifier une mise en demeure"),
         ("approve_dossier", "déclarer un dossier recevable"),
         ("sign_settlement", "signer le procès-verbal de conciliation"),
+        # L'épreuve qui sépare l'avocat du médiateur : l'un représente une
+        # partie, l'autre est le tiers neutre des deux. Sans cette ligne, la
+        # colonne « Avocat » ne se distinguerait pas à l'œil de sa voisine.
+        ("represent_client", "représenter son client en justice"),
+        ("sign_pleading", "signer la requête et les mémoires"),
         ("manage_tenants", "administrer les organisations"),
         ("upload_evidence", "déposer des pièces"),
     ]
@@ -112,6 +118,10 @@ def _privileges(sessions: dict) -> None:
     print("  Lecture : seul l'huissier signifie (CPCC art. 5 et 60). La PME")
     print("  peut DEMANDER l'acte, jamais le signifier. Générer n'est pas")
     print("  signifier, et la matrice le dit aussi côté serveur.")
+    print()
+    print("  Seul l'avocat représente et signe les écritures (CDPF art. 35,")
+    print("  57 et 19) : le médiateur accrédité est un tiers neutre, il ne")
+    print("  représente personne, et l'huissier signifie sans plaider.")
 
 
 def _la_porte(sessions: dict) -> None:

@@ -3,7 +3,7 @@ import { permissions } from '@/lib/auth';
 import { privileges, type ClePermission } from '@/components/roles/privileges';
 
 /**
- * Le contenu des cinq tableaux de bord.
+ * Le contenu des six tableaux de bord.
  *
  * Règle unique et non négociable de ce fichier : **une action n'apparaît sur
  * un tableau de bord que si la matrice de `lib/auth.ts` l'autorise pour ce
@@ -85,7 +85,7 @@ export type Tableau = {
 };
 
 /* ---------------------------------------------------------------------------
-   Les cinq tableaux
+   Les six tableaux
 --------------------------------------------------------------------------- */
 
 export const tableaux: Record<Role, Tableau> = {
@@ -185,9 +185,114 @@ export const tableaux: Record<Role, Tableau> = {
         <>
           La plateforme calcule vos délais, cite les articles et prépare vos
           actes. Elle ne signifie rien, ne juge rien et ne vous représente pas.
-          Le monopole de la signification appartient au{' '}
-          <span className="incise-ar">عدل منفذ</span>, et il n’est pas
-          négociable.
+          Le monopole de la signification appartient à l’huissier de justice
+          {' ('}
+          <span className="incise-ar">عدل منفذ</span>
+          {'), '}
+          et il n’est pas négociable.
+        </>
+      ),
+    },
+  },
+
+  /* --- Avocat --------------------------------------------------------------
+     Le tableau de l'avocat se distingue de celui du professionnel accrédité
+     sur un point que le jury doit voir immédiatement : l'avocat a un CLIENT,
+     nommé sur chaque ligne, alors que le médiateur a deux parties et n'en
+     défend aucune. Les colonnes « parties » le disent en toutes lettres.  */
+  avocat: {
+    accroche:
+      'Les dossiers que vos clients vous confient, et les écritures à porter.',
+    mesures: [
+      {
+        libelle: 'Dossiers confiés',
+        valeur: '5',
+        detail: 'Par mandat de vos clients',
+        etat: 'verified',
+      },
+      {
+        libelle: 'Représentation obligatoire',
+        valeur: '2',
+        detail: 'Au-delà de 25 000 DT — CDPF art. 57',
+        etat: 'verified',
+      },
+      {
+        libelle: 'Écriture à signer',
+        valeur: '8 jours',
+        detail: 'Mémoire en réponse — dossier Sfax Métal, ci-dessous',
+        etat: 'declared',
+      },
+    ],
+    titreListe: 'Dossiers de vos clients',
+    sousTitreListe:
+      'Vous n’accédez qu’aux dossiers où votre client vous a donné mandat. Le dossier de la partie adverse vous reste fermé.',
+    dossiers: [
+      {
+        reference: 'Appel 2024/A/0338 — pour Atelier de la Médina',
+        parties: 'Votre client, appelant · Kairouan Textile, intimé',
+        montant: '28 400 DT',
+        etat: 'Représentation obligatoire — mémoire à signer',
+        etatTon: 'verified',
+        delai: { nombre: '21', libelle: 'jours pour conclure', ton: 'attention' },
+      },
+      {
+        reference: 'Recours 2024/R/0117 — pour Sfax Métal',
+        parties: 'Votre client, demandeur · Transports Jelassi, défendeur',
+        montant: '61 500 DT',
+        etat: 'Mémoire en réponse en rédaction',
+        etatTon: 'declared',
+        delai: { nombre: '8', libelle: 'jours pour signer', ton: 'critique' },
+      },
+      {
+        reference: 'Consultation 2024/C/0092 — pour Ets Mabrouk',
+        parties: 'Votre client, créancier · Fournitures Zarzis, débiteur',
+        montant: '5 900 DT',
+        etat: 'Bon de livraison réclamé au client',
+        etatTon: 'abstain',
+      },
+    ],
+    titreActions: 'Votre ministère d’avocat',
+    actions: [
+      { cle: 'represent_client' },
+      { cle: 'draft_pleading' },
+      { cle: 'sign_pleading' },
+      { cle: 'request_missing_piece' },
+      {
+        cle: 'view_assigned_case',
+        intitule: 'Ouvrir le dossier d’un client',
+        portee:
+          'Consulter l’entier dossier — pièces, délais calculés, articles ' +
+          'cités — dès que votre client vous a donné mandat.',
+      },
+    ],
+    fermees: [
+      {
+        intitule: 'Signifier vous-même la mise en demeure',
+        motif:
+          'Représenter n’est pas signifier. Toute citation, notification ou ' +
+          'exécution passe par le ministère d’un huissier de justice, quelle ' +
+          'que soit la qualité de celui qui la demande.',
+        reservee: 'à l’huissier de justice',
+        fondement: 'Code de procédure civile et commerciale, art. 5 et 60',
+      },
+      {
+        intitule: 'Conduire la conciliation entre les deux parties',
+        motif:
+          'Vous défendez l’une des parties : vous ne pouvez pas être le ' +
+          'tiers neutre qui les concilie. La conduite de la médiation ' +
+          'appartient au professionnel accrédité que les parties retiennent ' +
+          'ensemble.',
+        reservee: 'au professionnel accrédité',
+      },
+    ],
+    limite: {
+      titre: 'La plateforme prépare, vous plaidez',
+      corps: (
+        <>
+          Mizan calcule les délais, retrouve les articles et prépare la
+          matière de vos écritures. Elle ne choisit ni vos moyens, ni votre
+          stratégie, et elle ne signe rien : la signature de l’avocat rend
+          l’écriture recevable, et elle n’appartient qu’à vous.
         </>
       ),
     },
@@ -312,7 +417,7 @@ export const tableaux: Record<Role, Tableau> = {
       'Un projet reçu n’est pas un acte accepté : vous restez libre de le refuser ou de le faire corriger.',
     dossiers: [
       {
-        reference: 'Projet d’إنذار — Atelier de la Médina',
+        reference: 'Projet de mise en demeure (⁨إنذار⁩) — Atelier de la Médina',
         parties: 'Contre Kairouan Textile · Tunis',
         montant: '28 400 DT',
         etat: 'À contrôler avant signification',
@@ -320,14 +425,14 @@ export const tableaux: Record<Role, Tableau> = {
         delai: { nombre: '5', libelle: 'jours francs requis', ton: 'attention' },
       },
       {
-        reference: 'Projet d’إنذار — Sfax Métal',
+        reference: 'Projet de mise en demeure — Sfax Métal',
         parties: 'Contre Transports Jelassi · Sfax',
         montant: '61 500 DT',
         etat: 'Signifié le 4 septembre',
         etatTon: 'verified',
       },
       {
-        reference: 'Projet d’إنذار — Fournitures Zarzis',
+        reference: 'Projet de mise en demeure — Fournitures Zarzis',
         parties: 'Contre Ets Mabrouk · Médenine',
         montant: '890 DT',
         etat: 'Montant inférieur au seuil — à vérifier',

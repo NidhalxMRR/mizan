@@ -3,7 +3,7 @@
 POST /comptes/inscription — crée un compte ; le rôle choisi apporte ses privilèges.
 POST /comptes/connexion   — vérifie les identifiants et délivre un jeton signé.
 GET  /comptes/moi         — ce que le serveur sait du porteur du jeton.
-GET  /comptes/roles       — la matrice publique des rôles, pour l'écran d'inscription.
+GET  /comptes/roles       — la matrice publique des qualités, pour l'inscription.
 GET  /comptes/organisation — les comptes de MON organisation, et d'aucune autre.
 
 Une règle gouverne ce routeur : ce que le client envoie ne décide de rien. Le
@@ -93,8 +93,8 @@ class DemandeInscription(BaseModel):
         description="Au moins 8 caractères. Il n'est jamais stocké en clair.",
     )
     role: str = Field(
-        description="Un des cinq rôles : platform_admin, msme, accredited_pro, "
-                    "court_clerk, huissier.",
+        description="Une des six qualités : platform_admin, msme, avocat, "
+                    "accredited_pro, court_clerk, huissier.",
         json_schema_extra={"example": "msme"},
     )
     nom_organisation: str = Field(
@@ -252,12 +252,14 @@ def moi(session: Session = Depends(verifier_jeton),
 
 
 @routeur.get("/comptes/roles", response_model=MatriceRendue,
-             summary="Les cinq rôles et leurs privilèges")
+             summary="Les six qualités et leurs privilèges")
 def liste_des_roles() -> MatriceRendue:
     """La matrice, en accès libre : l'écran d'inscription en a besoin.
 
     Aucun secret ici. Savoir que seul l'huissier signifie est une règle de
-    droit publiée au CPCC, pas une information à protéger.
+    droit publiée au CPCC, pas une information à protéger. Il en va de même de
+    la représentation obligatoire par avocat au-delà de 25 000 dinars, qui est
+    écrite au CDPF art. 57.
     """
     return MatriceRendue(
         roles=[

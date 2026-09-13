@@ -22,9 +22,9 @@ import '../espace/espace.css';
  * champs, un bouton. Un écran d'entrée qui explique quelque chose est un
  * écran qu'on relit chaque matin pour rien.
  *
- * La colonne de droite rappelle les cinq acteurs sans rien demander : un jury
+ * La colonne de droite rappelle les six acteurs sans rien demander : un jury
  * qui arrive par cette page doit comprendre en trois secondes que la
- * plateforme distingue cinq qualités, sans avoir à créer un compte.
+ * plateforme distingue six qualités, sans avoir à créer un compte.
  *
  * Les raccourcis de démonstration en bas remplissent l'adresse à la place de
  * l'orateur. Motif : taper une adresse au clavier devant un jury rate une
@@ -40,6 +40,7 @@ type EtatEnvoi =
 /** Les comptes de démonstration. Ils n'existent que pour la salle. */
 const comptesDemo: { role: Role; courriel: string }[] = [
   { role: 'msme', courriel: 'direction@atelier-medina.tn' },
+  { role: 'avocat', courriel: 'cabinet@avocat-tunis.tn' },
   { role: 'accredited_pro', courriel: 'mediateur@cabinet-benali.tn' },
   { role: 'huissier', courriel: 'etude@hj-tunis.tn' },
   { role: 'court_clerk', courriel: 'greffe@tc-tunis.tn' },
@@ -217,8 +218,8 @@ export default function Connexion() {
           </p>
         </section>
 
-        <aside className="panel connexion-rappel" aria-label="Les cinq acteurs">
-          <p className="eyebrow">CINQ QUALITÉS</p>
+        <aside className="panel connexion-rappel" aria-label="Les six acteurs">
+          <p className="eyebrow">SIX QUALITÉS</p>
           <h2>Chacun son espace</h2>
           <ul className="connexion-rappel-liste">
             {ordreInscription.map((r) => (

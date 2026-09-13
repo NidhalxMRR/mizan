@@ -1,4 +1,4 @@
-"""Les cinq rôles de Mizan et les privilèges attachés à chacun.
+"""Les six qualités de Mizan et les privilèges attachés à chacune.
 
 Ce fichier est la transposition serveur de `web/lib/auth.ts`. L'interface
 décidait déjà quels boutons afficher ; elle ne décidait rien de plus. Tant que
@@ -17,14 +17,17 @@ from __future__ import annotations
 
 
 class RoleInconnu(ValueError):
-    """Le rôle demandé ne fait pas partie des cinq rôles de la plateforme."""
+    """Le rôle demandé ne fait pas partie des qualités reconnues par Mizan."""
 
 
-# L'ordre est celui de `web/lib/auth.ts` : administration, puis les quatre
-# acteurs du litige dans l'ordre où ils interviennent.
+# L'ordre est celui de `web/lib/auth.ts` : administration, puis les acteurs du
+# litige dans l'ordre où ils interviennent. L'avocat vient juste après la
+# PME parce qu'il agit POUR elle : le mandat précède la voie amiable comme il
+# précède le tribunal.
 ROLES: tuple[str, ...] = (
     "platform_admin",   # exploitation de la plateforme
     "msme",             # la PME : dépose, consulte, accepte
+    "avocat",           # محام — représente et plaide pour son client
     "accredited_pro",   # médiateur · conciliateur · arbitre agréé
     "court_clerk",      # greffier du tribunal de commerce
     "huissier",         # عدل منفذ — monopole légal de la signification
@@ -45,6 +48,40 @@ PERMISSIONS: dict[str, tuple[str, ...]] = {
         "open_ecma",             # ouvre une conciliation / médiation
         "accept_settlement",     # accepte un projet de صلح (COC art. 1458)
         "choose_professional",
+    ),
+    # L'avocat n'est ni un tiers neutre, ni un officier ministériel : il est le
+    # mandataire d'une partie. Sa liste ne recopie donc aucune des deux autres.
+    #
+    #   · « view_assigned_case » est repris tel quel : le dossier lui est
+    #     confié, exactement comme au professionnel accrédité. La différence
+    #     tient à qui le confie — une seule partie ici, les deux là-bas — mais
+    #     le pouvoir informatique est le même, et inventer une clé jumelle
+    #     aurait fait diverger deux choses identiques.
+    #   · « represent_client » n'existait pas : aucune autre qualité ne
+    #     représente qui que ce soit. CDPF art. 57 rend cette représentation
+    #     OBLIGATOIRE au-delà de 25 000 dinars, et CDPF art. 19 réserve la
+    #     saisine des chambres d'appel à la voie d'avocat.
+    #   · « draft_pleading » et « sign_pleading » sont distincts, comme le sont
+    #     déjà « draft_settlement » et « sign_settlement » : on rédige un projet
+    #     bien avant de l'endosser. CDPF art. 35 exige que la requête et les
+    #     mémoires en réponse soient SIGNÉS par un avocat auprès de la cassation
+    #     ou de l'appel — c'est la signature, pas la rédaction, que la loi
+    #     réserve.
+    #   · « request_missing_piece » est repris au professionnel accrédité :
+    #     réclamer la pièce qui manque n'est pas un acte de puissance, c'est une
+    #     diligence ordinaire de celui qui tient un dossier.
+    #
+    # Ce qu'il n'a PAS, et ce sont les absences qui le définissent :
+    # « issue_formal_notice » (monopole du عدل منفذ, CPCC art. 5 et 60),
+    # « sign_settlement » (le PV de conciliation est signé par le tiers neutre,
+    # pas par le conseil d'une partie), « approve_dossier » (le greffe),
+    # « conduct_ecma » (on ne conduit pas une médiation où l'on défend).
+    "avocat": (
+        "view_assigned_case",
+        "represent_client",
+        "draft_pleading",
+        "sign_pleading",
+        "request_missing_piece",
     ),
     "accredited_pro": (
         "view_assigned_case",
@@ -74,6 +111,7 @@ PERMISSIONS: dict[str, tuple[str, ...]] = {
 LIBELLES: dict[str, str] = {
     "platform_admin": "Administrateur",
     "msme": "Entreprise",
+    "avocat": "Avocat",
     "accredited_pro": "Professionnel accrédité",
     "court_clerk": "Greffier",
     "huissier": "Huissier de justice",
@@ -82,6 +120,7 @@ LIBELLES: dict[str, str] = {
 LIBELLES_AR: dict[str, str] = {
     "platform_admin": "مدير المنصة",
     "msme": "المؤسسة",
+    "avocat": "محام",
     "accredited_pro": "الوسيط المعتمد",
     "court_clerk": "كاتب المحكمة",
     "huissier": "عدل منفذ",
@@ -104,6 +143,9 @@ LIBELLES_PERMISSIONS: dict[str, str] = {
     "accept_settlement": "accepter un projet de règlement amiable",
     "choose_professional": "choisir un professionnel accrédité",
     "view_assigned_case": "consulter un dossier qui lui est confié",
+    "represent_client": "représenter son client en justice",
+    "draft_pleading": "rédiger la requête et les mémoires",
+    "sign_pleading": "signer la requête et les mémoires",
     "conduct_ecma": "conduire la conciliation ou la médiation",
     "draft_settlement": "rédiger un projet de règlement amiable",
     "sign_settlement": "signer le procès-verbal de conciliation",

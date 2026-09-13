@@ -14,6 +14,7 @@
 export const roles = [
   'platform_admin',   // exploitation de la plateforme
   'msme',             // la PME : dépose, consulte, accepte
+  'avocat',           // محام — voir la note ci-dessous
   'accredited_pro',   // médiateur · conciliateur · arbitre agréé
   'court_clerk',      // greffier du tribunal de commerce
   'huissier',         // عدل منفذ — voir la note ci-dessous
@@ -36,6 +37,24 @@ export type Role = (typeof roles)[number];
  * de destinataire, et `issue_formal_notice` n'appartient qu'à lui.
  */
 
+/**
+ * Sur le محام (avocat).
+ *
+ * CDPF art. 57 : « تكون إنابة المحامي وجوبية إذا تجاوز مبلغ الأداء الموظف
+ *                 إجباريا أو المبلغ المطلوب استرجاعه خمسة وعشرين ألف دينار »
+ *                — au-delà de 25 000 dinars, la représentation par avocat
+ *                n'est pas une faculté : elle est obligatoire.
+ * CDPF art. 35 : la requête et les mémoires en réponse sont signés par un
+ *                avocat auprès de la cassation ou de l'appel.
+ * CDPF art. 19 : la saisine des chambres d'appel se fait par voie d'avocat.
+ *
+ * L'avocat n'est donc ni le tiers neutre qu'est le professionnel accrédité —
+ * il défend une partie, il ne concilie pas les deux — ni l'officier
+ * ministériel qu'est l'huissier : il ne signifie rien. Sa matrice ne recopie
+ * aucune des deux. Ce qu'il apporte et que personne d'autre n'a, c'est la
+ * représentation en justice et la signature des écritures.
+ */
+
 export const permissions = {
   platform_admin: [
     'manage_tenants', 'manage_users', 'view_all', 'manage_corpus',
@@ -47,6 +66,13 @@ export const permissions = {
     'open_ecma',            // ouvre une conciliation/médiation
     'accept_settlement',    // accepte un projet de صلح (COC art. 1458)
     'choose_professional',
+  ],
+  avocat: [
+    'view_assigned_case',   // le dossier que son client lui confie
+    'represent_client',     // CDPF art. 57 — obligatoire au-delà de 25 000 DT
+    'draft_pleading',
+    'sign_pleading',        // CDPF art. 35 — la signature, pas la rédaction
+    'request_missing_piece',
   ],
   accredited_pro: [
     'view_assigned_case',
@@ -79,6 +105,7 @@ export function can(role: Role, permission: string): boolean {
 export const roleLabels: Record<Role, string> = {
   platform_admin: 'Administrateur',
   msme: 'Entreprise',
+  avocat: 'Avocat',
   accredited_pro: 'Professionnel accrédité',
   court_clerk: 'Greffier',
   huissier: 'Huissier de justice',
@@ -88,6 +115,7 @@ export const roleLabels: Record<Role, string> = {
 export const roleLabelsAr: Record<Role, string> = {
   platform_admin: 'مدير المنصة',
   msme: 'المؤسسة',
+  avocat: 'محام',
   accredited_pro: 'الوسيط المعتمد',
   court_clerk: 'كاتب المحكمة',
   huissier: 'عدل منفذ',

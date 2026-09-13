@@ -29,6 +29,25 @@
 
 import { permissions, roles, roleLabels, type Role } from '@/lib/auth';
 
+/**
+ * Sur les mots arabes qui apparaissent dans les phrases de ce fichier.
+ *
+ * Règle de rédaction : une phrase française visible doit se tenir debout toute
+ * seule. Le terme arabe ne porte jamais la syntaxe — il vient en apposition,
+ * entre parenthèses, après le mot français. « Le monopole appartient au عدل
+ * منفذ » fait buter un lecteur francophone et paraît négligé devant un jury ;
+ * « appartient à l'huissier de justice (عدل منفذ) » se lit d'un trait.
+ *
+ * Sur les deux caractères invisibles qui encadrent chaque mot arabe plus bas,
+ * U+2068 et U+2069 : ce sont les isolateurs bidirectionnels d'Unicode. Ils
+ * font dans une chaîne de texte ce que `unicode-bidi: isolate` fait dans une
+ * feuille de style — et il en faut, car ces valeurs sont des CHAÎNES et non du
+ * JSX : on ne peut pas les envelopper dans un `<span className="incise-ar">`.
+ * Sans eux, l'algorithme bidi rattache la parenthèse fermante au segment arabe
+ * et la renvoie de l'autre côté : on lit « (عدل منفذ( » au lieu de
+ * « (عدل منفذ) ». À vérifier sur capture, pas au jugé.
+ */
+
 /** Toutes les clés de permission qui existent, tous rôles confondus. */
 export type ClePermission = (typeof permissions)[Role][number];
 
@@ -140,8 +159,9 @@ export const privileges: Record<ClePermission, Privilege> = {
   accept_settlement: {
     intitule: 'Accepter un accord transactionnel',
     portee:
-      "Donner votre consentement à un projet de صلح rédigé par le " +
-      'professionnel qui conduit la conciliation.',
+      'Donner votre consentement à un projet de règlement amiable ' +
+      '(\u2068صلح\u2069) rédigé par le professionnel qui conduit la ' +
+      'conciliation.',
     borne:
       "Votre acceptation vous engage. Une transation régulièrement conclue " +
       "a, entre les parties, l'autorité de la chose jugée.",
@@ -155,6 +175,43 @@ export const privileges: Record<ClePermission, Privilege> = {
     borne:
       "Vous choisissez parmi les professionnels accrédités : la plateforme " +
       "ne vous en impose aucun, et n'en invente aucun.",
+  },
+
+  // --- Avocat ---------------------------------------------------------------
+  represent_client: {
+    intitule: 'Représenter votre client en justice',
+    portee:
+      'Agir au nom de votre client devant la juridiction saisie : porter ' +
+      'ses prétentions, répondre à celles de la partie adverse, et le ' +
+      'dispenser de comparaître lui-même.',
+    borne:
+      'Vous représentez celui qui vous a donné mandat, et lui seul. Le ' +
+      'mandat se justifie ; il ne se déclare pas à l’écran.',
+    fondement:
+      'Code des droits et procédures fiscaux, art. 57 — la représentation ' +
+      'est obligatoire au-delà de 25 000 dinars',
+    exclusif: true,
+  },
+  draft_pleading: {
+    intitule: 'Rédiger la requête et les mémoires',
+    portee:
+      'Établir l’écriture qui sera déposée : les faits, les moyens, et les ' +
+      'articles du corpus qui les fondent, cités mot pour mot.',
+    borne:
+      'Mizan prépare la matière et cite les textes ; elle ne choisit ni vos ' +
+      'moyens ni votre stratégie. L’argumentation reste la vôtre.',
+  },
+  sign_pleading: {
+    intitule: 'Signer la requête et les mémoires',
+    portee:
+      'Apposer votre signature d’avocat sur l’écriture : c’est elle qui la ' +
+      'rend recevable devant la cour d’appel et devant la cassation.',
+    borne:
+      'Votre signature engage votre responsabilité professionnelle. Un ' +
+      'mémoire non signé par un avocat n’est pas recevable devant ces ' +
+      'juridictions — et aucune autre qualité ne peut y suppléer.',
+    fondement: 'Code des droits et procédures fiscaux, art. 35 et 19',
+    exclusif: true,
   },
 
   // --- Professionnel accrédité ---------------------------------------------
@@ -279,9 +336,9 @@ export const privileges: Record<ClePermission, Privilege> = {
       "Vous seul en avez le pouvoir. Toute citation, notification ou " +
       'exécution passe par votre ministère.',
     borne:
-      "Au-delà de 150 dinars, l'إنذار doit être signifié par votre " +
-      'intermédiaire, cinq jours francs avant toute saisine. La plateforme ' +
-      "prépare l'acte ; elle ne le signifie jamais.",
+      'Au-delà de 150 dinars, la mise en demeure (\u2068إنذار\u2069) doit ' +
+      'être signifiée par votre intermédiaire, cinq jours francs avant toute ' +
+      "saisine. La plateforme prépare l'acte ; elle ne le signifie jamais.",
     fondement: 'Code de procédure civile et commerciale, art. 5 et 60',
     exclusif: true,
   },
@@ -342,6 +399,25 @@ export const fiches: Record<Role, FicheRole> = {
       aide: 'Celui qui figure sur votre patente et vos factures.',
     },
   },
+  avocat: {
+    role: 'avocat',
+    destinataire:
+      'Vous êtes avocat (\u2068محام\u2069), inscrit au barreau, et vous ' +
+      'défendez une entreprise.',
+    promesse:
+      'Recevoir le dossier que votre client vous confie, avec ses délais ' +
+      'calculés et ses textes cités, et porter ses écritures.',
+    justificatif:
+      'Votre inscription à l’Ordre national des avocats de Tunisie sera ' +
+      'vérifiée.',
+    champIdentite: {
+      libelle: 'Numéro d’inscription au barreau',
+      exemple: 'AV-TUN-1204',
+      aide:
+        'Avec la section où vous êtes inscrit, et la mention « cassation » ' +
+        'ou « appel » si vous en relevez.',
+    },
+  },
   accredited_pro: {
     role: 'accredited_pro',
     destinataire:
@@ -360,7 +436,7 @@ export const fiches: Record<Role, FicheRole> = {
   huissier: {
     role: 'huissier',
     destinataire:
-      'Vous êtes huissier de justice — عدل منفذ — en exercice.',
+      'Vous êtes huissier de justice (\u2068عدل منفذ\u2069) en exercice.',
     promesse:
       'Recevoir des projets de mise en demeure déjà complets, à contrôler ' +
       'et à signifier.',
@@ -415,6 +491,7 @@ export const fiches: Record<Role, FicheRole> = {
  */
 export const ordreInscription: Role[] = [
   'msme',
+  'avocat',
   'accredited_pro',
   'huissier',
   'court_clerk',

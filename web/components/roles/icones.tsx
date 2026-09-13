@@ -1,12 +1,12 @@
 /**
- * Les cinq icônes de rôle — dessinées à la main, en SVG inline.
+ * Les six icônes de rôle — dessinées à la main, en SVG inline.
  *
  * Pourquoi à la main plutôt qu'une bibliothèque : la salle de démonstration
  * n'a pas de wifi garanti. Une icône chargée depuis un CDN, une police
  * d'icônes distante ou un paquet npm supplémentaire, c'est un rond vide à
  * l'écran devant le jury. Ici il n'y a que des tracés, dans le fichier.
  *
- * Contraintes tenues sur les cinq, pour qu'elles forment une famille et non
+ * Contraintes tenues sur les six, pour qu'elles forment une famille et non
  * une collection :
  *   - même boîte : viewBox 0 0 24 24, tracés contenus entre 2 et 22 ;
  *   - même épaisseur : 1.6, jointures et extrémités arrondies ;
@@ -18,6 +18,9 @@
  * Chaque dessin dit le métier, pas l'abstraction : un organigramme pour
  * l'administrateur, une devanture pour l'entreprise, un sceau pour
  * l'accréditation, un registre pour le greffe, un pli cacheté pour l'huissier.
+ * Et pour l'avocat, la robe : col, rabat et épitoge. Pas une balance — elle
+ * appartient à la juridiction, pas au conseil, et elle sert déjà de marque à
+ * Mizan ; deux balances à l'écran auraient brouillé les deux.
  */
 
 import type { Role } from '@/lib/auth';
@@ -86,6 +89,31 @@ export function IconeEntreprise({ taille = 24, className }: ProprietesIcone) {
   );
 }
 
+/**
+ * Avocat — la robe : les épaules, le col en V largement ouvert, et le rabat
+ * en deux bandes au creux du V.
+ *
+ * Le premier tracé était juste mais illisible : à 22 px — la taille réelle des
+ * cartes de qualité — le V se refermait, le rabat se lisait comme la poignée
+ * d'une mallette, et l'épitoge ajoutait un trait de plus dans une zone déjà
+ * chargée. Vérifié sur capture à 479 px comme à 1280 px. Il reste donc quatre
+ * gestes, pas davantage : deux épaules, un V profond, deux bandes. Une icône
+ * exacte que personne ne déchiffre ne vaut pas une icône simple qui se lit.
+ */
+export function IconeAvocat({ taille = 24, className }: ProprietesIcone) {
+  return (
+    <svg {...socle(taille, className)}>
+      {/* Les épaules et les pans de la robe, qui tombent droit. */}
+      <path d="M8.6 3.2 4.4 5.4a2 2 0 0 0-1.2 1.9v13.5h17.6V7.3a2 2 0 0 0-1.2-1.9L15.4 3.2" />
+      {/* Le col : un V large et profond, seul signe réellement lisible à 22 px. */}
+      <path d="M8.6 3.2 12 11.2 15.4 3.2" />
+      {/* Le rabat : deux bandes verticales jointives, au creux du col. */}
+      <path d="M10.7 11.6v3.9" />
+      <path d="M13.3 11.6v3.9" />
+    </svg>
+  );
+}
+
 /** Professionnel accrédité — un sceau à ruban : l'agrément, pas le diplôme. */
 export function IconeProfessionnel({ taille = 24, className }: ProprietesIcone) {
   return (
@@ -129,6 +157,7 @@ export function IconeHuissier({ taille = 24, className }: ProprietesIcone) {
 const parRole: Record<Role, (p: ProprietesIcone) => React.JSX.Element> = {
   platform_admin: IconeAdministrateur,
   msme: IconeEntreprise,
+  avocat: IconeAvocat,
   accredited_pro: IconeProfessionnel,
   court_clerk: IconeGreffier,
   huissier: IconeHuissier,
