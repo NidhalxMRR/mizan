@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { roleLabels, roleLabelsAr, type Role } from '@/lib/auth';
 import {
@@ -10,14 +11,18 @@ import {
   IconeBalance,
 } from '@/components/roles/icones';
 import { deRole, ordreInscription } from '@/components/roles/privileges';
-import { lireSession } from '@/app/components/agent/session';
+import {
+  lireSession,
+  oublierSession,
+} from '@/app/components/agent/session';
+import { annoncerLaSession } from '@/app/components/agent/pont-connexion';
 import { tableaux, actionsDuRole } from './tableaux';
 import './espace.css';
 
 /**
  * L'espace de travail.
  *
- * Cinq tableaux de bord, un par qualité. Ils ne diffèrent pas par la
+ * Six tableaux de bord, un par qualité. Ils ne diffèrent pas par la
  * décoration : ils diffèrent par ce qu'ils PROPOSENT. Une entreprise n'y
  * trouve pas de bouton pour signifier un acte ; un huissier n'y trouve pas de
  * bouton pour déposer une facture. Ce n'est pas un choix d'ergonomie, c'est
@@ -42,13 +47,14 @@ import './espace.css';
  *
  * Sur l'absence d'appel à l'API : cet écran ne dépend d'aucun serveur. C'est
  * délibéré. Le jour de la démonstration, si le service d'identification n'est
- * pas en ligne, les cinq tableaux restent montrables. Les chiffres affichés
+ * pas en ligne, les six tableaux restent montrables. Les chiffres affichés
  * sont des dossiers de démonstration et ne prétendent jamais avoir été
  * calculés : les calculs réels vivent dans « Mon impayé », qui interroge le
  * moteur déterministe et affiche l'article qui fonde chaque résultat.
  */
 
 export default function Espace() {
+  const router = useRouter();
   const [role, setRole] = useState<Role>('msme');
   /**
    * La qualité portée par le compte identifié. `null` tant que la session
@@ -112,6 +118,32 @@ export default function Espace() {
             ) : null}
             <p className="espace-identite-sous">{tableau.accroche}</p>
           </div>
+
+          {/*
+            Se déconnecter était impossible : la session durait douze heures
+            et rien à l'écran ne permettait d'en sortir. Un visiteur qui
+            voulait entrer sous une autre qualité devait vider la mémoire de
+            son navigateur, et un ordinateur partagé gardait la session
+            ouverte pour le suivant. Le bouton n'apparaît que si une session
+            existe vraiment, pour ne pas proposer de quitter une place que
+            l'on n'occupe pas.
+          */}
+          {roleDuCompte !== null ? (
+            <button
+              type="button"
+              className="espace-deconnexion"
+              onClick={() => {
+                oublierSession();
+                // On prévient la bulle de dialogue par le même canal que la
+                // connexion : sans cela elle continuerait de se croire
+                // habilitée et parlerait au nom d'une organisation quittée.
+                annoncerLaSession(null);
+                router.push('/connexion');
+              }}
+            >
+              Quitter cet espace
+            </button>
+          ) : null}
         </div>
 
         {/*

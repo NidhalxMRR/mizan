@@ -599,6 +599,74 @@
 }
 
 .espace-identite { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+/*
+ * Quitter son espace.
+ *
+ * Le bouton se tient en retrait : il ne dispute pas l'attention aux actions
+ * du métier, qui sont la raison d'être de l'écran. Un contour suffit à le
+ * rendre cliquable sans l'annoncer comme une action principale.
+ *
+ * `align-self: center` est nécessaire : le conteneur aligne ses enfants au
+ * centre, mais un bouton placé en dernier s'étirerait sur toute la hauteur
+ * de l'identité, jusqu'à cinquante-deux pixels, et deviendrait une barre.
+ * `white-space: nowrap` empêche « Quitter cet espace » de se couper en deux
+ * lignes sur un téléphone, où la place manque.
+ */
+.espace-deconnexion {
+	align-self: center;
+	flex: 0 0 auto;
+	margin-inline-start: auto;
+	padding: 8px 14px;
+	border: 1px solid var(--line);
+	border-radius: 9px;
+	background: transparent;
+	color: var(--ink);
+	font-family: inherit;
+	font-size: 12.5px;
+	line-height: 1.2;
+	/*
+	 * Le rembourrage seul ne suffit pas à garantir une cible cliquable :
+	 * la hauteur d'une ligne dépend de la police réellement chargée, et le
+	 * bouton retombait à trente-trois pixels sur un écran large. On fixe
+	 * donc un plancher plutôt que de laisser la hauteur au hasard du rendu.
+	 */
+	min-height: 40px;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background 140ms ease, border-color 140ms ease;
+}
+
+.espace-deconnexion:hover {
+	background: color-mix(in oklab, var(--mint) 40%, transparent);
+	border-color: color-mix(in oklab, var(--ink) 30%, transparent);
+}
+
+.espace-deconnexion:focus-visible {
+	outline: 2px solid var(--verified);
+	outline-offset: 2px;
+}
+
+/*
+ * Sur un téléphone, la cible doit rester atteignable au doigt. Le bouton
+ * mesurait vingt-neuf pixels de haut, en dessous de ce qu'une main atteint
+ * sans viser : on l'épaissit sans l'agrandir en largeur, où la place manque.
+ */
+@media (max-width: 860px) {
+	.espace-deconnexion {
+		padding: 11px 14px;
+		font-size: 13px;
+		/*
+		 * Le rembourrage seul laissait le bouton à trente-neuf virgule six
+		 * pixels : la hauteur d'une ligne de texte n'est pas un nombre rond
+		 * et dépend de la police réellement chargée, si bien que la cible
+		 * passait sous le seuil des quarante pixels sans qu'on puisse le
+		 * prévoir. Une hauteur minimale garantit la prise au doigt quelle
+		 * que soit la police, au lieu de la laisser au hasard du rendu.
+		 */
+		min-height: 44px;
+	}
+}
 .espace-identite-icone {
 	display: grid;
 	place-items: center;
@@ -757,6 +825,15 @@
 	color: var(--ink);
 	cursor: pointer;
 	width: 100%;
+	/*
+	 * Sans cette ligne, la largeur de cent pour cent s'entend hors garnissage
+	 * et hors bordure : une carte de quatre cent soixante-trois pixels en
+	 * occupait cinq cent un, et débordait de vingt-deux pixels sur un
+	 * téléphone. Le défaut ne se voyait que sur les cartes « fermé à votre
+	 * qualité », les plus longues, et seulement sous quatre cent
+	 * quatre-vingts pixels.
+	 */
+	box-sizing: border-box;
 	transition: border-color .18s, transform .18s, box-shadow .18s;
 }
 .action:hover {

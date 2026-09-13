@@ -222,13 +222,53 @@ h2 {
 .nav-item:hover { background: rgba(255,255,255,.07); color: #f2f7f2; }
 .nav-item-active { color: #f4fbf5; background: #2f5a63; box-shadow: inset 3px 0 0 #7cc8b9; }
 
+/*
+ * Le lien vers le second volet mène hors de cette application. Il se
+ * distingue par un filet à gauche plutôt que par une couleur vive : le
+ * visiteur doit comprendre qu'il change de lieu, sans que l'entrée paraisse
+ * plus importante que les écrans du produit lui-même.
+ */
+.nav-item-voisin {
+	border-left: 2px solid rgba(124, 200, 185, .45);
+	color: #92aaa3;
+}
+.nav-item-voisin:hover { color: #f2f7f2; }
+
 .security-note {
-	display: flex; gap: 9px; align-items: center;
+	display: flex; gap: 9px; align-items: flex-start;
 	color: #94b1a9; font-size: 10px; line-height: 1.45;
 	border-top: 1px solid rgba(255,255,255,.12);
 	padding: 18px 8px 0;
 }
 .security-note strong { color: #d5ece3; font-weight: 600; }
+
+/*
+ * Le bandeau portait une seule phrase ; il en porte quatre depuis qu'il
+ * résume les trois limites de l'encadré d'accueil. Le cadenas se cale donc
+ * en haut plutôt qu'au milieu, et les lignes se détachent les unes des
+ * autres — sans quoi le tout se lit comme un paragraphe compact que
+ * personne ne parcourt.
+ */
+.security-note > span:last-child { display: block; min-width: 0; }
+.note-titre {
+	display: block;
+	margin-bottom: 7px;
+	font-size: 9.5px;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+}
+.note-ligne { display: block; margin-bottom: 4px; }
+/*
+ * La dernière ligne dit ce que l'outil fait, après trois lignes disant ce
+ * qu'il ne fait pas. Un filet l'en sépare pour qu'on ne la lise pas comme
+ * un quatrième refus.
+ */
+.note-ligne-fin {
+	margin-top: 7px;
+	padding-top: 7px;
+	border-top: 1px solid rgba(255,255,255,.09);
+	color: #7fa89b;
+}
 
 .content-area { flex: 1; min-width: 0; }
 .topbar {
@@ -295,8 +335,30 @@ h2 {
 @media (max-width: 860px) {
 	.app-shell { flex-direction: column; }
 	.sidebar { width: 100%; flex: none; flex-direction: row; align-items: center; padding: 12px 16px; overflow-x: auto; }
-	.main-nav { display: flex; gap: 4px; }
-	.nav-item { white-space: nowrap; }
+	/*
+	 * Sur un téléphone la barre passe à l'horizontale. Trois entrées y
+	 * tenaient ; la quatrième, « Mon espace », débordait de seize pixels sur
+	 * la droite et se trouvait coupée par le bord de l'écran.
+	 *
+	 * Plutôt que de masquer une entrée ou de la renvoyer dans un menu replié
+	 * — ce qui cacherait justement l'espace de travail, au cœur de la
+	 * démonstration — la barre défile horizontalement et les entrées se
+	 * resserrent. Le défilement reste discret : la barre ne montre pas
+	 * d'ascenseur, et les quatre entrées tiennent en réalité une fois
+	 * l'espacement réduit.
+	 */
+	.main-nav {
+		display: flex;
+		gap: 2px;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.main-nav::-webkit-scrollbar { display: none; }
+	.nav-item {
+		white-space: nowrap;
+		padding: 11px 9px;
+		flex: 0 0 auto;
+	}
 	.security-note, .brand-caption, .nav-label { display: none; }
 	.topbar { padding: 0 20px; }
 	.page-content { padding: 24px 20px 40px; }
