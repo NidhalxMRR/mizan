@@ -2531,3 +2531,55 @@ h2 {
 	padding-top: 14px;
 	border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/*
+ * Le bloc de session, en bas de la barre : qui l'on est, et de quoi sortir.
+ *
+ * Il se place juste au-dessus du rappel des limites, séparé par un filet :
+ * l'identité et la sortie vont ensemble, et ne se confondent pas avec le
+ * parcours au-dessus.
+ */
+.coque-session {
+	margin-top: auto;
+	padding: 14px 8px 12px;
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.coque-session-nom {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 600;
+	color: #e8f0ed;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.coque-session-role {
+	margin: 0 0 8px;
+	font-size: 10.5px;
+	color: #94b1a9;
+}
+.coque-deconnexion {
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	background: transparent;
+	color: #cfe0db;
+	border-radius: 9px;
+	padding: 8px 12px;
+	font-size: 11.5px;
+	cursor: pointer;
+	min-height: 40px;
+	text-align: center;
+}
+.coque-deconnexion:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: #fff;
+}
+@media (max-width: 860px) {
+	/* Cible tactile : un doigt ne vise pas 40 pixels de façon fiable. */
+	.coque-deconnexion { min-height: 44px; font-size: 11px; }
+	.coque-session { padding: 10px 4px 8px; }
+	.coque-session-nom { font-size: 11px; }
+	.coque-session-role { display: none; }
+}

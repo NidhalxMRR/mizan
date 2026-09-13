@@ -1,8 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import {
+  lireSession,
+  oublierSession,
+  type SessionMizan,
+} from '@/app/components/agent/session';
+import { annoncerLaSession } from '@/app/components/agent/pont-connexion';
 
 /**
  * La coque : barre latérale, fil d'Ariane, zone de contenu.
@@ -56,6 +62,7 @@ const filsAriane: Record<string, string> = {
 
 export function Coque({ children }: { children: React.ReactNode }) {
   const chemin = usePathname();
+  const router = useRouter();
 
   /*
    * L'adresse du second volet se déduit du nom d'hôte par lequel la page a
@@ -73,6 +80,22 @@ export function Coque({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setVolet2(`${window.location.protocol}//${window.location.hostname}:8830/`);
   }, []);
+
+  /*
+   * La session ouverte, s'il y en a une.
+   *
+   * Lue après le premier rendu et jamais pendant : `localStorage` n'existe
+   * pas sur le serveur, et une lecture directe ferait diverger le HTML
+   * envoyé de celui que React reconstruit chez le visiteur.
+   *
+   * Relue à chaque changement de page : on se connecte sur `/connexion`,
+   * puis on arrive ici — sans cette dépendance, la barre continuerait
+   * d'afficher « pas de session » jusqu'au prochain rechargement complet.
+   */
+  const [session, setSession] = useState<SessionMizan | null>(null);
+  useEffect(() => {
+    setSession(lireSession());
+  }, [chemin]);
 
   return (
     <div className="app-shell">
@@ -143,6 +166,42 @@ export function Coque({ children }: { children: React.ReactNode }) {
             </a>
           ))}
         </nav>
+
+        {/*
+          Quitter son espace, depuis n'importe quelle page.
+
+          Le bouton n'existait que sur `/espace`. Dès qu'on naviguait vers
+          « Mon impayé » ou « Le corpus », plus aucun moyen de fermer la
+          session : il fallait revenir en arrière pour le retrouver. Sur un
+          poste partagé — et une démonstration se fait toujours sur un poste
+          partagé — la session du précédent restait ouverte pour le suivant.
+
+          Il ne s'affiche que si une session existe vraiment : proposer de
+          quitter une place que l'on n'occupe pas n'apprend rien à personne.
+        */}
+        {session !== null ? (
+          <div className="coque-session">
+            <p className="coque-session-nom" title={session.nomOrganisation}>
+              {session.nomOrganisation}
+            </p>
+            <p className="coque-session-role">{session.libelleRole}</p>
+            <button
+              type="button"
+              className="coque-deconnexion"
+              onClick={() => {
+                oublierSession();
+                // La bulle de dialogue est prévenue par le même canal que la
+                // connexion : sans cela elle continuerait de se croire
+                // habilitée et parlerait au nom d'une organisation quittée.
+                annoncerLaSession(null);
+                setSession(null);
+                router.push('/connexion');
+              }}
+            >
+              Quitter cet espace
+            </button>
+          </div>
+        ) : null}
 
         <div className="security-note">
           <span aria-hidden="true">🔒</span>
