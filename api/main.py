@@ -38,6 +38,8 @@ from packages.legal.legal_engine import DateImpossible, assess
 from packages.models.client import ClientLLM, ModeleIndisponible
 from agents import chaine
 
+from api.agent_routes import routeur as routeur_agent
+from api.comptes import routeur as routeur_comptes
 from api.documents import routeur as routeur_documents
 from api.schemas import (
     Analyse,
@@ -75,10 +77,23 @@ app = FastAPI(
     ),
 )
 
-# Le frontend Next.js tourne en local sur le port 3000.
+# Le frontend Next.js tourne sur le port 3000, mais pas seulement en local :
+# pendant la démonstration, l'écran est ouvert depuis un téléphone, donc
+# depuis l'adresse publique du serveur. N'autoriser que localhost ferait
+# échouer toute requête du navigateur avec un « Failed to fetch » muet —
+# l'identification et l'agent conversationnel seraient inutilisables sur le
+# téléphone alors que le serveur, lui, répond parfaitement.
+#
+# On nomme donc explicitement les origines attendues. Le joker « * » est
+# écarté : il est incompatible avec allow_credentials, et il autoriserait
+# n'importe quel site tiers à appeler l'API avec le jeton de l'utilisateur.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://161.97.134.3:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -86,7 +101,41 @@ app.add_middleware(
 
 # Les deux livrables institutionnels du brief §4 : le projet de mise en
 # demeure et le tableau greffier.
+# ---------------------------------------------------------------------------
+# Le pont entre l'identification et l'agent conversationnel.
+#
+# Deux briques ont été construites séparément : le garde d'accès, qui sait
+# lire un jeton dans l'en-tête « Authorization: Bearer », et l'agent, qui
+# attend de trouver la session déjà vérifiée dans l'état de la requête. Ni
+# l'un ni l'autre ne pouvait poser ce lien sans écrire dans le fichier de
+# l'autre.
+#
+# Ce middleware le pose. Il ne décide rien : il tente la vérification, et en
+# cas d'échec il ne pose simplement rien, laissant l'agent refuser lui-même
+# avec sa propre phrase. Un jeton absent, expiré ou altéré n'est donc jamais
+# traité comme valide — il est traité comme inexistant.
+# ---------------------------------------------------------------------------
+@app.middleware("http")
+async def _poser_la_session_verifiee(requete, appeler_la_suite):
+    from packages.comptes.garde import _jeton_de_l_entete
+    from packages.comptes.jetons import JetonInvalide, lire_jeton
+
+    autorisation = requete.headers.get("authorization")
+    if autorisation:
+        try:
+            requete.state.session = lire_jeton(
+                _jeton_de_l_entete(autorisation)
+            )
+        except (JetonInvalide, HTTPException, ValueError):
+            # Volontairement muet : c'est à la route appelée de refuser, avec
+            # le vocabulaire qu'elle a choisi pour ses utilisateurs.
+            pass
+    return await appeler_la_suite(requete)
+
+
 app.include_router(routeur_documents)
+app.include_router(routeur_comptes)
+app.include_router(routeur_agent)
 
 # Un seul client, construit au démarrage : `sonder()` interroge le réseau, on
 # ne recrée pas l'objet à chaque requête.
