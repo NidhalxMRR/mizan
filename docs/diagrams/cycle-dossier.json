@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Cycle de vie d'un dossier de litige MIZAN",
+    "output": "docs/diagrams/cycle-dossier.html",
+    "viewBox": [
+      1040,
+      566
+    ],
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "rail-principal",
+        "label": "Rail principal",
+        "focus": [
+          "brouillon",
+          "verifie",
+          "en_conciliation",
+          "projet_acte",
+          "signifie"
+        ],
+        "note": "Les cinq phases ordonnées du dossier, du dépôt par la PME à la signification par l'huissier."
+      },
+      {
+        "id": "recevabilite",
+        "label": "Recevabilité et prescription",
+        "focus": [
+          "brouillon",
+          "piece_refusee",
+          "verifie",
+          "prescrit"
+        ],
+        "note": "La porte d'entrée refuse une pièce avec motif ; la prescription, elle, ferme le dossier sans retour."
+      },
+      {
+        "id": "actes-reserves",
+        "label": "Actes réservés",
+        "focus": [
+          "en_conciliation",
+          "accord_signe",
+          "projet_acte",
+          "signifie",
+          "transmis_greffe"
+        ],
+        "note": "Deux transitions sont verrouillées par trigger : le PV signé par le professionnel accrédité et la signification par l'huissier."
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "Instruction du dossier"
+    }
+  ],
+  "states": [
+    {
+      "id": "brouillon",
+      "type": "start",
+      "label": "Brouillon",
+      "sublabel": "la PME dépose ses pièces",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "modifiable"
+    },
+    {
+      "id": "verifie",
+      "type": "active",
+      "label": "Vérifié",
+      "sublabel": "délai et articles calculés",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "instruit"
+    },
+    {
+      "id": "en_conciliation",
+      "type": "active",
+      "label": "En conciliation",
+      "sublabel": "séance E-CMA ouverte",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "E-CMA"
+    },
+    {
+      "id": "projet_acte",
+      "type": "waiting",
+      "label": "Projet d'acte prêt",
+      "sublabel": "attend un huissier",
+      "lane": "main",
+      "col": 3,
+      "step": "04",
+      "tag": "en attente"
+    },
+    {
+      "id": "signifie",
+      "type": "active",
+      "label": "Signifié",
+      "sublabel": "CPC art. 5 et 60",
+      "lane": "main",
+      "col": 4,
+      "step": "05",
+      "tag": "irréversible"
+    },
+    {
+      "id": "piece_refusee",
+      "type": "failure",
+      "label": "Pièce refusée",
+      "sublabel": "gate_ok faux sur la pièce",
+      "lane": "main",
+      "col": 0,
+      "yOffset": 190,
+      "tag": "hors énumération"
+    },
+    {
+      "id": "prescrit",
+      "type": "failure",
+      "label": "Prescrit",
+      "sublabel": "COC art. 402 et 403",
+      "lane": "main",
+      "col": 1,
+      "yOffset": 190,
+      "tag": "terminal"
+    },
+    {
+      "id": "accord_signe",
+      "type": "success",
+      "label": "Accord signé",
+      "sublabel": "PV de conciliation",
+      "lane": "main",
+      "col": 2,
+      "tag": "terminal",
+      "yOffset": 190
+    },
+    {
+      "id": "transmis_greffe",
+      "type": "success",
+      "label": "Transmis au greffe",
+      "sublabel": "tribunal de commerce",
+      "lane": "main",
+      "col": 4,
+      "tag": "terminal",
+      "yOffset": 190
+    }
+  ],
+  "transitions": [
+    {
+      "id": "verification",
+      "from": "brouillon",
+      "to": "verifie",
+      "label": "La PME complète le dépôt",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 73
+    },
+    {
+      "id": "refus-porte",
+      "from": "brouillon",
+      "to": "piece_refusee",
+      "label": "La porte refuse une pièce",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        171,
+        250
+      ]
+    },
+    {
+      "id": "redepot",
+      "from": "piece_refusee",
+      "to": "brouillon",
+      "label": "La PME redépose la pièce",
+      "variant": "emphasis",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          14,
+          347
+        ],
+        [
+          14,
+          157
+        ]
+      ],
+      "labelAt": [
+        171,
+        292
+      ]
+    },
+    {
+      "id": "prescription",
+      "from": "verifie",
+      "to": "prescrit",
+      "label": "Le délai légal est éteint",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        325,
+        250
+      ]
+    },
+    {
+      "id": "ouverture-ecma",
+      "from": "verifie",
+      "to": "en_conciliation",
+      "label": "La PME saisit l'E-CMA",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 73
+    },
+    {
+      "id": "pv-signe",
+      "from": "en_conciliation",
+      "to": "accord_signe",
+      "label": "Le pro accrédité signe le PV",
+      "variant": "emphasis",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        420,
+        292
+      ]
+    },
+    {
+      "id": "echec-ecma",
+      "from": "en_conciliation",
+      "to": "projet_acte",
+      "label": "Échec de la conciliation",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 73
+    },
+    {
+      "id": "signification",
+      "from": "projet_acte",
+      "to": "signifie",
+      "label": "L'huissier signifie l'acte",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 73
+    },
+    {
+      "id": "depot-greffe",
+      "from": "signifie",
+      "to": "transmis_greffe",
+      "label": "Le greffier reçoit le dossier",
+      "variant": "emphasis",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        710,
+        250
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ce que la base autorise",
+      "items": [
+        "Huit états dans dossier_state",
+        "Pièce refusée = état de pièce",
+        "Modifiable en brouillon seul"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Actes réservés",
+      "items": [
+        "Signifié : rôle huissier",
+        "Accord signé : PV du pro",
+        "Signifié ne va qu'au greffe"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Impasses assumées",
+      "items": [
+        "Prescrit n'est pas réactivable",
+        "Refus toujours motivé",
+        "Transitions journalisées"
+      ]
+    }
+  ]
+}
