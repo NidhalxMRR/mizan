@@ -1,0 +1,203 @@
+/*
+ * Le thème du pitch deck.
+ *
+ * Aucune police distante, aucun CDN : la salle n'a pas de wifi garanti et un
+ * deck qui attend une ressource extérieure s'affiche en Times New Roman
+ * devant le jury. Tout ce qui suit tient dans ce fichier.
+ *
+ * Les couleurs sont celles de l'application — ce n'est pas de la coquetterie :
+ * le jury passe du deck à la démonstration en direct, et deux chartes
+ * différentes lui feraient croire à deux produits.
+ *
+ * Format : 1280 × 720 par diapositive, imprimable en PDF paysage sans marge.
+ */
+
+:root {
+	--fond: #0d2b28;
+	--fond-clair: #f7f6f1;
+	--encre: #12201d;
+	--encre-claire: #e8f0ed;
+	--sourdine: #94b1a9;
+	--primaire: #2f7c73;
+	--primaire-clair: #57a89d;
+	--danger: #bf6d68;
+	--ambre: #c28c3a;
+	--filet: rgba(255, 255, 255, 0.14);
+	--filet-clair: rgba(18, 32, 29, 0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+	font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	background: #3a4a47;
+	color: var(--encre);
+	-webkit-font-smoothing: antialiased;
+}
+
+.slide {
+	position: relative;
+	width: 1280px;
+	height: 720px;
+	margin: 24px auto;
+	padding: 64px 72px;
+	background: var(--fond-clair);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	page-break-after: always;
+	break-after: page;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+.slide-sombre {
+	background: var(--fond);
+	color: var(--encre-claire);
+}
+
+/* Le numéro et le fil, discrets, en bas de chaque diapositive. */
+.slide-pied {
+	position: absolute;
+	left: 72px;
+	right: 72px;
+	bottom: 28px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 13px;
+	color: var(--sourdine);
+	border-top: 1px solid var(--filet-clair);
+	padding-top: 12px;
+}
+.slide-sombre .slide-pied { border-top-color: var(--filet); }
+
+.eyebrow {
+	font-size: 13px;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--primaire);
+	font-weight: 700;
+	margin-bottom: 18px;
+}
+.slide-sombre .eyebrow { color: var(--primaire-clair); }
+
+h1 {
+	font-size: 60px;
+	line-height: 1.08;
+	letter-spacing: -0.02em;
+	font-weight: 700;
+	margin-bottom: 20px;
+}
+h2 {
+	font-size: 42px;
+	line-height: 1.12;
+	letter-spacing: -0.015em;
+	font-weight: 700;
+	margin-bottom: 26px;
+}
+h3 {
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 10px;
+}
+p { font-size: 19px; line-height: 1.55; }
+.grand { font-size: 24px; line-height: 1.5; }
+.sourdine { color: #4a5b58; }
+.slide-sombre .sourdine { color: var(--sourdine); }
+
+/* Les chiffres qui frappent. */
+.chiffres {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 28px;
+	margin-top: 12px;
+}
+.chiffre { border-left: 3px solid var(--danger); padding-left: 20px; }
+.chiffre-valeur {
+	font-size: 64px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.03em;
+	color: var(--danger);
+}
+.chiffre-libelle { font-size: 17px; line-height: 1.4; margin-top: 10px; }
+.chiffre-source { font-size: 12.5px; color: #5a6b68; margin-top: 8px; }
+.slide-sombre .chiffre-source { color: var(--sourdine); }
+
+/* Deux colonnes. */
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; flex: 1; }
+.trois { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+
+/* Les cartes. */
+.carte {
+	background: #fff;
+	border: 1px solid var(--filet-clair);
+	border-radius: 14px;
+	padding: 26px 24px;
+}
+.slide-sombre .carte {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: var(--filet);
+}
+.carte-num {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--primaire);
+	letter-spacing: 0.1em;
+	margin-bottom: 8px;
+}
+.slide-sombre .carte-num { color: var(--primaire-clair); }
+
+/* Le tableau comparatif. */
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--filet-clair); }
+th { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #5d716d; font-weight: 700; }
+.col-mizan { background: rgba(47, 124, 115, 0.09); font-weight: 600; }
+th.col-mizan { color: var(--primaire); }
+.oui { color: var(--primaire); font-weight: 700; }
+.non { color: #b9c4c2; }
+.partiel { color: var(--ambre); font-weight: 600; }
+
+/* La liste à puces carrées. */
+ul { list-style: none; }
+li {
+	font-size: 19px;
+	line-height: 1.5;
+	padding-left: 26px;
+	position: relative;
+	margin-bottom: 14px;
+}
+li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 11px;
+	width: 8px;
+	height: 8px;
+	background: var(--primaire);
+	border-radius: 2px;
+}
+.slide-sombre li::before { background: var(--primaire-clair); }
+
+/* Le terme arabe consacré, toujours en apposition. */
+.ar { font-size: 0.94em; color: var(--ambre); }
+
+/* Le bandeau de principe. */
+.principe {
+	margin-top: auto;
+	padding: 18px 24px;
+	background: rgba(47, 124, 115, 0.1);
+	border-left: 3px solid var(--primaire);
+	border-radius: 0 10px 10px 0;
+	font-size: 18px;
+}
+.slide-sombre .principe {
+	background: rgba(87, 168, 157, 0.12);
+	border-left-color: var(--primaire-clair);
+}
+
+@media print {
+	body { background: #fff; }
+	.slide { margin: 0; box-shadow: none; }
+	@page { size: 1280px 720px; margin: 0; }
+}

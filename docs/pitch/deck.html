@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>MIZAN — Hack4Justice 2026 — Challenge B</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+<!--
+  MIZAN — pitch deck, Hack4Justice 2026, Challenge B.
+
+  Public : jury VIP (mérite technique, potentiel économique, innovation,
+  faisabilité) ET représentants du secteur public qui portent le « adopt
+  protocol ». Deux auditoires, un seul deck : chaque diapositive doit parler
+  aux deux — l'institution veut de l'adoption, l'investisseur veut du marché.
+
+  Temps : 4 minutes de pitch, 1 minute de démonstration en direct, 3 à 5
+  minutes de questions. Soit environ 20 secondes par diapositive.
+
+  Aucune police distante, aucun CDN : la salle n'a pas de wifi garanti.
+-->
+
+<!-- ================= 1. COUVERTURE ================= -->
+<section class="slide slide-sombre">
+  <div class="eyebrow">HACK4JUSTICE 2026 · CHALLENGE B</div>
+  <h1>MIZAN <span class="ar">ميزان</span></h1>
+  <p class="grand" style="max-width:800px;color:var(--encre-claire)">
+    La créance impayée d'une petite entreprise tunisienne, traitée de bout en
+    bout&nbsp;: ce que dit la loi, la mise en demeure, l'accord amiable, et le
+    dossier numérique que le greffe reçoit sans papier.
+  </p>
+  <div class="principe" style="margin-top:auto;max-width:760px">
+    <strong>L'IA propose. Le droit dispose.</strong><br>
+    <span class="sourdine">Le calcul des délais ne dépend d'aucun modèle de langage.
+    Il cite l'article qui le fonde.</span>
+  </div>
+  <div class="slide-pied"><span>MIZAN — Challenge B</span><span>1</span></div>
+</section>
+
+<!-- ================= 2. LA PROBLÉMATIQUE ================= -->
+<section class="slide">
+  <div class="eyebrow">LA PROBLÉMATIQUE</div>
+  <h2>Une facture impayée ne fait pas perdre de l'argent.<br>Elle fait fermer l'entreprise.</h2>
+  <div class="chiffres">
+    <div class="chiffre">
+      <div class="chiffre-valeur">97,4 %</div>
+      <div class="chiffre-libelle">des entreprises tunisiennes comptent
+        <strong>5 salariés ou moins</strong></div>
+      <div class="chiffre-source">INS — Répertoire national des entreprises</div>
+    </div>
+    <div class="chiffre">
+      <div class="chiffre-valeur">99,9 %</div>
+      <div class="chiffre-libelle">emploient <strong>moins de 200 personnes</strong> —
+        le tissu économique est presque entièrement composé de MPME</div>
+      <div class="chiffre-source">INS — Répertoire national des entreprises</div>
+    </div>
+    <div class="chiffre">
+      <div class="chiffre-valeur">0</div>
+      <div class="chiffre-libelle">juriste dans une entreprise de cinq personnes.
+        <strong>Le gérant est seul face au droit.</strong></div>
+      <div class="chiffre-source">Conséquence directe des deux chiffres précédents</div>
+    </div>
+  </div>
+  <div style="margin-top:40px;max-width:960px">
+    <p class="grand">Un artisan à qui l'on doit 9&nbsp;520 dinars ne sait pas trois choses&nbsp;:
+      <strong>combien de temps il lui reste</strong> pour agir,
+      <strong>ce que son contrat l'oblige</strong> à faire d'abord,
+      et <strong>ce qu'il peut exiger</strong> sans avocat.</p>
+    <p class="grand" style="margin-top:16px;color:#a8514b;font-weight:600">
+      Il ne renonce pas parce que la loi lui donne tort.<br>
+      <strong style="color:var(--danger)">Il renonce parce qu'il ne sait pas qu'elle lui donne raison.</strong></p>
+  </div>
+  <div class="slide-pied"><span>La problématique</span><span>2</span></div>
+</section>
+
+<!-- ================= 3. L'IMPACT EN CHAÎNE ================= -->
+<section class="slide slide-sombre">
+  <div class="eyebrow">L'IMPACT EN CHAÎNE</div>
+  <h2>Le même impayé traverse trois étages.</h2>
+  <div class="trois" style="margin-top:10px">
+    <div class="carte">
+      <div class="carte-num">ÉTAGE 1 — L'ENTREPRISE</div>
+      <h3>La trésorerie</h3>
+      <p class="sourdine">La créance non recouvrée devient une dette envers le
+      fournisseur, puis un salaire différé. Une entreprise de cinq personnes
+      n'a pas de matelas&nbsp;: elle a un mois.</p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">ÉTAGE 2 — LA JUSTICE</div>
+      <h3>Le tribunal</h3>
+      <p class="sourdine">Les litiges qui arrivent au greffe sont incomplets,
+      sur papier, sans historique de tentative amiable. Le greffier ressaisit,
+      vérifie, renvoie. Le rôle s'allonge.</p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">ÉTAGE 3 — L'ÉTAT</div>
+      <h3>La recette fiscale</h3>
+      <p class="sourdine">Une entreprise qui ne recouvre pas ne déclare pas de
+      bénéfice, ne paie pas d'impôt, et finit par sortir du registre. La
+      créance privée devient un manque à gagner public.</p>
+    </div>
+  </div>
+  <div class="principe">
+    Traiter l'impayé <strong>avant</strong> qu'il devienne un contentieux,
+    c'est agir sur les trois étages à la fois.
+  </div>
+  <div class="slide-pied"><span>L'impact en chaîne</span><span>3</span></div>
+</section>
+
+<!-- ================= 4. LA QUESTION ================= -->
+<section class="slide">
+  <div class="eyebrow">UNE QUESTION</div>
+  <div style="margin:auto 0">
+    <h1 style="font-size:52px;max-width:1000px">
+      Comment donner à un artisan, <span style="color:var(--primaire)">sans avocat
+      et sans argent</span>, la même lucidité juridique qu'une grande entreprise
+      — <span style="color:var(--primaire)">et faire arriver son dossier au
+      tribunal déjà en état d'être jugé&nbsp;?</span>
+    </h1>
+  </div>
+  <div class="slide-pied"><span>Une question</span><span>4</span></div>
+</section>
+
+<!-- ================= 5. L'OBJECTIF ================= -->
+<section class="slide">
+  <div class="eyebrow">L'OBJECTIF</div>
+  <h2>Quatre choses, dans cet ordre.</h2>
+  <div class="deux" style="align-items:start">
+    <div>
+      <div class="carte" style="margin-bottom:20px">
+        <div class="carte-num">1 — SAVOIR</div>
+        <h3>Combien de temps reste-t-il&nbsp;?</h3>
+        <p class="sourdine">Le délai de prescription, calculé à la date près,
+        avec l'article qui le fonde. Pas une estimation&nbsp;: un calcul.</p>
+      </div>
+      <div class="carte">
+        <div class="carte-num">2 — COMPRENDRE</div>
+        <h3>Qu'ai-je signé&nbsp;?</h3>
+        <p class="sourdine">Le contrat déposé en PDF, même scanné, relu clause
+        par clause&nbsp;: arbitrage, juridiction, pénalités, délai dérogatoire.</p>
+      </div>
+    </div>
+    <div>
+      <div class="carte" style="margin-bottom:20px">
+        <div class="carte-num">3 — AGIR</div>
+        <h3>Régler sans procès</h3>
+        <p class="sourdine">Mise en demeure bilingue, puis échéancier proposé
+        au débiteur par lien unique. Il accepte, refuse ou contre-propose
+        en ligne.</p>
+      </div>
+      <div class="carte">
+        <div class="carte-num">4 — TRANSMETTRE</div>
+        <h3>Un dossier que le greffe accepte</h3>
+        <p class="sourdine">Si l'amiable échoue, le dossier part au tribunal
+        structuré, avec son historique de conciliation. Plus de papier.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-pied"><span>L'objectif</span><span>5</span></div>
+</section>
+
+
+<!-- ================= 6. ÉTUDE DE L'EXISTANT ================= -->
+<section class="slide">
+  <div class="eyebrow">ÉTUDE DE L'EXISTANT</div>
+  <h2>Ce qui existe déjà — et où chacun s'arrête.</h2>
+  <div class="trois" style="margin-top:6px">
+    <div class="carte">
+      <div class="carte-num">EN TUNISIE</div>
+      <h3>La documentation juridique</h3>
+      <p class="sourdine" style="font-size:17px">Des bases de textes par
+      abonnement&nbsp;: on y cherche un article, on le lit. Elles s'adressent au
+      professionnel du droit, pas au gérant, et s'arrêtent à la consultation.
+      <strong>Aucune ne calcule un délai, ne rédige un acte, ni ne parle au
+      débiteur.</strong></p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">À L'INTERNATIONAL</div>
+      <h3>Le recouvrement B2B</h3>
+      <p class="sourdine" style="font-size:17px">Des plateformes de relance qui
+      automatisent l'e-mail, le suivi et l'encaissement. Elles supposent une
+      comptabilité installée, un abonnement mensuel, et
+      <strong>un droit qui n'est pas le droit tunisien.</strong></p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">JUSTICE PUBLIQUE</div>
+      <h3>La résolution en ligne</h3>
+      <p class="sourdine" style="font-size:17px">Des tribunaux numériques
+      étrangers — dont ceux soutenus par HiiL — ont prouvé que le litige civil
+      peut se régler en ligne. <strong>Ils supposent une institution déjà
+      numérisée, et un corpus qui n'est pas le nôtre.</strong></p>
+    </div>
+  </div>
+  <div class="principe">
+    Chacun résout <strong>un</strong> maillon. Aucun ne relie la question de
+    l'artisan au dossier que le greffier ouvrira.
+  </div>
+  <div class="slide-pied"><span>Étude de l'existant</span><span>6</span></div>
+</section>
+
+<!-- ================= 7. TABLEAU COMPARATIF ================= -->
+<section class="slide">
+  <div class="eyebrow">TABLEAU COMPARATIF</div>
+  <h2>Le même parcours, mesuré sur dix critères.</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:31%">Ce dont l'artisan a besoin</th>
+        <th>Bases juridiques</th>
+        <th>Recouvrement B2B</th>
+        <th>Cabinet d'avocat</th>
+        <th class="col-mizan">MIZAN</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Savoir combien de jours il lui reste</td>
+        <td class="non">non</td><td class="non">non</td>
+        <td class="oui">oui</td><td class="col-mizan oui">oui — calculé, article cité</td></tr>
+      <tr><td>Corpus juridique tunisien interrogeable</td>
+        <td class="oui">oui</td><td class="non">non</td>
+        <td class="oui">oui</td><td class="col-mizan oui">4 087 articles</td></tr>
+      <tr><td>Lire les clauses cachées de son contrat</td>
+        <td class="non">non</td><td class="non">non</td>
+        <td class="oui">oui</td><td class="col-mizan oui">oui — PDF scanné compris</td></tr>
+      <tr><td>Mise en demeure bilingue <span class="ar">فرنسي / عربي</span></td>
+        <td class="non">non</td><td class="partiel">modèle</td>
+        <td class="oui">oui</td><td class="col-mizan oui">oui — générée</td></tr>
+      <tr><td>Négocier un échéancier avec le débiteur</td>
+        <td class="non">non</td><td class="partiel">relance</td>
+        <td class="partiel">hors ligne</td><td class="col-mizan oui">oui — en ligne</td></tr>
+      <tr><td>Un guichet pour le greffe du tribunal</td>
+        <td class="non">non</td><td class="non">non</td>
+        <td class="non">non</td><td class="col-mizan oui">oui</td></tr>
+      <tr><td>Coût pour une entreprise de cinq personnes</td>
+        <td class="partiel">abonnement</td><td class="partiel">abonnement</td>
+        <td class="non">honoraires</td><td class="col-mizan oui">gratuit</td></tr>
+      <tr><td>Refuse d'usurper le monopole de l'huissier</td>
+        <td class="oui">sans objet</td><td class="non">zone grise</td>
+        <td class="oui">oui</td><td class="col-mizan oui">oui — affiché</td></tr>
+    </tbody>
+  </table>
+  <div class="slide-pied"><span>Tableau comparatif</span><span>7</span></div>
+</section>
+
+<!-- ================= 8. LA PRÉ-REMÉDIATION ================= -->
+<section class="slide slide-sombre">
+  <div class="eyebrow">AIDE À LA DÉCISION — LA PRÉ-REMÉDIATION</div>
+  <h2>« La facture date du 12 mai. Que se passe-t-il&nbsp;? »</h2>
+  <div class="deux" style="align-items:start;margin-top:4px">
+    <div>
+      <div class="carte" style="margin-bottom:18px">
+        <p style="font-size:17px" class="sourdine">FACTURE 2026-041 · MENUISERIE · SFAX</p>
+        <div style="display:flex;align-items:baseline;gap:14px;margin-top:10px">
+          <span style="font-size:52px;font-weight:700;color:var(--primaire-clair)">241</span>
+          <span style="font-size:20px">jours restants</span>
+        </div>
+        <p class="sourdine" style="font-size:16px;margin-top:10px">
+          Montant&nbsp;: 9&nbsp;520,000 DT · Fondement&nbsp;: <strong>COC art. 403</strong></p>
+      </div>
+      <div class="carte">
+        <p style="font-size:17px" class="sourdine">SI UNE SOMMATION EST SIGNIFIÉE LE 1ᵉʳ JUILLET</p>
+        <div style="display:flex;align-items:baseline;gap:14px;margin-top:10px">
+          <span style="font-size:52px;font-weight:700;color:var(--primaire-clair)">291</span>
+          <span style="font-size:20px">jours — l'acte interrompt la prescription</span>
+        </div>
+        <p class="sourdine" style="font-size:16px;margin-top:10px">
+          Fondement&nbsp;: <strong>CPCC art. 60</strong></p>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:16px">Ce que l'artisan décide, en connaissance de cause</h3>
+      <ul>
+        <li>Attendre encore&nbsp;: il sait exactement jusqu'à quand.</li>
+        <li>Proposer un échéancier&nbsp;: il sait ce qu'il risque s'il échoue.</li>
+        <li>Faire signifier&nbsp;: il sait ce que l'acte lui rachète en délai.</li>
+      </ul>
+      <div class="principe" style="margin-top:20px">
+        <strong>Le chiffre ne vient d'aucun modèle de langage.</strong><br>
+        <span class="sourdine">Il est calculé par une règle, et la règle affiche
+        l'article dont elle est tirée. Si le modèle tombe, le calcul reste.</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-pied"><span>La pré-remédiation</span><span>8</span></div>
+</section>
+
+
+<!-- ================= 9. LA VALEUR AJOUTÉE ================= -->
+<section class="slide">
+  <div class="eyebrow">LA VALEUR AJOUTÉE — D'APRÈS L'ÉTUDE DE L'EXISTANT</div>
+  <h2>Trois choses que personne ne fait ensemble.</h2>
+  <div class="trois" style="margin-top:6px">
+    <div class="carte">
+      <div class="carte-num">1</div>
+      <h3>Le droit tunisien, pas une traduction</h3>
+      <p class="sourdine" style="font-size:17px">4 087 articles indexés. Chaque
+      réponse cite l'article. Le calcul de prescription applique le
+      <strong>Code des obligations et des contrats</strong>, pas une règle
+      européenne adaptée.</p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">2</div>
+      <h3>Les deux côtés du litige</h3>
+      <p class="sourdine" style="font-size:17px">Le créancier propose, <strong>le
+      débiteur répond en ligne</strong> par un lien unique. Il accepte, refuse ou
+      contre-propose. L'accord amiable existe dans le produit — pas seulement
+      dans le discours.</p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">3</div>
+      <h3>L'institution est dans le produit</h3>
+      <p class="sourdine" style="font-size:17px">Un poste greffe, protégé, où le
+      tribunal reçoit des dossiers structurés. <strong>Ce n'est pas une
+      promesse d'intégration&nbsp;: c'est un écran qui fonctionne aujourd'hui.</strong></p>
+    </div>
+  </div>
+  <div class="principe">
+    <strong>L'IA propose. Le droit dispose.</strong> Mizan ne signifie pas
+    — seul l'huissier de justice <span class="ar">(عدل منفذ)</span> le peut,
+    CPC art. 5. Elle ne juge pas. Elle ne représente personne.
+    <span class="sourdine">Cette limite n'est pas une faiblesse&nbsp;: c'est ce qui
+    rend l'outil adoptable par une institution.</span>
+  </div>
+  <div class="slide-pied"><span>La valeur ajoutée</span><span>9</span></div>
+</section>
+
+<!-- ================= 10. FAISABILITÉ TECHNIQUE ================= -->
+<section class="slide slide-sombre">
+  <div class="eyebrow">FAISABILITÉ TECHNIQUE — CE QUI TOURNE AUJOURD'HUI</div>
+  <h2>Ce n'est pas une maquette.</h2>
+  <div class="deux" style="align-items:start">
+    <div>
+      <h3 style="margin-bottom:14px">Mesuré, pas annoncé</h3>
+      <ul>
+        <li><strong>4 087 articles</strong> indexés, recherche par mots-clés,
+          réponse toujours sourcée.</li>
+        <li><strong>857 tests automatisés</strong> passent sur le moteur juridique.</li>
+        <li><strong>Un contrat scanné réel</strong> — sans couche texte — lu par
+          reconnaissance de caractères arabe et français, <strong>4 clauses
+          extraites en 13 secondes</strong>, chacune citée dans le texte source.</li>
+        <li><strong>6 qualités juridiques</strong> distinctes&nbsp;: entreprise,
+          professionnel accrédité, greffier <span class="ar">(كاتب المحكمة)</span>,
+          huissier, avocat, administrateur.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-bottom:14px">Comment c'est bâti</h3>
+      <ul>
+        <li><strong>Le calcul juridique est déterministe.</strong> Aucune
+          dépendance à un modèle&nbsp;: une règle, un article, un résultat
+          reproductible.</li>
+        <li><strong>Le modèle de langage ne fait que reformuler.</strong> Il
+          n'invente aucun délai et ne décide rien.</li>
+        <li><strong>Souveraineté des données</strong>&nbsp;: le corpus et le moteur
+          tournent sur le serveur. Aucun dossier ne quitte l'infrastructure
+          pour être calculé.</li>
+        <li><strong>Le greffe est protégé côté serveur</strong>, pas seulement
+          masqué à l'écran.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-pied"><span>Faisabilité technique</span><span>10</span></div>
+</section>
+
+<!-- ================= 11. L'IMPACT — THE AGENCY BENEFIT ================= -->
+<section class="slide">
+  <div class="eyebrow">L'IMPACT RÉEL — THE AGENCY BENEFIT</div>
+  <h2>Ce que le tribunal y gagne, par dossier.</h2>
+  <div class="deux" style="align-items:start">
+    <div>
+      <h3 style="margin-bottom:6px">Mesuré dans les données de démonstration</h3>
+      <p class="sourdine" style="margin-bottom:18px;font-size:16px">Compté par le
+      produit, pas estimé.</p>
+      <div class="carte" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:19px">Dossiers papier supprimés</span>
+          <span style="font-size:36px;font-weight:700;color:var(--primaire)">3</span>
+        </div>
+      </div>
+      <div class="carte" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:19px">Saisines évitées par accord conclu</span>
+          <span style="font-size:36px;font-weight:700;color:var(--primaire)">1</span>
+        </div>
+      </div>
+      <div class="carte">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:19px">Conciliations engagées avant saisine</span>
+          <span style="font-size:36px;font-weight:700;color:var(--primaire)">1</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:6px">Estimé — à valider par le tribunal</h3>
+      <p class="sourdine" style="margin-bottom:18px;font-size:16px">Décomposition
+      des gestes manuels, non chronométrée.</p>
+      <table style="font-size:16px">
+        <tr><td>Réception et enregistrement du dossier papier</td><td style="text-align:right;font-weight:700">12 min</td></tr>
+        <tr><td>Vérification de complétude pièce à pièce</td><td style="text-align:right;font-weight:700">15 min</td></tr>
+        <tr><td>Ressaisie des parties et des montants</td><td style="text-align:right;font-weight:700">8 min</td></tr>
+        <tr><td>Recherche des articles applicables</td><td style="text-align:right;font-weight:700">20 min</td></tr>
+        <tr><td>Archivage physique</td><td style="text-align:right;font-weight:700">10 min</td></tr>
+        <tr style="border-top:2px solid var(--primaire)">
+          <td style="font-weight:700;font-size:19px">Par dossier</td>
+          <td style="text-align:right;font-weight:700;font-size:26px;color:var(--primaire)">65 min</td></tr>
+      </table>
+      <p class="sourdine" style="font-size:15px;margin-top:14px">
+        <strong>Nous ne présentons pas ce chiffre comme mesuré.</strong> Il se
+        valide en chronométrant dix dossiers papier et dix dossiers reçus par
+        Mizan — c'est la première chose que nous demanderons à un tribunal
+        pilote.</p>
+    </div>
+  </div>
+  <div class="slide-pied"><span>L'impact réel</span><span>11</span></div>
+</section>
+
+
+<!-- ================= 12. USAGE RÉEL POUR LA MPME ================= -->
+<section class="slide slide-sombre">
+  <div class="eyebrow">USABILITÉ — LE PARCOURS D'AHMED, MENUISIER À SFAX</div>
+  <h2>Quatre écrans. Aucun mot de jargon.</h2>
+  <div class="trois" style="margin-top:6px">
+    <div class="carte">
+      <div class="carte-num">ÉCRAN 1</div>
+      <h3>Il dépose sa facture</h3>
+      <p class="sourdine" style="font-size:17px">9&nbsp;520 DT, 12 mai.
+      <strong>241 jours restants</strong>, COC art. 403 affiché sous le chiffre.
+      Il n'a rien saisi d'autre que son montant et sa date.</p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">ÉCRAN 2</div>
+      <h3>Il dépose son contrat</h3>
+      <p class="sourdine" style="font-size:17px">Une photo de contrat scanné
+      suffit. Quatre clauses ressortent, <strong>chacune avec sa phrase exacte
+      surlignée</strong>&nbsp;: il voit ce qu'il avait signé sans le lire.</p>
+    </div>
+    <div class="carte">
+      <div class="carte-num">ÉCRANS 3 ET 4</div>
+      <h3>Il propose, le client répond</h3>
+      <p class="sourdine" style="font-size:17px">Trois versements. Le client
+      reçoit un lien, <strong>accepte en deux clics</strong>. Si le client refuse,
+      le dossier part au greffe avec l'historique de la tentative.</p>
+    </div>
+  </div>
+  <div class="principe">
+    <strong>Rien à installer, rien à payer, rien à comprendre du droit
+    avant de commencer.</strong>
+    <span class="sourdine">C'est le critère qui décide de l'adoption par une
+    entreprise de cinq personnes.</span>
+  </div>
+  <div class="slide-pied"><span>Usabilité</span><span>12</span></div>
+</section>
+
+<!-- ================= 13. LA SUITE ================= -->
+<section class="slide">
+  <div class="eyebrow">LA SUITE — CE QUE NOUS DEMANDONS</div>
+  <h2>Un tribunal pilote, trois mois.</h2>
+  <div class="deux" style="align-items:start">
+    <div>
+      <h3 style="margin-bottom:14px">Ce qui est prêt maintenant</h3>
+      <ul>
+        <li>Le parcours complet, de la facture au dossier reçu par le greffe.</li>
+        <li>Le poste greffier, protégé par mot de passe côté serveur.</li>
+        <li>Une <strong>interface de programmation publique</strong>, documentée&nbsp;:
+          une institution peut s'y brancher sans passer par notre écran.</li>
+      </ul>
+      <h3 style="margin:24px 0 14px">Les trois mois suivants</h3>
+      <ul>
+        <li><strong>Mesurer pour de vrai</strong>&nbsp;: chronométrer dix dossiers
+          papier contre dix dossiers Mizan, et publier l'écart.</li>
+        <li><strong>Signature électronique</strong> et raccordement au registre
+          national des entreprises pour l'identité du débiteur.</li>
+        <li><strong>Interface en arabe intégral</strong> — le corpus l'est déjà.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="carte" style="margin-bottom:18px">
+        <div class="carte-num">POUR LE SECTEUR PUBLIC</div>
+        <h3>Ce que nous demandons</h3>
+        <p class="sourdine" style="font-size:17px">Un tribunal de commerce
+        volontaire, une chambre, trois mois. Nous fournissons l'outil et la
+        mesure&nbsp;; l'institution garde ses dossiers et sa décision.
+        <strong>Aucune donnée ne sort de l'infrastructure.</strong></p>
+      </div>
+      <div class="carte">
+        <div class="carte-num">MODÈLE ÉCONOMIQUE</div>
+        <h3>Gratuit pour la MPME</h3>
+        <p class="sourdine" style="font-size:17px">L'artisan ne paie jamais.
+        Les revenus viennent des <strong>professionnels accrédités</strong>
+        — avocats, huissiers, médiateurs — qui reçoivent des dossiers déjà
+        instruits, et de l'abonnement institutionnel.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-pied"><span>La suite</span><span>13</span></div>
+</section>
+
+<!-- ================= 14. CLÔTURE ================= -->
+<section class="slide slide-sombre">
+  <div class="eyebrow">MIZAN <span class="ar">ميزان</span> · CHALLENGE B</div>
+  <div style="margin:auto 0;max-width:980px">
+    <h1 style="font-size:50px;line-height:1.12">
+      Un litige a deux côtés.<br>
+      <span style="color:var(--primaire-clair)">Nous avons construit les deux —
+      et la porte par laquelle le tribunal les reçoit.</span>
+    </h1>
+    <p class="grand" style="margin-top:28px;color:var(--encre-claire)">
+      La créance de 9&nbsp;520 dinars d'Ahmed&nbsp;: <strong>241 jours</strong>
+      calculés sans modèle, <strong>4 clauses</strong> extraites d'un contrat
+      scanné, <strong>un échéancier accepté en ligne</strong>, et un dossier
+      que le greffe ouvre sans ressaisir une ligne.
+    </p>
+  </div>
+  <div class="principe">
+    <strong>L'IA propose. Le droit dispose.</strong><br>
+    <span class="sourdine">Mizan prépare le dossier. Un officier public décide.
+    C'est la seule façon d'entrer dans un tribunal.</span>
+  </div>
+  <div class="slide-pied"><span>Merci</span><span>14</span></div>
+</section>
+
+</body>
+</html>
