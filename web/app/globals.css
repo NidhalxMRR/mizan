@@ -2506,3 +2506,16 @@ h2 {
 	font-weight: 600;
 	cursor: not-allowed;
 }
+
+/*
+ * Le second intertitre de la barre : « RECOUVRER ».
+ *
+ * Les liens qu'il coiffe mènent à l'autre application. Un filet au-dessus
+ * et un peu d'air séparent les deux moitiés du parcours, sans les couper :
+ * c'est le même dossier, servi par deux machines.
+ */
+.nav-label-second {
+	margin-top: 18px;
+	padding-top: 14px;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

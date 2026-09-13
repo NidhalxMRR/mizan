@@ -27,6 +27,24 @@ const entrees = [
   { href: '/espace', libelle: 'Mon espace', cle: 'espace' },
 ] as const;
 
+/*
+ * Les quatre étapes du recouvrement, servies par le second volet.
+ *
+ * Elles portent un chemin relatif, jamais une adresse complète : le nom
+ * d'hôte est ajouté à l'exécution, à partir de celui par lequel la page a
+ * été ouverte.
+ *
+ * Le poste du greffier n'est pas dans cette liste. C'est le bureau d'un
+ * officier public, gardé par un mot de passe côté serveur ; un commerçant
+ * venu réclamer une facture n'a rien à y faire.
+ */
+const recouvrement = [
+  { chemin: 'deposer', libelle: 'Déposer la facture', cle: 'deposer' },
+  { chemin: 'contrat', libelle: 'Lire le contrat', cle: 'contrat' },
+  { chemin: 'amiable', libelle: 'Relancer à l’amiable', cle: 'amiable' },
+  { chemin: 'slide', libelle: 'Le bénéfice', cle: 'benefice' },
+] as const;
+
 const filsAriane: Record<string, string> = {
   '/': 'Principe',
   '/dossier': 'Mon impayé',
@@ -88,13 +106,19 @@ export function Coque({ children }: { children: React.ReactNode }) {
           })}
 
           {/*
-            Le second volet, tenu par Zied, vit dans une application
+            Le recouvrement lui-même, tenu par Zied, vit dans une application
             distincte servie sur son propre port. Les deux moitiés se
-            répondent : ici l'on regarde la facture qu'une société n'a pas
-            payée ; là-bas, le client qui ne règle pas l'entreprise, jusqu'à
-            l'écran où le débiteur lui-même reçoit la réclamation.
+            répondent : ici l'on établit ce que dit le droit ; là-bas, on
+            agit — déposer la facture, lire les clauses du contrat, relancer,
+            proposer un échéancier.
 
-            On y renvoie par un lien ordinaire, et non par une passerelle
+            Un lien unique intitulé « Le recouvrement » ne disait rien de ce
+            qu'on y trouve : le visiteur cliquait sans savoir où il allait, et
+            le produit paraissait s'arrêter à la doctrine. Les quatre étapes
+            sont donc nommées, exactement comme les pages internes — c'est la
+            même barre, le même parcours, servi par deux machines.
+
+            On y renvoie par des liens ordinaires, et non par une passerelle
             interne : chaque application garde ses ports, ses dépendances et
             ses pannes. Si l'une tombe, l'autre n'en sait rien — ce qui, le
             jour d'une démonstration, vaut mieux qu'une élégance commune.
@@ -102,15 +126,22 @@ export function Coque({ children }: { children: React.ReactNode }) {
             L'adresse se déduit de celle par laquelle la page a été ouverte,
             afin qu'un visiteur venu de l'extérieur ne soit pas renvoyé vers
             la machine sur laquelle il se trouve.
+
+            Le poste du greffier n'y figure pas : c'est le bureau d'un
+            officier public, gardé par un mot de passe côté serveur. Le
+            proposer à un commerçant lui offrirait une porte qui ne le
+            concerne pas.
           */}
-          <a
-            className="nav-item nav-item-voisin"
-            href={volet2}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Le recouvrement
-          </a>
+          <p className="nav-label nav-label-second">RECOUVRER</p>
+          {recouvrement.map((e) => (
+            <a
+              key={e.cle}
+              className="nav-item nav-item-voisin"
+              href={volet2 === '#' ? '#' : `${volet2}${e.chemin}`}
+            >
+              {e.libelle}
+            </a>
+          ))}
         </nav>
 
         <div className="security-note">
