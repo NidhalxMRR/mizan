@@ -7,6 +7,25 @@ Dispute Resolution & Pre-Litigation*.
 
 ---
 
+# 🔗 DÉMO EN LIGNE
+
+# http://161.97.134.3:3000
+
+**Le parcours de recouvrement** : http://161.97.134.3:8830
+
+### Comptes de démonstration
+
+| Rôle | Adresse | Mot de passe |
+|---|---|---|
+| Entreprise | `ahmed.demo@menuiserie-sfax.tn` | `Hack4Justice2026!` |
+| Greffier | `greffe.demo@tc-tunis.tn` | `Hack4Justice2026!` |
+
+> Le lien est servi en **http://** et non en https : le navigateur
+> affichera « Non sécurisé ». C'est une démonstration de hackathon, pas un
+> déploiement de production.
+
+---
+
 ## Le principe
 
 > **L'IA propose. Le droit dispose.**
