@@ -36,6 +36,7 @@ from packages.legal import doc_gate, gate, invoice, retrieve
 from packages.legal.legal_engine import DateImpossible, assess
 from packages.models.client import ClientLLM, ModeleIndisponible
 
+from api.documents import routeur as routeur_documents
 from api.schemas import (
     Analyse,
     ArticleTrouve,
@@ -79,6 +80,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Les deux livrables institutionnels du brief §4 : le projet de mise en
+# demeure et le tableau greffier.
+app.include_router(routeur_documents)
 
 # Un seul client, construit au démarrage : `sonder()` interroge le réseau, on
 # ne recrée pas l'objet à chaque requête.
