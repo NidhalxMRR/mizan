@@ -265,6 +265,31 @@ h2 {
 .primary-button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 .secondary-button { background: transparent; color: var(--ink); border: 1px solid var(--line); }
 
+/* Un bouton d'appel à l'action en bas de carte : inline-flex le laissait
+   calé à gauche, avec deux cent soixante pixels de vide à sa droite dans une
+   carte de quatre cent quarante. L'œil lisait un bouton décentré plutôt
+   qu'un bouton compact. Mesuré à 479 px comme à 1280 px.
+
+   On lui donne toute la largeur de la carte : le texte, déjà centré par
+   justify-content, se retrouve alors au milieu de la carte et non au milieu
+   d'un bloc coincé à gauche. Au-delà de 560 px la carte devient large et un
+   bouton pleine largeur paraîtrait démesuré : il reprend sa taille naturelle
+   et c'est la carte qui le centre. */
+.panel > .primary-button,
+.panel > .secondary-button {
+	display: flex;
+	width: 100%;
+}
+
+@media (min-width: 560px) {
+	.panel > .primary-button,
+	.panel > .secondary-button {
+		width: auto;
+		align-self: center;
+	}
+	.panel { display: flex; flex-direction: column; }
+}
+
 /* Sous 860 px la barre latérale passe en bandeau : la démonstration se fait
    aussi sur téléphone. */
 @media (max-width: 860px) {

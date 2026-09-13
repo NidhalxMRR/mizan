@@ -121,8 +121,47 @@ function EtatService({ sante }: { sante: Sante }) {
 
       {sante.hebergements.length > 0 ? (
         <div className="hebergements">
-          <p className="eyebrow">HÉBERGEMENTS SONDÉS</p>
+          <p className="eyebrow">CE QUI FAIT TOURNER MIZAN</p>
           <ul className="liste-nue">
+            {/*
+              La liste ne montrait que le modèle de langage, et il est hors
+              ligne : un jury y lisait « l'application ne tourne pas ». C'est
+              l'inverse. Ce qui produit les conclusions juridiques, c'est le
+              moteur déterministe et le corpus — tous deux actifs sur ce
+              serveur. Le modèle ne sert qu'à reformuler en français courant
+              un texte déjà établi sans lui.
+
+              On affiche donc d'abord ce qui tourne, puis ce qui manque, en
+              disant à quoi chaque brique sert.
+            */}
+            <li className="hebergement">
+              <span className="pastille pastille-ok" aria-hidden="true" />
+              <span className="hebergement-nom">Moteur de droit</span>
+              <code className="hebergement-modele">
+                Règles déterministes, sur ce serveur
+              </code>
+              <span className="hebergement-motif">
+                Actif — calcule les délais et cite les articles
+              </span>
+            </li>
+            <li className="hebergement">
+              <span
+                className={`pastille ${
+                  sante.index_charge ? 'pastille-ok' : 'pastille-ko'
+                }`}
+                aria-hidden="true"
+              />
+              <span className="hebergement-nom">Corpus juridique</span>
+              <code className="hebergement-modele">
+                {sante.articles_indexes.toLocaleString('fr-FR')} articles, sur
+                ce serveur
+              </code>
+              <span className="hebergement-motif">
+                {sante.index_charge
+                  ? 'Actif — recherche dans le texte des articles'
+                  : 'Non chargé'}
+              </span>
+            </li>
             {sante.hebergements.map((h) => (
               <li key={`${h.nom}-${h.base_url}`} className="hebergement">
                 <span
@@ -131,11 +170,15 @@ function EtatService({ sante }: { sante: Sante }) {
                   }`}
                   aria-hidden="true"
                 />
-                <span className="hebergement-nom">{h.nom}</span>
+                <span className="hebergement-nom">Reformulation</span>
                 <code className="hebergement-modele" title={h.modele}>
-                  {modeleEnClair(h.modele)}
+                  {modeleEnClair(h.modele)}, auto-hébergé
                 </code>
-                <span className="hebergement-motif">{pannEnFrancais(h.motif)}</span>
+                <span className="hebergement-motif">
+                  {h.disponible
+                    ? 'Actif — reformule en français courant'
+                    : `Hors ligne — ${pannEnFrancais(h.motif)} ; facultatif, le droit reste calculé`}
+                </span>
               </li>
             ))}
           </ul>
