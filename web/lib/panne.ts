@@ -52,6 +52,11 @@ export function moteurEnFrancais(valeur: string): string {
  */
 export function modeleEnClair(tag: string): string {
   if (!tag) return tag;
+  // L'API de Modal sert le modèle sous le nom technique « qwen », tout court :
+  // l'envoyer autrement fait échouer l'appel avec « The model does not exist ».
+  // Le nom exact ne peut donc pas être corrigé côté serveur. Il l'est ici, à
+  // l'affichage : interrogé sur son identité, ce modèle répond qu'il est Qwen3.
+  if (/^qwen$/i.test(tag.trim())) return 'Qwen3';
   const m = /^([a-z]+)([\d.]+)?:?(\d+b)?/i.exec(tag);
   if (!m) return tag;
   const famille = m[1].charAt(0).toUpperCase() + m[1].slice(1);

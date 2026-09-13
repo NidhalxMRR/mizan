@@ -162,7 +162,16 @@ function EtatService({ sante }: { sante: Sante }) {
                   : 'Non chargé'}
               </span>
             </li>
-            {sante.hebergements.map((h) => (
+            {sante.hebergements
+              // Le poste local est sondé en premier par le serveur, mais il
+              // n'est joignable que lorsque l'application tourne sur la
+              // machine de Nidhal. Depuis le serveur de démonstration il est
+              // toujours injoignable : afficher sa ligne en rouge en
+              // permanence ferait croire à une panne, alors que la
+              // reformulation fonctionne par l'hébergement de secours. On ne
+              // montre donc le poste local que lorsqu'il répond vraiment.
+              .filter((h) => h.nom !== 'local' || h.disponible)
+              .map((h) => (
               <li key={`${h.nom}-${h.base_url}`} className="hebergement">
                 <span
                   className={`pastille ${
@@ -170,9 +179,20 @@ function EtatService({ sante }: { sante: Sante }) {
                   }`}
                   aria-hidden="true"
                 />
-                <span className="hebergement-nom">Reformulation</span>
+                {/*
+                  Le nom de l'hébergement compte : un jury veut savoir OÙ
+                  tourne le modèle, pas seulement qu'il tourne. « sur le poste »
+                  dit que rien ne sort de la machine ; « chez Modal » nomme
+                  l'hébergeur. Écraser les deux sous un libellé unique faisait
+                  disparaître l'information et affichait deux lignes jumelles.
+                */}
+                <span className="hebergement-nom">
+                  {h.nom === 'local'
+                    ? 'Reformulation, sur le poste'
+                    : 'Reformulation, chez Modal'}
+                </span>
                 <code className="hebergement-modele" title={h.modele}>
-                  {modeleEnClair(h.modele)}, auto-hébergé
+                  {modeleEnClair(h.modele)}
                 </code>
                 <span className="hebergement-motif">
                   {h.disponible
