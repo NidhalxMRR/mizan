@@ -1692,3 +1692,624 @@ h2 {
 	.depot-actions .secondary-button { width: 100%; }
 	.depot-champ::file-selector-button { margin-inline-end: 9px; padding: 8px 11px; }
 }
+
+/* ===========================================================================
+   LA BULLE DE L'AGENT — ajoutée en fin de feuille, aucune règle existante
+   n'est modifiée.
+
+   Contraintes tenues ici :
+     - aucune police distante, aucune bibliothèque, aucun CDN : la salle de
+       démonstration n'a peut-être pas de wifi ;
+     - toutes les couleurs sortent des jetons déclarés en tête de fichier,
+       donc le thème sombre suit sans une ligne de plus ;
+     - à 479 px la bulle occupe l'écran sans jamais élargir le document : la
+       largeur est bornée par `100dvw` moins les marges, et le fil est le seul
+       élément qui défile.
+   =========================================================================== */
+
+/* --- Le déclencheur, en bas à droite ------------------------------------- */
+
+.agent-declencheur {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	z-index: 60;
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	max-width: calc(100vw - 40px);
+	padding: 13px 18px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--navy);
+	color: #eaf5f0;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .01em;
+	cursor: pointer;
+	box-shadow: 0 14px 34px rgba(32, 60, 72, .28);
+	transition: transform .2s, box-shadow .2s, background .2s;
+}
+.agent-declencheur:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 18px 40px rgba(32, 60, 72, .34);
+}
+.agent-declencheur-marque {
+	display: grid;
+	place-items: center;
+	width: 21px;
+	height: 21px;
+	border: 1px solid #7cc8b9;
+	border-radius: 7px 7px 7px 2px;
+	color: #9ddcce;
+	font-size: 11px;
+	flex: 0 0 auto;
+}
+.agent-declencheur-texte { white-space: nowrap; }
+
+/* Ouverte, la pastille reste accessible mais s'efface devant le panneau. */
+.agent-declencheur-ouverte { background: var(--teal); }
+
+/* --- Le panneau ---------------------------------------------------------- */
+
+.agent-panneau {
+	position: fixed;
+	right: 20px;
+	bottom: 78px;
+	z-index: 61;
+	width: 400px;
+	max-width: calc(100vw - 40px);
+	/* `dvh` plutôt que `vh` : sur téléphone, la barre d'adresse mange une
+	   partie de `vh` et le champ de saisie passait sous l'écran. */
+	max-height: min(640px, calc(100dvh - 112px));
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	box-shadow: 0 26px 64px rgba(35, 61, 56, .22);
+	animation: agent-apparait .22s ease-out;
+}
+
+@keyframes agent-apparait {
+	from { opacity: 0; transform: translateY(10px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+.agent-entete {
+	display: flex;
+	align-items: start;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 14px 14px 12px 16px;
+	background: var(--navy);
+	color: #eaf5f0;
+	flex: 0 0 auto;
+}
+.agent-entete-nom {
+	margin: 0;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 16px;
+	font-weight: 400;
+	letter-spacing: -.02em;
+}
+.agent-entete-nom span { color: #7cc8b9; margin-inline-start: 6px; }
+.agent-entete-principe {
+	margin: 3px 0 0;
+	color: #9db4ae;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+}
+.agent-fermer {
+	flex: 0 0 auto;
+	width: 28px;
+	height: 28px;
+	display: grid;
+	place-items: center;
+	border: 0;
+	border-radius: 7px;
+	background: rgba(255, 255, 255, .1);
+	color: #dbeae4;
+	font-size: 17px;
+	line-height: 1;
+	cursor: pointer;
+}
+.agent-fermer:hover { background: rgba(255, 255, 255, .2); }
+
+/* --- L'identité : visible en permanence, c'est la preuve du cloisonnement - */
+
+.agent-identite {
+	flex: 0 0 auto;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 8px;
+	margin: 0;
+	padding: 9px 16px;
+	background: color-mix(in oklab, var(--mint) 50%, var(--panel));
+	border-bottom: 1px solid var(--line);
+	font-size: 11px;
+	line-height: 1.5;
+}
+.agent-identite-mention {
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+.agent-identite-organisation {
+	color: var(--ink);
+	font-weight: 700;
+	font-size: 12px;
+	overflow-wrap: anywhere;
+}
+.agent-identite-role {
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--verified) 16%, transparent);
+	color: var(--verified);
+	font-size: 10px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+/* --- Le fil -------------------------------------------------------------- */
+
+.agent-fil {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 14px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	background: var(--paper);
+}
+
+.agent-accueil, .agent-invite {
+	border: 1px dashed var(--line);
+	border-radius: 10px;
+	padding: 14px;
+	background: var(--panel);
+}
+.agent-accueil-titre, .agent-invite-titre {
+	margin: 0 0 6px;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 14px;
+	color: var(--ink);
+}
+.agent-accueil-texte, .agent-invite-texte {
+	margin: 0;
+	color: var(--muted);
+	font-size: 11.5px;
+	line-height: 1.65;
+}
+.agent-invite-lien {
+	display: inline-flex;
+	margin-top: 11px;
+	padding: 9px 14px;
+	border-radius: 6px;
+	background: var(--teal);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	text-decoration: none;
+}
+.agent-invite-lien:hover { filter: brightness(1.06); }
+
+/* Ce que l'utilisateur a écrit : aligné à droite, sobre. */
+.agent-dit-vous {
+	align-self: flex-end;
+	max-width: 88%;
+	margin: 0;
+	padding: 10px 13px;
+	border-radius: 12px 12px 3px 12px;
+	background: var(--navy);
+	color: #eef6f1;
+	font-size: 12px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+/* Ce que Mizan répond. */
+.agent-dit-mizan {
+	align-self: stretch;
+	max-width: 100%;
+	padding: 13px 14px;
+	border: 1px solid var(--line);
+	border-inline-start: 3px solid var(--verified);
+	border-radius: 3px 12px 12px 3px;
+	background: var(--panel);
+	min-width: 0;
+}
+/* Un refus n'est pas une erreur : filet doré, pas rouge d'avarie. */
+.agent-dit-refus {
+	border-inline-start-color: var(--declared);
+	background: color-mix(in oklab, var(--declared) 5%, var(--panel));
+}
+/* Une abstention n'est pas une panne : gris assumé, comme `--abstain`. */
+.agent-dit-abstention {
+	border-inline-start-color: var(--abstain);
+	background: color-mix(in oklab, var(--abstain) 6%, var(--panel));
+}
+
+.agent-bandeau {
+	display: flex;
+	align-items: start;
+	gap: 9px;
+	margin: 0 0 10px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	font-size: 11px;
+	line-height: 1.6;
+}
+.agent-bandeau strong { display: block; margin-bottom: 2px; font-weight: 700; }
+.agent-bandeau-sceau {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	border-radius: 6px;
+	font-size: 11px;
+}
+.agent-bandeau-refus {
+	background: color-mix(in oklab, var(--declared) 13%, transparent);
+	color: color-mix(in oklab, var(--declared) 78%, var(--ink));
+}
+.agent-bandeau-refus .agent-bandeau-sceau {
+	background: color-mix(in oklab, var(--declared) 24%, transparent);
+}
+.agent-bandeau-abstention {
+	background: color-mix(in oklab, var(--abstain) 14%, transparent);
+	color: color-mix(in oklab, var(--abstain) 72%, var(--ink));
+}
+.agent-bandeau-abstention .agent-bandeau-sceau {
+	background: color-mix(in oklab, var(--abstain) 24%, transparent);
+}
+
+.agent-texte {
+	margin: 0;
+	color: var(--ink);
+	font-size: 12.5px;
+	line-height: 1.7;
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+}
+
+.agent-degrade {
+	margin: 10px 0 0;
+	padding: 9px 11px;
+	border-radius: 7px;
+	background: color-mix(in oklab, var(--declared) 11%, transparent);
+	color: color-mix(in oklab, var(--declared) 76%, var(--ink));
+	font-size: 10.5px;
+	line-height: 1.6;
+}
+.agent-degrade strong { font-weight: 700; }
+
+/* --- Les articles cités -------------------------------------------------- */
+
+.agent-articles { margin-top: 12px; }
+.agent-articles-titre {
+	margin: 0 0 7px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+.agent-article {
+	background: color-mix(in oklab, var(--mint) 40%, transparent);
+	border-inline-start: 3px solid var(--verified);
+	border-radius: 0 8px 8px 0;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	min-width: 0;
+}
+.agent-article-ref {
+	display: block;
+	color: var(--verified);
+	font-size: 9.5px;
+	font-weight: 800;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+	margin-bottom: 6px;
+	overflow-wrap: anywhere;
+}
+/* L'arabe hérite de `.legal-ar` : direction, isolation bidi, interligne. On
+   ne réduit ici que la taille, pour tenir dans une bulle de 400 px. */
+.agent-article-ar {
+	margin: 0;
+	font-size: 13.5px;
+	line-height: 1.95;
+	overflow-wrap: anywhere;
+}
+.agent-article-fr {
+	margin: 6px 0 0;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+}
+.agent-articles-source {
+	margin: 0;
+	color: var(--abstain);
+	font-size: 10px;
+	font-style: italic;
+}
+
+.agent-avertissements {
+	margin: 11px 0 0;
+	padding-inline-start: 17px;
+	color: color-mix(in oklab, var(--declared) 76%, var(--ink));
+	font-size: 10.5px;
+	line-height: 1.65;
+}
+.agent-avertissements li { margin-bottom: 4px; }
+
+.agent-plume {
+	margin: 11px 0 0;
+	padding-top: 9px;
+	border-top: 1px solid var(--line);
+	color: var(--abstain);
+	font-size: 9.5px;
+	line-height: 1.55;
+	font-style: italic;
+}
+
+/* --- L'avarie : réservée aux vraies pannes, jamais à un refus de droit ---- */
+
+.agent-avarie {
+	border: 1px solid color-mix(in oklab, var(--danger) 35%, var(--line));
+	border-radius: 10px;
+	padding: 12px 13px;
+	background: color-mix(in oklab, var(--danger) 7%, var(--panel));
+}
+.agent-avarie-titre {
+	margin: 0 0 5px;
+	color: var(--danger);
+	font-size: 12px;
+	font-weight: 700;
+}
+.agent-avarie-texte {
+	margin: 0;
+	color: var(--ink);
+	font-size: 11px;
+	line-height: 1.65;
+}
+
+/* --- L'attente ----------------------------------------------------------- */
+
+.agent-attente {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 10px;
+	padding: 12px 13px;
+	border: 1px solid var(--line);
+	border-radius: 3px 12px 12px 3px;
+	border-inline-start: 3px solid var(--teal);
+	background: var(--panel);
+}
+.agent-attente-points {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex: 0 0 auto;
+}
+.agent-attente-points i {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--teal);
+	animation: agent-pouls 1.25s ease-in-out infinite;
+}
+.agent-attente-points i:nth-child(2) { animation-delay: .18s; }
+.agent-attente-points i:nth-child(3) { animation-delay: .36s; }
+
+@keyframes agent-pouls {
+	0%, 80%, 100% { opacity: .25; transform: translateY(0); }
+	40%           { opacity: 1;   transform: translateY(-3px); }
+}
+
+.agent-attente-texte {
+	color: var(--ink);
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 0;
+}
+.agent-attente-note {
+	flex: 1 0 100%;
+	color: var(--muted);
+	font-size: 10px;
+	line-height: 1.55;
+}
+
+/* Le mouvement est une information, pas une décoration : quand le système
+   demande moins d'animation, les points cessent de sauter mais la phrase
+   continue de changer — l'information, elle, est conservée. */
+@media (prefers-reduced-motion: reduce) {
+	.agent-attente-points i { animation: none; opacity: .7; }
+	.agent-panneau { animation: none; }
+	.agent-declencheur { transition: none; }
+}
+
+/* --- Les suggestions ----------------------------------------------------- */
+
+.agent-suggestions {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 11px 16px 0;
+	background: var(--panel);
+	border-top: 1px solid var(--line);
+}
+.agent-suggestion {
+	width: 100%;
+	text-align: left;
+	padding: 9px 12px;
+	border: 1px solid var(--line);
+	border-radius: 7px;
+	background: var(--paper);
+	color: var(--ink);
+	font-size: 11px;
+	line-height: 1.45;
+	cursor: pointer;
+	transition: border-color .18s, background .18s;
+}
+.agent-suggestion:hover {
+	border-color: var(--teal);
+	background: color-mix(in oklab, var(--mint) 40%, var(--panel));
+}
+
+/* --- La saisie ----------------------------------------------------------- */
+
+.agent-saisie {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	padding: 11px 16px 13px;
+	background: var(--panel);
+	border-top: 1px solid var(--line);
+}
+/* L'étiquette existe pour les lecteurs d'écran ; l'espace est trop compté
+   pour l'afficher, et le champ porte déjà un exemple. */
+.agent-champ-etiquette {
+	position: absolute;
+	width: 1px; height: 1px;
+	padding: 0; margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+.agent-champ {
+	flex: 1 1 auto;
+	min-width: 0;
+	resize: none;
+	max-height: 96px;
+	padding: 10px 12px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: inherit;
+	font-size: 12px;
+	line-height: 1.5;
+}
+.agent-champ:focus {
+	outline: none;
+	border-color: var(--teal);
+	box-shadow: 0 0 0 3px color-mix(in oklab, var(--teal) 18%, transparent);
+}
+.agent-champ:disabled { opacity: .6; }
+.agent-champ::placeholder { color: var(--abstain); }
+
+.agent-envoyer {
+	flex: 0 0 auto;
+	padding: 11px 15px;
+	border: 0;
+	border-radius: 8px;
+	background: var(--teal);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.agent-envoyer:disabled { opacity: .45; cursor: not-allowed; }
+
+/* --- Téléphone ----------------------------------------------------------- */
+
+/* Sous 560 px le panneau prend la largeur utile et monte jusqu'en haut : une
+   bulle de 400 px sur un écran de 479 laisserait des gouttières inutiles, et
+   le fil devenait si court qu'une réponse avec articles ne tenait plus.
+   Mesuré à 479 px. */
+@media (max-width: 560px) {
+	.agent-declencheur {
+		right: 12px;
+		bottom: 12px;
+		padding: 11px 15px;
+		max-width: calc(100vw - 24px);
+	}
+	.agent-panneau {
+		right: 10px;
+		left: 10px;
+		bottom: 68px;
+		width: auto;
+		max-width: none;
+		max-height: calc(100dvh - 92px);
+	}
+	.agent-fil { padding: 12px; gap: 10px; }
+	.agent-identite { padding: 8px 12px; }
+	.agent-suggestions { padding: 10px 12px 0; }
+	.agent-saisie { padding: 10px 12px 12px; }
+	.agent-dit-vous { max-width: 92%; }
+}
+
+/* Écran très court (téléphone couché) : le fil doit garder de quoi lire. */
+@media (max-height: 520px) {
+	.agent-panneau { max-height: calc(100dvh - 76px); bottom: 62px; }
+	.agent-suggestions { display: none; }
+}
+
+/* --- Corrections issues de la relecture des captures ---------------------- */
+
+/* Vu à 479 px sur /espace : le dernier bouton de la page (« Changer de
+   compte ») passait sous la pastille flottante. Mesuré : rectangle de la
+   pastille x 279→467 y 805→848, rectangle du bouton x 20→411 y 786→819 —
+   ils se croisaient sur trente-deux pixels de haut.
+
+   Plutôt que de déplacer la pastille, qui doit rester là où l'œil la
+   cherche, on réserve sa hauteur au bas de la zone de contenu. Aucun bouton
+   de l'application ne peut plus se retrouver dessous, sur aucune page, y
+   compris celles qui seront écrites après.
+
+   Le sélecteur ne touche aucune règle déclarée plus haut : il n'ajoute
+   qu'une marge basse à `.page-content`, dont le `padding` d'origine reste
+   celui défini dans la couche applicative. */
+.page-content { padding-bottom: 110px; }
+
+@media (max-width: 560px) {
+	.page-content { padding-bottom: 92px; }
+}
+
+/* Le contraste des mentions de provenance.
+ *
+ * Relu au ratio, pas à l'œil. `--abstain` (#7a8b94) sur `--panel` donne
+ * 3,50:1, et `--muted` 4,10:1 — tous deux sous le seuil de 4,5:1 exigé pour
+ * du petit texte. Or ces lignes-là sont précisément celles qui disent QUI a
+ * rédigé la phrase et d'où viennent les articles : c'est l'argument du
+ * projet, il ne peut pas être la ligne la moins lisible de l'écran.
+ *
+ * On assombrit en mêlant `--abstain` à `--ink` plutôt qu'en écrivant une
+ * couleur en dur : la même déclaration donne 6,01:1 en thème clair et 8,39:1
+ * en thème sombre, sans une règle de plus. L'italique et la petite taille
+ * sont conservés — la mention reste discrète, elle devient lisible.
+ */
+.agent-plume,
+.agent-articles-source {
+	color: color-mix(in oklab, var(--abstain) 60%, var(--ink));
+}
+/* Relevée pour la même raison : 4,10:1 à 9 px, c'est l'étiquette de
+   l'organisation, et l'organisation est la preuve du cloisonnement. */
+.agent-identite-mention,
+.agent-articles-titre {
+	color: color-mix(in oklab, var(--muted) 62%, var(--ink));
+}
+
+/* La baseline de l'en-tête sombre : #9db4ae sur le navy #203c48 donne 4,32:1,
+   sous le seuil, et elle est en capitales espacées de 9 px — le pire cas.
+   On la relève sans la rendre bavarde. */
+.agent-entete-principe { color: #bcd2cb; }
+
+/* Vu sur la capture à 479 px : quand le champ grandit à deux lignes, il
+   remonte et frôle la dernière suggestion. On fixe l'écart plutôt que de le
+   laisser dépendre de la hauteur du champ. */
+.agent-suggestions { padding-bottom: 3px; }
