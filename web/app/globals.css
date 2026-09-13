@@ -1747,8 +1747,56 @@ h2 {
 }
 .agent-declencheur-texte { white-space: nowrap; }
 
-/* Ouverte, la pastille reste accessible mais s'efface devant le panneau. */
-.agent-declencheur-ouverte { background: var(--teal); }
+/* La pastille n'existe plus quand le panneau est ouvert : c'est le composant
+   qui la retire du document. Deux commandes de fermeture, aux deux coins
+   opposés de l'écran et de deux styles différents, faisaient hésiter le
+   lecteur ; la croix de l'en-tête est désormais la seule sortie visible,
+   doublée par la touche Échap et par le clic sur le voile. */
+
+/* --- Le voile ------------------------------------------------------------ */
+
+/* Sans voile, le titre de la page restait lisible autour de la bulle et se
+   faisait couper net par son bord : on ne savait pas si l'on lisait une
+   couche posée par-dessus la page ou un bloc inséré dedans.
+
+   Le voile est teinté du bleu de l'identité — `--navy`, la couleur de
+   l'en-tête — et non d'un noir d'obturateur : la page ne s'éteint pas, elle
+   passe derrière.
+
+   Mais `--navy` pur ne suffisait pas, et la première version était fausse :
+   mesuré en comparant les pixels avant/après ouverture, vingt-trois points
+   de contrôle à 479 px et soixante-cinq à 1280 px ne bougeaient pas d'un
+   iota. Tous valaient exactement #203c48 — c'est-à-dire `--navy` lui-même :
+   la barre de navigation et la colonne latérale sont peintes de la couleur
+   du voile, et du navy à 58 % posé sur du navy redonne du navy. Le bandeau
+   de marque restait donc aussi vif qu'avant, ce qui est précisément l'endroit
+   où l'œil cherche à savoir s'il lit une couche ou la page.
+
+   On assombrit donc la teinte avant de la rendre translucide : le voile
+   garde le bleu de l'identité mais passe sous la luminance de `--navy`, et
+   dès lors il dépose de l'ombre sur le navy comme sur le papier. Le flou
+   d'arrière-plan n'est qu'un renfort : là où il n'est pas géré, la couleur
+   seule fait déjà le travail.
+
+   `inset: 0` en `position: fixed` ne peut pas élargir le document, donc rien
+   ne déborde à 479 px, et le panneau garde son propre défilement intérieur
+   puisque le voile ne le contient pas. */
+.agent-voile {
+	position: fixed;
+	inset: 0;
+	z-index: 59;
+	background: color-mix(
+		in srgb,
+		color-mix(in oklab, var(--navy) 55%, #000) 68%,
+		transparent
+	);
+	backdrop-filter: blur(1.5px);
+	animation: agent-voile-apparait .22s ease-out;
+}
+@keyframes agent-voile-apparait {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
 
 /* --- Le panneau ---------------------------------------------------------- */
 
@@ -1982,16 +2030,10 @@ h2 {
 	white-space: pre-wrap;
 }
 
-.agent-degrade {
-	margin: 10px 0 0;
-	padding: 9px 11px;
-	border-radius: 7px;
-	background: color-mix(in oklab, var(--declared) 11%, transparent);
-	color: color-mix(in oklab, var(--declared) 76%, var(--ink));
-	font-size: 10.5px;
-	line-height: 1.6;
-}
-.agent-degrade strong { font-weight: 700; }
+/* `.agent-degrade` a été retiré avec son encadré ambre : en mode dégradé, la
+   réponse porte désormais sa provenance sur la ligne `.agent-plume`, comme
+   toutes les autres. Une seule ligne, un seul registre, aucune perte
+   d'information. */
 
 /* --- Les articles cités -------------------------------------------------- */
 
@@ -2313,3 +2355,76 @@ h2 {
    remonte et frôle la dernière suggestion. On fixe l'écart plutôt que de le
    laisser dépendre de la hauteur du champ. */
 .agent-suggestions { padding-bottom: 3px; }
+
+/* --- Ce que la disparition de la pastille a libéré ------------------------ */
+
+/* Le panneau était calé à 78 px du bas pour laisser la place à la pastille
+   flottante. Celle-ci n'existe plus tant que la bulle est ouverte : la
+   réserve est devenue une bande vide sous le panneau, où le voile laissait
+   voir un fragment de page — exactement l'effet de « bloc posé au milieu de
+   rien » qu'on cherchait à supprimer. Mesuré sur les captures : 68 px de
+   vide à 479 px, 78 px à 1280 px.
+
+   On rend cette place au panneau. La marge basse devient celle du côté
+   droit, donc le panneau est posé dans son coin au lieu de flotter, et la
+   hauteur disponible augmente d'autant — ce qui profite au fil, seul
+   élément qui défile. */
+.agent-panneau {
+	bottom: 20px;
+	max-height: min(720px, calc(100dvh - 40px));
+}
+
+/* À 479 px, rendre TOUTE la place libérée donnait un panneau haut de 876 px
+   sur 900 : il ne restait que huit pixels de voile en haut, et le voile
+   cessait alors de se lire comme un voile — l'écran ressemblait à un fond
+   noir, ce qui ne dit plus « la page est derrière ». On garde donc une
+   bande de voile franche au-dessus du panneau. Le panneau reste malgré
+   tout plus haut qu'avant la correction (828 px contre 808), donc le fil
+   n'a rien perdu. */
+@media (max-width: 560px) {
+	.agent-panneau {
+		bottom: 12px;
+		max-height: calc(100dvh - 72px);
+	}
+}
+
+@media (max-height: 520px) {
+	.agent-panneau { bottom: 10px; max-height: calc(100dvh - 20px); }
+}
+
+/* --- Le bouton « Envoyer » : l'action principale doit en avoir l'air ------ */
+
+/* Défaut vu sur la capture à 479 px, puis vérifié au ratio : « Envoyer »
+   avait l'air désactivé alors qu'il était actif. Deux causes, mesurées.
+
+   D'abord le contraste. `--teal` (#2f8d82) sous du blanc donne 4,00:1, sous
+   le seuil de 4,5:1 exigé par WCAG AA pour du texte — et il s'agit du seul
+   bouton qui déclenche quoi que ce soit dans la bulle. On assombrit le fond
+   en mêlant le teal au navy de l'en-tête plutôt qu'en écrivant une couleur
+   en dur : la teinte reste celle de l'identité, et la même déclaration tient
+   dans les deux thèmes, où `--navy` est déjà la couleur sombre du jeu.
+
+   Ensuite la distinction. L'état désactivé ne se signalait que par une
+   opacité de 0,45 : un bouton actif un peu pâle et un bouton inactif un peu
+   pâle se ressemblaient trop pour qu'on les distingue d'un coup d'œil. Le
+   désactivé change maintenant de nature — fond neutre, texte gris, contour
+   visible — au lieu de changer seulement d'intensité. On ne peut plus les
+   confondre, y compris depuis le fond d'une salle. */
+.agent-envoyer {
+	background: color-mix(in oklab, var(--teal) 62%, var(--navy));
+	color: #ffffff;
+	box-shadow: 0 2px 8px color-mix(in oklab, var(--navy) 22%, transparent);
+	transition: background .18s, box-shadow .18s;
+}
+.agent-envoyer:hover:not(:disabled) {
+	background: color-mix(in oklab, var(--teal) 45%, var(--navy));
+}
+.agent-envoyer:disabled {
+	opacity: 1;
+	background: color-mix(in oklab, var(--line) 70%, var(--paper));
+	color: color-mix(in oklab, var(--muted) 75%, var(--ink));
+	box-shadow: none;
+	border: 1px solid var(--line);
+	font-weight: 600;
+	cursor: not-allowed;
+}

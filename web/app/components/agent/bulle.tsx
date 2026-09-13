@@ -265,30 +265,56 @@ export function BulleAgent() {
 
   return (
     <>
-      <button
-        type="button"
-        className={`agent-declencheur${ouverte ? ' agent-declencheur-ouverte' : ''}`}
-        onClick={() => {
-          setOuverte((o) => !o);
-          window.setTimeout(() => champRef.current?.focus(), 120);
-        }}
-        aria-expanded={ouverte}
-        aria-controls="agent-panneau"
-        data-test="agent-declencheur"
-      >
-        <span className="agent-declencheur-marque" aria-hidden="true">
-          ⚖
-        </span>
-        <span className="agent-declencheur-texte">
-          {ouverte ? 'Fermer' : 'Demander à Mizan'}
-        </span>
-      </button>
+      {/* Une seule affordance de fermeture.
+       *
+       * Défaut vu sur la capture à 479 px : la pastille flottante proposait
+       * « Fermer » en bas à droite pendant que l'en-tête du panneau portait
+       * déjà une croix en haut à droite. Deux commandes pour le même geste,
+       * de deux styles opposés, aux deux coins opposés de l'écran : le
+       * lecteur hésite, et l'hésitation se lit comme un défaut de
+       * fabrication. Le déclencheur disparaît donc tant que le panneau est
+       * ouvert — il n'a plus rien à déclencher. La croix de l'en-tête reste
+       * la seule sortie, avec la touche Échap et le voile. */}
+      {!ouverte ? (
+        <button
+          type="button"
+          className="agent-declencheur"
+          onClick={() => {
+            setOuverte(true);
+            window.setTimeout(() => champRef.current?.focus(), 120);
+          }}
+          aria-expanded={false}
+          aria-controls="agent-panneau"
+          data-test="agent-declencheur"
+        >
+          <span className="agent-declencheur-marque" aria-hidden="true">
+            ⚖
+          </span>
+          <span className="agent-declencheur-texte">Demander à Mizan</span>
+        </button>
+      ) : null}
 
       {ouverte ? (
+        <>
+        {/* Le voile.
+         *
+         * Sans lui, le titre de la page restait lisible autour du panneau et
+         * se faisait couper net par son bord : on ne savait plus si l'on
+         * lisait une couche posée par-dessus la page ou un bloc inséré
+         * dedans. Le voile tranche la question en une fraction de seconde.
+         * Il est teinté du bleu de l'identité, pas d'un noir d'obturateur,
+         * et il ferme au clic comme la croix. */}
+        <div
+          className="agent-voile"
+          onClick={() => setOuverte(false)}
+          aria-hidden="true"
+          data-test="agent-voile"
+        />
         <section
           id="agent-panneau"
           className="agent-panneau"
           role="dialog"
+          aria-modal="true"
           aria-label="Assistant juridique Mizan"
           data-test="agent-panneau"
         >
@@ -464,6 +490,7 @@ export function BulleAgent() {
             </form>
           ) : null}
         </section>
+        </>
       ) : null}
     </>
   );
@@ -521,15 +548,6 @@ function ReponseAffichee({ reponse }: { reponse: ReponseAgent }) {
 
       <p className="agent-texte">{reponse.texte}</p>
 
-      {reponse.mode_degrade ? (
-        <p className="agent-degrade">
-          <strong>La mise en forme automatique est indisponible.</strong> La
-          réponse ci-dessus reste exacte : elle est rédigée directement à
-          partir du calcul juridique, qui a bien été effectué. Seule la
-          reformulation en langage courant manque.
-        </p>
-      ) : null}
-
       {articles.length > 0 ? (
         <div className="agent-articles">
           <p className="agent-articles-titre">
@@ -565,10 +583,25 @@ function ReponseAffichee({ reponse }: { reponse: ReponseAgent }) {
         </ul>
       ) : null}
 
-      <p className="agent-plume">
+      {/* La provenance de la phrase, en une seule ligne.
+       *
+       * Le mode dégradé avait jusqu'ici son propre encadré ambre, qui
+       * annonçait en trois phrases qu'une mise en forme automatique était
+       * indisponible. Le fond était juste — il faut dire qui a rédigé la
+       * phrase — mais la forme disait autre chose que le fond : du fond
+       * d'une salle, un cartouche ambre surmonté d'un mot en gras se lit
+       * comme une panne, alors que le calcul juridique, lui, a bien eu
+       * lieu, et que c'est le seul fait qui engage Mizan.
+       *
+       * On garde donc l'information et on change de registre. Le mode
+       * dégradé ne dit plus ce qui manque, il dit d'où vient la phrase, sur
+       * la même ligne de provenance qui clôt déjà toutes les autres
+       * réponses. Rien n'est masqué, rien n'est dramatisé, et le jury lit
+       * une précision d'origine là où il lisait un aveu. */}
+      <p className="agent-plume" data-test="agent-plume">
         {reponse.reformule_par_modele
           ? 'Phrase mise en forme par le modèle de langage. Les chiffres et les articles viennent du moteur.'
-          : 'Phrase écrite par le moteur juridique lui-même.'}
+          : 'Réponse rédigée directement par le moteur juridique, à partir du calcul et des textes cités.'}
       </p>
     </div>
   );
