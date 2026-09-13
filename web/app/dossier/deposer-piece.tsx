@@ -103,17 +103,48 @@ export function DeposerPiece({
         <label htmlFor="piece-fichier" className="depot-label">
           Fichier de la facture
         </label>
+        {/*
+          Le navigateur dessine lui-même le contenu d'un <input type="file"> et
+          le libelle dans la langue du SYSTÈME, pas dans celle de la page : sur
+          un poste anglophone il affiche « Choose File / No file chosen » au
+          milieu d'une interface française. Aucun attribut HTML ne permet de le
+          traduire.
+
+          On garde donc l'input réel — c'est lui qui porte l'accessibilité et
+          la sélection de fichier — mais on le rend invisible, et on affiche à
+          sa place un bouton français qui le déclenche. Le clavier fonctionne
+          toujours : le label est associé à l'input par htmlFor.
+        */}
         <input
           ref={champFichier}
           id="piece-fichier"
           name="piece-fichier"
           type="file"
           accept="application/pdf,.pdf"
-          className="depot-champ"
+          className="depot-champ-natif"
           onChange={choisir}
           disabled={etat.phase === 'lecture'}
           aria-describedby="piece-aide"
         />
+        <div className="depot-commande">
+          <button
+            type="button"
+            className="depot-bouton"
+            onClick={() => champFichier.current?.click()}
+            disabled={etat.phase === 'lecture'}
+          >
+            Choisir un fichier
+          </button>
+          <span className="depot-nom-fichier">
+            {etat.phase === 'lecture'
+              ? etat.nom
+              : etat.phase === 'lue'
+                ? etat.piece.nom_fichier
+                : etat.phase === 'echec'
+                  ? 'Fichier refusé'
+                  : 'Aucun fichier sélectionné'}
+          </span>
+        </div>
         <p id="piece-aide" className="champ-aide">
           Un seul PDF, celui de la facture impayée. Il est lu sur ce poste par
           l&apos;API Mizan ; aucun service extérieur n&apos;y accède.
