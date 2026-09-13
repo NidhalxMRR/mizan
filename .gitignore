@@ -31,3 +31,6 @@ id_ed25519*
 Thumbs.db
 *.log
 .tmp/
+
+# Index BM25 — reconstruit par `python -m packages.legal.retrieve`
+index.pkl
