@@ -89,14 +89,49 @@ def _scratch():
 
 
 def _to_float(raw):
-    s = raw.strip().replace(' ', '')
-    if ',' in s and '.' in s:
-        s = s.replace('.', '').replace(',', '.') if s.rfind(',') > s.rfind('.') \
-            else s.replace(',', '')
-    elif ',' in s:
-        s = s.replace(',', '.') if len(s.split(',')[-1]) <= 3 else s.replace(',', '')
-    elif s.count('.') == 1 and len(s.split('.')[-1]) == 3:
-        s = s.replace('.', '')
+    """Lit un montant écrit sur une facture tunisienne.
+
+    Le dinar vaut mille millimes, et l'usage local écrit cette partie
+    fractionnaire avec trois décimales : 9,520.000 se lit neuf mille cinq
+    cent vingt dinars, et 107.100 se lit cent sept dinars cent millimes.
+
+    C'est l'inverse de la convention où le point sépare les milliers. Prendre
+    l'une pour l'autre multiplie la créance par mille, franchit les seuils du
+    code — cent cinquante dinars pour la sommation par huissier, vingt-cinq
+    mille pour la représentation par avocat — et fait conseiller une
+    procédure sans rapport avec ce que réclame l'entreprise.
+
+    La règle retenue : quand les deux signes sont présents, le dernier des
+    deux marque les décimales. Quand un seul est présent, il marque les
+    décimales s'il n'est suivi que d'un groupe de chiffres et qu'aucun autre
+    groupe de trois ne le précède en position de millier ; la virgule seule
+    suivie d'exactement trois chiffres reste ambiguë et suit alors l'usage
+    tunisien du séparateur de milliers.
+    """
+    s = raw.strip().replace(' ', '').replace('\u00a0', '')
+    if not s:
+        return None
+
+    virgule, point = s.rfind(','), s.rfind('.')
+
+    if virgule >= 0 and point >= 0:
+        # Deux signes : le dernier porte les décimales, l'autre les milliers.
+        if virgule > point:
+            s = s.replace('.', '').replace(',', '.')
+        else:
+            s = s.replace(',', '')
+    elif virgule >= 0:
+        fin = s.split(',')[-1]
+        # Une virgule suivie de trois chiffres est, en Tunisie, un séparateur
+        # de milliers : 47,362 vaut quarante-sept mille trois cent
+        # soixante-deux. Au-delà ou en deçà, elle sépare les décimales.
+        s = s.replace(',', '') if len(fin) == 3 else s.replace(',', '.')
+    elif point >= 0:
+        # Un point unique sépare toujours les décimales : trois chiffres
+        # derrière, ce sont des millimes, et non un groupe de milliers.
+        if s.count('.') > 1:
+            return None
+
     try:
         return float(s)
     except ValueError:

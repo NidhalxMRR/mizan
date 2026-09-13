@@ -19,12 +19,20 @@ const entrees = [
   { href: '/', libelle: 'Principe', cle: 'accueil' },
   { href: '/dossier', libelle: 'Mon impayé', cle: 'dossier' },
   { href: '/corpus', libelle: 'Le corpus', cle: 'corpus' },
+  // L'espace de travail manquait à la navigation : on y arrivait après la
+  // connexion, mais aucun lien n'y ramenait ensuite. Un visiteur qui
+  // revenait à l'accueil perdait le chemin de son propre espace et n'avait
+  // plus que le bouton de retour du navigateur pour le retrouver.
+  { href: '/espace', libelle: 'Mon espace', cle: 'espace' },
 ] as const;
 
 const filsAriane: Record<string, string> = {
   '/': 'Principe',
   '/dossier': 'Mon impayé',
   '/corpus': 'Le corpus',
+  '/espace': 'Mon espace',
+  '/connexion': 'Connexion',
+  '/inscription': 'Créer mon espace',
 };
 
 export function Coque({ children }: { children: React.ReactNode }) {
