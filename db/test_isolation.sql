@@ -13,7 +13,7 @@
 --    ORG B — SARL Concurrent  (autre PME, aucun lien avec A)
 --  Chacune dépose une facture. B ne doit JAMAIS voir celle de A.
 --
---  Convention : toute assertion passe par mizan.assert_that(), qui
+--  Convention : toute assertion passe par pg_temp.assert_that(), qui
 --  lève une exception si la condition est fausse. Avec ON_ERROR_STOP=1,
 --  psql sort avec un code non nul : le test échoue bruyamment.
 -- =====================================================================
@@ -55,8 +55,11 @@ END $$;
 
 -- ---------------------------------------------------------------------
 -- Outil d'assertion
+--  Créé dans pg_temp : le rôle applicatif n'a pas — et ne doit pas avoir —
+--  le droit de créer des objets dans le schéma mizan. Le test tourne donc
+--  avec exactement les privilèges de la production.
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION mizan.assert_that(p_ok boolean, p_libelle text)
+CREATE OR REPLACE FUNCTION pg_temp.assert_that(p_ok boolean, p_libelle text)
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
   IF p_ok IS NOT TRUE THEN
@@ -67,7 +70,7 @@ BEGIN
 END $$;
 
 -- Vérifie qu'une opération est bien REFUSÉE. Si elle réussit, échec.
-CREATE OR REPLACE FUNCTION mizan.assert_refuse(p_sql text, p_libelle text)
+CREATE OR REPLACE FUNCTION pg_temp.assert_refuse(p_sql text, p_libelle text)
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
   BEGIN
@@ -79,6 +82,31 @@ BEGIN
   RAISE EXCEPTION E'\n\n*** ÉCHEC DU TEST ***\n    %\n    L''opération aurait dû être REFUSÉE et a RÉUSSI.\n',
     p_libelle USING ERRCODE = 'raise_exception';
 END $$;
+
+-- Vérifie qu'une écriture reste SANS EFFET. Distinct de assert_refuse :
+-- la RLS ne lève pas d'exception, elle rend la ligne non modifiable, et
+-- l'ordre affecte zéro ligne. Les deux sont des refus ; ils ne se
+-- prouvent pas de la même manière, et confondre les deux masquerait une
+-- fuite (une écriture qui « passe » sur 1 ligne).
+CREATE OR REPLACE FUNCTION pg_temp.assert_aucun_effet(p_sql text, p_libelle text)
+RETURNS void LANGUAGE plpgsql AS $$
+DECLARE n integer;
+BEGIN
+  BEGIN
+    EXECUTE p_sql;
+    GET DIAGNOSTICS n = ROW_COUNT;
+  EXCEPTION WHEN others THEN
+    RAISE NOTICE '  [OK] % (refus explicite : %)', p_libelle, left(SQLERRM, 80);
+    RETURN;
+  END;
+  IF n <> 0 THEN
+    RAISE EXCEPTION E'\n\n*** ÉCHEC DU TEST ***\n    %\n    L''écriture a modifié % ligne(s) alors qu''elle devait rester sans effet.\n',
+      p_libelle, n USING ERRCODE = 'raise_exception';
+  END IF;
+  RAISE NOTICE '  [OK] % (bloqué par la RLS : 0 ligne affectée)', p_libelle;
+END $$;
+
+-- ---------------------------------------------------------------------
 
 \echo ''
 \echo '====================================================================='
@@ -100,14 +128,14 @@ BEGIN
     FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
    WHERE n.nspname = 'mizan' AND c.relkind = 'r'
      AND NOT (c.relrowsecurity AND c.relforcerowsecurity);
-  PERFORM mizan.assert_that(manquantes IS NULL,
+  PERFORM pg_temp.assert_that(manquantes IS NULL,
     'Toutes les tables de mizan portent ENABLE + FORCE ROW LEVEL SECURITY'
     || COALESCE(' — manquantes : ' || manquantes, ''));
 END $$;
 
 DO $$
 BEGIN
-  PERFORM mizan.assert_that(
+  PERFORM pg_temp.assert_that(
     NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='mizan_app' AND rolbypassrls),
     'Le rôle applicatif mizan_app ne possède pas BYPASSRLS');
 END $$;
@@ -130,7 +158,7 @@ SELECT mizan.bootstrap_platform(
   '00000000-0000-0000-0000-00000000ad00'::uuid);
 
 -- L'amorçage est à usage unique : un second appel doit être refusé.
-DO $$ BEGIN PERFORM mizan.assert_refuse(
+DO $$ BEGIN PERFORM pg_temp.assert_refuse(
   $q$SELECT mizan.bootstrap_platform('Bis','bis@x.tn','Bis')$q$,
   'L''amorçage de la plateforme ne peut pas être rejoué'); END $$;
 
@@ -155,12 +183,12 @@ INSERT INTO mizan.app_user (id, org_id, role, email, full_name, pro_licence_no) 
   ('dddddddd-0000-0000-0000-000000000004', '44444444-4444-4444-4444-444444444444', 'huissier',
    'trabelsi@etude.tn', 'Nizar Trabelsi', 'HUI-2019-042-1');
 
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT count(*) FROM mizan.organization) = 5,
   'Le platform_admin voit les 5 organisations (permission view_all)'); END $$;
 
 -- Cohérence rôle ↔ organisation : un huissier dans une PME est refusé.
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.app_user (org_id, role, email, full_name, pro_licence_no)
   VALUES ('11111111-1111-1111-1111-111111111111','huissier','faux@x.tn','Faux Huissier','X-1')
 $q$, 'Un huissier ne peut pas être rattaché à une PME'); END $$;
@@ -209,7 +237,7 @@ VALUES ('b1ece000-bbbb-0000-0000-000000000002',
         repeat('b',64), 's3://mizan/B/facture.pdf',
         'bbbbbbbb-0000-0000-0000-000000000002');
 
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT count(*) FROM mizan.piece) = 1,
   'ORG B ne voit qu''une seule pièce : la sienne'); END $$;
 
@@ -224,24 +252,24 @@ DO $$ BEGIN PERFORM mizan.assert_that(
 SELECT mizan.set_context('bbbbbbbb-0000-0000-0000-000000000002');
 
 -- 3.1 Lecture directe de la pièce de A par son identifiant.
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   NOT EXISTS (SELECT 1 FROM mizan.piece
                WHERE id = 'b1ece000-aaaa-0000-0000-000000000001'),
   '3.1 B ne peut pas lire la pièce de A par son UUID'); END $$;
 
 -- 3.2 Balayage complet de la table : aucune ligne de A ne sort.
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   NOT EXISTS (SELECT 1 FROM mizan.piece
                WHERE org_id = '11111111-1111-1111-1111-111111111111'),
   '3.2 Un SELECT * sur mizan.piece ne renvoie aucune ligne de A'); END $$;
 
 -- 3.3 Le nom du fichier de A n'apparaît nulle part.
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   NOT EXISTS (SELECT 1 FROM mizan.piece WHERE filename LIKE '%secrete_A%'),
   '3.3 Le nom de fichier de A est invisible depuis B'); END $$;
 
 -- 3.4 Le dossier de A est invisible.
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   NOT EXISTS (SELECT 1 FROM mizan.dossier
                WHERE id = 'd0551e40-aaaa-0000-0000-000000000001'),
   '3.4 Le dossier de A est invisible depuis B'); END $$;
@@ -252,7 +280,7 @@ DO $$
 DECLARE n bigint;
 BEGIN
   SELECT count(*) INTO n FROM mizan.piece;
-  PERFORM mizan.assert_that(n = 1,
+  PERFORM pg_temp.assert_that(n = 1,
     '3.5 count(*) global depuis B renvoie 1 et non 2 (pas de fuite par agrégat) — obtenu : ' || n);
 END $$;
 
@@ -262,12 +290,12 @@ DECLARE n bigint;
 BEGIN
   SELECT count(*) INTO n
     FROM mizan.dossier d JOIN mizan.piece p ON p.dossier_id = d.id;
-  PERFORM mizan.assert_that(n = 1,
+  PERFORM pg_temp.assert_that(n = 1,
     '3.6 Une jointure dossier×pièce ne fait pas apparaître les données de A — obtenu : ' || n);
 END $$;
 
 -- 3.7 Écriture croisée : B tente de déposer une pièce DANS le dossier de A.
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.piece (dossier_id, org_id, kind, filename, n_bytes, sha256, storage_uri, uploaded_by)
   VALUES ('d0551e40-aaaa-0000-0000-000000000001','22222222-2222-2222-2222-222222222222',
           'contrat','intrus.pdf',10,repeat('c',64),'s3://x','bbbbbbbb-0000-0000-0000-000000000002')
@@ -279,7 +307,7 @@ DECLARE n integer;
 BEGIN
   DELETE FROM mizan.piece WHERE id = 'b1ece000-aaaa-0000-0000-000000000001';
   GET DIAGNOSTICS n = ROW_COUNT;
-  PERFORM mizan.assert_that(n = 0,
+  PERFORM pg_temp.assert_that(n = 0,
     '3.8 Un DELETE de B sur la pièce de A n''affecte aucune ligne');
 END $$;
 
@@ -289,10 +317,10 @@ END $$;
 DO $$
 BEGIN
   PERFORM set_config('mizan.org_id', '11111111-1111-1111-1111-111111111111', false);
-  PERFORM mizan.assert_that(
+  PERFORM pg_temp.assert_that(
     mizan.current_org() = '22222222-2222-2222-2222-222222222222',
     '3.9 Poser un faux mizan.org_id ne change rien : l''org est relue en base');
-  PERFORM mizan.assert_that(
+  PERFORM pg_temp.assert_that(
     NOT EXISTS (SELECT 1 FROM mizan.piece WHERE org_id = '11111111-1111-1111-1111-111111111111'),
     '3.9bis Même avec un faux GUC, la pièce de A reste invisible');
 END $$;
@@ -303,14 +331,14 @@ DO $$
 DECLARE n bigint;
 BEGIN
   SELECT count(*) INTO n FROM mizan.piece;
-  PERFORM mizan.assert_that(n = 0,
+  PERFORM pg_temp.assert_that(n = 0,
     '3.10 Sans contexte de session, aucune pièce n''est visible (fermé par défaut) — obtenu : ' || n);
 END $$;
 
 -- 3.11 Contre-preuve : A voit bien SA pièce. Un test d'isolation qui
 --      passerait parce que PERSONNE ne voit rien ne prouverait rien.
 SELECT mizan.set_context('aaaaaaaa-0000-0000-0000-000000000001');
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   EXISTS (SELECT 1 FROM mizan.piece
            WHERE id = 'b1ece000-aaaa-0000-0000-000000000001'
              AND filename = 'facture_secrete_A.pdf'),
@@ -324,7 +352,7 @@ DO $$ BEGIN PERFORM mizan.assert_that(
 
 -- Avant partage : le médiateur ne voit rien.
 SELECT mizan.set_context('cccccccc-0000-0000-0000-000000000003');
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT count(*) FROM mizan.piece) = 0,
   '4.1 Avant partage, le médiateur ne voit aucune pièce'); END $$;
 
@@ -342,9 +370,9 @@ DO $$
 DECLARE n bigint;
 BEGIN
   SELECT count(*) INTO n FROM mizan.piece;
-  PERFORM mizan.assert_that(n = 1,
+  PERFORM pg_temp.assert_that(n = 1,
     '4.2 Après partage, le médiateur voit la pièce de A — obtenu : ' || n);
-  PERFORM mizan.assert_that(
+  PERFORM pg_temp.assert_that(
     NOT EXISTS (SELECT 1 FROM mizan.piece WHERE org_id='22222222-2222-2222-2222-222222222222'),
     '4.3 Le partage de A n''ouvre AUCUNE donnée de B (pas de fuite latérale)');
 END $$;
@@ -356,7 +384,7 @@ UPDATE mizan.dossier_access SET revoked_at = now()
    AND org_id = '33333333-3333-3333-3333-333333333333';
 
 SELECT mizan.set_context('cccccccc-0000-0000-0000-000000000003');
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT count(*) FROM mizan.piece) = 0,
   '4.4 Après révocation, le médiateur ne voit plus rien'); END $$;
 
@@ -394,14 +422,14 @@ SELECT 'd0551e40-aaaa-0000-0000-000000000001','11111111-1111-1111-1111-111111111
        'aaaaaaaa-0000-0000-0000-000000000001', 'bailiff_notice'
   FROM mizan.corpus_article c WHERE c.id = 'procciv-art60';
 
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT count(*) FROM mizan.dossier_citation
     WHERE dossier_id='d0551e40-aaaa-0000-0000-000000000001') = 1,
   '5.1 Une citation dont le texte correspond au corpus est acceptée'); END $$;
 
 -- 5.2 Citation au texte altéré (« cent cinquante » changé en « cent ») :
 --     rejetée. C'est exactement le cas d'un texte produit par un modèle.
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.dossier_citation (dossier_id, org_id, corpus_id, code_id, article,
                                       citation_ar, verbatim_ar, verbatim_sha256, attached_by)
   VALUES ('d0551e40-aaaa-0000-0000-000000000001','11111111-1111-1111-1111-111111111111',
@@ -412,17 +440,17 @@ DO $$ BEGIN PERFORM mizan.assert_refuse($q$
 $q$, '5.2 Une citation dont le texte ne correspond pas au corpus est REFUSÉE'); END $$;
 
 -- 5.3 Citation vide : rejetée par la contrainte déclarative.
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.dossier_citation (dossier_id, org_id, corpus_id, code_id, article,
                                       citation_ar, verbatim_ar, verbatim_sha256, attached_by)
   VALUES ('d0551e40-aaaa-0000-0000-000000000001','11111111-1111-1111-1111-111111111111',
           'coc-art403','coc',403,'الفصل 403','   ',
           encode(sha256(convert_to('   ','UTF8')),'hex'),
           'aaaaaaaa-0000-0000-0000-000000000001')
-$q$, '5.3 Une citation au texte vide est REFUSÉE'); END $$;
+$q$, '5.3 Une citation au texte vide est REFUSÉE (aucun texte vide ne peut égaler un article du corpus)'); END $$;
 
 -- 5.4 Article absent du corpus : rejeté (référence inventée).
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.dossier_citation (dossier_id, org_id, corpus_id, code_id, article,
                                       citation_ar, verbatim_ar, verbatim_sha256, attached_by)
   VALUES ('d0551e40-aaaa-0000-0000-000000000001','11111111-1111-1111-1111-111111111111',
@@ -445,14 +473,14 @@ UPDATE mizan.dossier SET state = 'projet_acte_pret'
  WHERE id = 'd0551e40-aaaa-0000-0000-000000000001';
 
 -- 6.1 La PME tente de signifier elle-même : REFUS (CPC art. 5).
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   UPDATE mizan.dossier SET state='signifie'
    WHERE id='d0551e40-aaaa-0000-0000-000000000001'
 $q$, '6.1 Une PME (msme) ne peut PAS faire passer un dossier à « signifié »'); END $$;
 
 -- 6.2 Le médiateur non plus.
 SELECT mizan.set_context('cccccccc-0000-0000-0000-000000000003');
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   UPDATE mizan.dossier SET state='signifie'
    WHERE id='d0551e40-aaaa-0000-0000-000000000001'
 $q$, '6.2 Un professionnel accrédité ne peut PAS signifier'); END $$;
@@ -468,7 +496,7 @@ SELECT mizan.set_context('dddddddd-0000-0000-0000-000000000004');
 UPDATE mizan.dossier SET state = 'signifie'
  WHERE id = 'd0551e40-aaaa-0000-0000-000000000001';
 
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT state = 'signifie'
        AND signified_by = 'dddddddd-0000-0000-0000-000000000004'
        AND signified_at IS NOT NULL
@@ -476,7 +504,7 @@ DO $$ BEGIN PERFORM mizan.assert_that(
   '6.3 L''huissier signifie, et la base horodate l''acte à son nom'); END $$;
 
 -- 6.4 Un acte signifié ne se dé-signifie pas.
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   UPDATE mizan.dossier SET state='brouillon'
    WHERE id='d0551e40-aaaa-0000-0000-000000000001'
 $q$, '6.4 Un dossier signifié ne peut pas revenir en arrière'); END $$;
@@ -513,7 +541,7 @@ VALUES ('9f000000-bbbb-0000-0000-000000000002'::uuid,
 
 -- La PME tente de signer le PV à la place du médiateur : REFUS.
 SELECT mizan.set_context('bbbbbbbb-0000-0000-0000-000000000002');
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_aucun_effet($q$
   UPDATE mizan.settlement_minutes
      SET signed_by='bbbbbbbb-0000-0000-0000-000000000002'
    WHERE id='9f000000-bbbb-0000-0000-000000000002'
@@ -521,11 +549,27 @@ $q$, '6.5 Une PME ne peut PAS signer un PV de conciliation'); END $$;
 
 -- L'huissier non plus : la signature du PV n'est pas son acte.
 SELECT mizan.set_context('dddddddd-0000-0000-0000-000000000004');
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_aucun_effet($q$
   UPDATE mizan.settlement_minutes
      SET signed_by='dddddddd-0000-0000-0000-000000000004'
    WHERE id='9f000000-bbbb-0000-0000-000000000002'
 $q$, '6.6 Un huissier ne peut PAS signer un PV de conciliation'); END $$;
+
+-- Contrôle d'effet : après ces deux tentatives, le PV est toujours vierge.
+SELECT mizan.set_context('cccccccc-0000-0000-0000-000000000003');
+DO $$ BEGIN PERFORM pg_temp.assert_that(
+  (SELECT signed_by IS NULL AND signed_at IS NULL FROM mizan.settlement_minutes
+    WHERE id='9f000000-bbbb-0000-0000-000000000002'),
+  '6.6bis Le PV est resté NON SIGNÉ malgré les deux tentatives'); END $$;
+
+-- Le trigger d'acte réservé lui-même : même à l'intérieur du cabinet, on
+-- ne signe pas au nom d'un autre. Ici la RLS laisse passer, et c'est la
+-- règle juridique qui refuse — exception attendue, pas un silence.
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
+  UPDATE mizan.settlement_minutes
+     SET signed_by='bbbbbbbb-0000-0000-0000-000000000002'
+   WHERE id='9f000000-bbbb-0000-0000-000000000002'
+$q$, '6.6ter Le médiateur ne peut pas apposer la signature d''un tiers (trigger d''acte réservé)'); END $$;
 
 -- Le professionnel accrédité signe. Lui seul.
 SELECT mizan.set_context('cccccccc-0000-0000-0000-000000000003');
@@ -533,13 +577,13 @@ UPDATE mizan.settlement_minutes
    SET signed_by = 'cccccccc-0000-0000-0000-000000000003'
  WHERE id = '9f000000-bbbb-0000-0000-000000000002';
 
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   (SELECT signed_at IS NOT NULL FROM mizan.settlement_minutes
     WHERE id='9f000000-bbbb-0000-0000-000000000002'),
   '6.7 Le professionnel accrédité signe le PV, la base horodate'); END $$;
 
 -- 6.8 Un PV signé est figé.
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   UPDATE mizan.settlement_minutes SET body_ar='texte réécrit après signature'
    WHERE id='9f000000-bbbb-0000-0000-000000000002'
 $q$, '6.8 Le corps d''un PV signé ne peut plus être réécrit'); END $$;
@@ -557,12 +601,12 @@ DECLARE n bigint;
 BEGIN
   SELECT count(*) INTO n FROM mizan.audit_log
    WHERE dossier_id = 'd0551e40-aaaa-0000-0000-000000000001';
-  PERFORM mizan.assert_that(n >= 4,
+  PERFORM pg_temp.assert_that(n >= 4,
     '7.1 Les actes sur le dossier de A ont été journalisés automatiquement — entrées : ' || n);
 END $$;
 
 -- La signification est tracée avec son auteur et son rôle.
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   EXISTS (SELECT 1 FROM mizan.audit_log
            WHERE dossier_id='d0551e40-aaaa-0000-0000-000000000001'
              AND action='dossier.transition'
@@ -572,33 +616,92 @@ DO $$ BEGIN PERFORM mizan.assert_that(
 
 -- 7.3 Cloisonnement du journal : B ne lit pas le journal de A.
 SELECT mizan.set_context('bbbbbbbb-0000-0000-0000-000000000002');
-DO $$ BEGIN PERFORM mizan.assert_that(
+DO $$ BEGIN PERFORM pg_temp.assert_that(
   NOT EXISTS (SELECT 1 FROM mizan.audit_log
                WHERE org_id='11111111-1111-1111-1111-111111111111'),
   '7.3 B ne voit aucune entrée d''audit de A'); END $$;
 
 -- 7.4 Modification interdite.
 SELECT mizan.set_context('00000000-0000-0000-0000-00000000ad00');
-DO $$ BEGIN PERFORM mizan.assert_refuse(
+DO $$ BEGIN PERFORM pg_temp.assert_refuse(
   $q$UPDATE mizan.audit_log SET action='falsifié' WHERE seq=1$q$,
   '7.4 UPDATE sur le journal d''audit est REFUSÉ (même pour le platform_admin)'); END $$;
 
 -- 7.5 Suppression interdite.
-DO $$ BEGIN PERFORM mizan.assert_refuse(
+DO $$ BEGIN PERFORM pg_temp.assert_refuse(
   $q$DELETE FROM mizan.audit_log WHERE seq=1$q$,
   '7.5 DELETE sur le journal d''audit est REFUSÉ'); END $$;
 
 -- 7.6 TRUNCATE interdit.
-DO $$ BEGIN PERFORM mizan.assert_refuse(
+DO $$ BEGIN PERFORM pg_temp.assert_refuse(
   $q$TRUNCATE mizan.audit_log$q$,
   '7.6 TRUNCATE sur le journal d''audit est REFUSÉ'); END $$;
+
+-- 7.6bis QUELLE COUCHE A REFUSÉ ?
+--   Sous le rôle applicatif, c'est le retrait de privilèges (§13) qui
+--   bloque en premier : le message dit « permission denied ». C'est un
+--   refus réel, mais il ne prouve PAS le second verrou. Or un exploitant
+--   qui, un jour, accorderait UPDATE à mizan_app « pour corriger une
+--   ligne » retomberait sur le trigger. On contrôle donc au catalogue que
+--   ce second verrou est en place et ACTIF — un trigger désactivé
+--   (tgenabled = 'D') passerait inaperçu autrement.
+DO $$
+DECLARE n integer;
+BEGIN
+  SELECT count(*) INTO n FROM pg_trigger t
+    JOIN pg_class c ON c.oid = t.tgrelid
+    JOIN pg_namespace ns ON ns.oid = c.relnamespace
+   WHERE ns.nspname='mizan' AND c.relname='audit_log'
+     AND t.tgname IN ('audit_no_update','audit_no_delete','audit_no_truncate')
+     AND t.tgenabled <> 'D';
+  PERFORM pg_temp.assert_that(n = 3,
+    '7.6bis Les 3 triggers d''inaltérabilité du journal existent et sont ACTIFS (second verrou, indépendant des privilèges) — trouvés : ' || n);
+END $$;
+
+-- 7.6ter Troisième verrou, indépendant des deux autres : aucune politique
+--   RLS d'écriture destructrice n'existe sur audit_log. RLS active sans
+--   politique = refus total, y compris si privilèges ET triggers tombaient.
+DO $$
+DECLARE n integer;
+BEGIN
+  SELECT count(*) INTO n FROM pg_policies
+   WHERE schemaname='mizan' AND tablename='audit_log'
+     AND cmd IN ('UPDATE','DELETE','ALL');
+  PERFORM pg_temp.assert_that(n = 0,
+    '7.6ter Aucune politique RLS d''écriture destructrice sur le journal (troisième verrou) — trouvées : ' || n);
+END $$;
+
+-- 7.7bis CONTRE-ÉPREUVE DU DÉTECTEUR.
+--   « 0 maillon rompu » ne vaut rien si la fonction est incapable de
+--   détecter quoi que ce soit : une fonction renvoyant toujours vide
+--   afficherait le même résultat rassurant. On lui soumet donc une
+--   entrée volontairement falsifiée — recalculée EN MÉMOIRE, sans
+--   toucher au journal réel — et elle DOIT la déclarer incohérente.
+DO $$
+DECLARE n integer;
+BEGIN
+  WITH faux AS (
+    SELECT a.prev_hash, a.occurred_at, a.org_id, a.actor_id, a.actor_role,
+           'ACTION_FALSIFIEE'::text AS action,      -- l'action est réécrite
+           a.object_type, a.object_id, a.dossier_id, a.details, a.entry_hash
+      FROM mizan.audit_log a ORDER BY a.seq LIMIT 1)
+  SELECT count(*) INTO n FROM faux f
+   WHERE f.entry_hash <> encode(sha256(convert_to(
+           COALESCE(f.prev_hash,'GENESIS') || '|' || f.occurred_at::text || '|' ||
+           COALESCE(f.org_id::text,'') || '|' || COALESCE(f.actor_id::text,'') || '|' ||
+           COALESCE(f.actor_role::text,'') || '|' || f.action || '|' ||
+           f.object_type || '|' || COALESCE(f.object_id,'') || '|' ||
+           COALESCE(f.dossier_id::text,'') || '|' || f.details::text,'UTF8')),'hex');
+  PERFORM pg_temp.assert_that(n = 1,
+    '7.7bis CONTRE-ÉPREUVE : une entrée réécrite est bien détectée comme incohérente (le détecteur n''est pas aveugle)');
+END $$;
 
 -- 7.7 La chaîne cryptographique est intacte.
 DO $$
 DECLARE n bigint;
 BEGIN
   SELECT count(*) INTO n FROM mizan.verify_audit_chain();
-  PERFORM mizan.assert_that(n = 0,
+  PERFORM pg_temp.assert_that(n = 0,
     '7.7 La chaîne d''empreintes du journal est intacte (0 maillon rompu) — rompus : ' || n);
 END $$;
 
@@ -610,18 +713,18 @@ END $$;
 
 SELECT mizan.set_context('aaaaaaaa-0000-0000-0000-000000000001');
 
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   UPDATE mizan.piece SET sha256 = repeat('f',64)
    WHERE id='b1ece000-aaaa-0000-0000-000000000001'
 $q$, '8.1 L''empreinte SHA-256 d''une pièce déposée est immuable'); END $$;
 
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.piece (dossier_id, org_id, kind, filename, n_bytes, sha256, storage_uri, uploaded_by)
   VALUES ('d0551e40-aaaa-0000-0000-000000000001','11111111-1111-1111-1111-111111111111',
           'contrat','x.pdf',10,'pas-une-empreinte','s3://x','aaaaaaaa-0000-0000-0000-000000000001')
 $q$, '8.2 Une empreinte malformée est REFUSÉE par le domaine sha256_hex'); END $$;
 
-DO $$ BEGIN PERFORM mizan.assert_refuse($q$
+DO $$ BEGIN PERFORM pg_temp.assert_refuse($q$
   INSERT INTO mizan.piece (dossier_id, org_id, kind, filename, n_bytes, sha256, storage_uri, uploaded_by, gate_ok)
   VALUES ('d0551e40-aaaa-0000-0000-000000000001','11111111-1111-1111-1111-111111111111',
           'contrat','refus.pdf',10,repeat('e',64),'s3://x','aaaaaaaa-0000-0000-0000-000000000001',false)
@@ -644,9 +747,9 @@ BEGIN
   RAISE NOTICE '';
   RAISE NOTICE 'Organisations : %   Pièces : %   Entrées d''audit : %   Maillons rompus : %',
     n_org, n_piece, n_audit, n_rompus;
-  PERFORM mizan.assert_that(n_piece = 2,
+  PERFORM pg_temp.assert_that(n_piece = 2,
     'BILAN : le platform_admin voit les 2 pièces (une par tenant) — obtenu : ' || n_piece);
-  PERFORM mizan.assert_that(n_rompus = 0, 'BILAN : journal d''audit intact');
+  PERFORM pg_temp.assert_that(n_rompus = 0, 'BILAN : journal d''audit intact');
 END $$;
 
 \echo ''

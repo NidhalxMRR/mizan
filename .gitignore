@@ -34,3 +34,6 @@ Thumbs.db
 
 # Index BM25 — reconstruit par `python -m packages.legal.retrieve`
 index.pkl
+
+# Cluster PostgreSQL de vérification (local, jamais versionné)
+.mizan-pg/
