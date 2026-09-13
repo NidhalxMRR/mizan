@@ -55,6 +55,73 @@ export type Etape = {
   article: number;
 };
 
+/**
+ * L'interruption de la prescription (COC art. 396 à 398).
+ *
+ * Recopié de `api/schemas.py` : `ActeInterruptifEntree`, `InterruptionRetenue`,
+ * `ActeSansEffet`, `Interruption`. Rien n'est reformulé ici — les phrases
+ * juridiques (`fondement_fr`, `effet_fr`, `motif_fr`, `resume_fr`) sont
+ * rédigées par le moteur et affichées mot pour mot. Si l'interface les
+ * réécrivait, les deux finiraient par diverger et c'est l'écran qui aurait
+ * tort devant un juge.
+ */
+export type TypeActeInterruptif =
+  | 'sommation_huissier'
+  | 'demande_justice'
+  | 'saisie_conservatoire'
+  | 'reconnaissance_dette'
+  | 'paiement_partiel'
+  | 'arrete_compte';
+
+/** Ce qu'on ENVOIE : un acte invoqué par la PME. */
+export type ActeInterruptifEntree = {
+  type: TypeActeInterruptif;
+  date: string;
+  description: string;
+};
+
+/** Un acte que le moteur a RETENU : il a réellement interrompu le délai. */
+export type InterruptionRetenue = {
+  type: string;
+  libelle_fr: string;
+  date: string;
+  description: string;
+  /** 396 (acte du créancier) ou 397 (reconnaissance du débiteur). */
+  article_cause: number;
+  fondement_fr: string;
+  effet_fr: string;
+  nouvelle_echeance: string;
+  articles: Source[];
+};
+
+/**
+ * Un acte produit mais qui n'a RIEN interrompu, avec son motif.
+ *
+ * C'est le cas le plus dangereux du dossier : une PME croit son délai
+ * relancé alors qu'il ne l'est pas. L'interface ne le masque jamais.
+ */
+export type ActeSansEffet = {
+  type: string;
+  libelle_fr: string;
+  date: string;
+  description: string;
+  motif_fr: string;
+  articles: Source[];
+};
+
+export type Interruption = {
+  interrompu: boolean;
+  date_depart_initiale: string;
+  date_depart_effective: string;
+  echeance_initiale: string;
+  echeance_effective: string;
+  jours_gagnes: number;
+  interruptions: InterruptionRetenue[];
+  actes_sans_effet: ActeSansEffet[];
+  sources: Source[];
+  resume_fr: string;
+};
+
 export type Analyse = {
   montant_tnd: number;
   date_facture: string;
@@ -69,6 +136,12 @@ export type Analyse = {
   jours_francs: number;
   sources: Source[];
   etapes: Etape[];
+  /**
+   * `null` quand aucun acte n'a été transmis : le délai court alors sans
+   * interruption depuis la facture. Ce n'est pas une absence de donnée,
+   * c'est une information.
+   */
+  interruption: Interruption | null;
   origine: 'moteur_deterministe';
 };
 
@@ -254,6 +327,11 @@ export function analyserDossier(demande: {
   montant_tnd: number;
   date_facture: string;
   activite: string;
+  /**
+   * Omis quand la liste est vide : on envoie au moteur exactement ce que la
+   * PME a déclaré, pas un tableau vide qui laisserait croire à une saisie.
+   */
+  actes_interruptifs?: ActeInterruptifEntree[];
 }): Promise<Resultat<Analyse>> {
   return appeler<Analyse>('/dossiers/analyser', {
     methode: 'POST',

@@ -1,6 +1,10 @@
+import Link from 'next/link';
 import { analyserDossier, API_URL, type Analyse } from '@/lib/api';
+import { lireActesDepuisUrl, type ActeIllisible } from '@/lib/actes';
 import { PanneApi, TexteArabe } from '../components/etats';
 import { FormulaireDossier } from './formulaire';
+import { DeclarerActes } from './declarer-actes';
+import { BlocInterruption } from './interruption';
 import { Reformulation } from './reformulation';
 
 export const metadata = { title: 'Mon impayé — Mizan' };
@@ -16,6 +20,11 @@ export const metadata = { title: 'Mon impayé — Mizan' };
  * La reformulation par le modèle, elle, reste un îlot client déclenché à la
  * demande — parce qu'elle est facultative et lente, et surtout parce qu'elle
  * ne doit jamais retarder l'affichage du droit.
+ *
+ * Les actes interruptifs (COC art. 396 à 398) suivent exactement la même
+ * règle : ils voyagent dans l'URL sous `acte=type:date[:texte]`, répétable
+ * (voir `lib/actes.ts`), et sont transmis au moteur dans le même appel
+ * serveur. Aucune interruption n'est calculée ici.
  */
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +33,35 @@ const DEFAUTS = {
   date: '2025-11-03',
   activite: 'menuiserie',
 };
+
+/**
+ * Les deux cas de démonstration, prêts à cliquer.
+ *
+ * Ce ne sont que des URL : elles n'embarquent aucun résultat. Le moteur
+ * recalcule tout à chaque ouverture, et si l'API est éteinte l'écran le dit
+ * au lieu d'afficher un chiffre d'archive. Le second cas est celui qu'un
+ * jury doit voir — la sommation qui arrive trop tard et ne sert à rien.
+ */
+const CAS_DEMO = [
+  {
+    cle: 'ahmed-interrompu',
+    titre: 'Ahmed, menuisier à Sfax — avec une sommation',
+    detail:
+      '9 520,000 DT, facture du 12/05/2026, sommation par huissier du 01/07/2026.',
+    href:
+      '/dossier?montant=9520&date=2026-05-12&activite=menuiserie' +
+      '&acte=sommation_huissier%3A2026-07-01%3ASommation%20de%20payer%20signifi%C3%A9e%20%C3%A0%20la%20soci%C3%A9t%C3%A9%20d%C3%A9bitrice',
+  },
+  {
+    cle: 'creance-prescrite',
+    titre: 'Le piège — une créance de 2020 et une sommation de 2026',
+    detail:
+      '9 520,000 DT, facture du 15/01/2020, sommation du 01/01/2026 : elle arrive après la prescription.',
+    href:
+      '/dossier?montant=9520&date=2020-01-15&activite=menuiserie' +
+      '&acte=sommation_huissier%3A2026-01-01%3ASommation%20signifi%C3%A9e%20apr%C3%A8s%20l%27expiration%20du%20d%C3%A9lai',
+  },
+] as const;
 
 export default async function DossierPage(props: PageProps<'/dossier'>) {
   const params = await props.searchParams;
@@ -36,6 +74,11 @@ export default async function DossierPage(props: PageProps<'/dossier'>) {
   const date = lire('date') ?? DEFAUTS.date;
   const activite = lire('activite') ?? DEFAUTS.activite;
 
+  // `acte` est répétable : on lit le paramètre brut, pas seulement sa
+  // première valeur. Ce qui n'a pas la forme attendue est conservé pour être
+  // signalé — jamais silencieusement écarté.
+  const { actes, illisibles } = lireActesDepuisUrl(params['acte']);
+
   const valeur = Number(montant);
   const saisieValide = Number.isFinite(valeur) && valeur > 0;
 
@@ -47,6 +90,9 @@ export default async function DossierPage(props: PageProps<'/dossier'>) {
         montant_tnd: valeur,
         date_facture: date,
         activite: activite.trim() || 'menuiserie',
+        // Omis quand la PME n'a rien déclaré : le moteur renvoie alors
+        // `interruption: null`, ce qui est une information et non un vide.
+        ...(actes.length > 0 ? { actes_interruptifs: actes } : {}),
       })
     : null;
 
@@ -67,11 +113,23 @@ export default async function DossierPage(props: PageProps<'/dossier'>) {
         </div>
       </div>
 
+      <CasDeDemonstration />
+
       <FormulaireDossier
         montantInitial={montant}
         dateInitiale={date}
         activiteInitiale={activite}
+        actes={actes}
       />
+
+      <DeclarerActes
+        montant={montant}
+        date={date}
+        activite={activite.trim() || 'menuiserie'}
+        actesInitiaux={actes}
+      />
+
+      {illisibles.length > 0 ? <ActesIllisibles liste={illisibles} /> : null}
 
       {!saisieValide ? (
         <div className="bloc-espace">
@@ -95,6 +153,7 @@ export default async function DossierPage(props: PageProps<'/dossier'>) {
       {resultat && resultat.ok ? (
         <>
           <CompteARebours a={resultat.valeur} />
+          <BlocInterruption a={resultat.valeur} />
           <PourquoiCeDelai a={resultat.valeur} />
           {resultat.valeur.huissier_requis ? (
             <EncartHuissier a={resultat.valeur} />
@@ -112,6 +171,61 @@ export default async function DossierPage(props: PageProps<'/dossier'>) {
         </>
       ) : null}
     </>
+  );
+}
+
+/**
+ * Les cas prêts à l'emploi.
+ *
+ * Des `Link`, pas des boutons : la démonstration ne demande aucune saisie au
+ * clavier, et l'adresse reste visible et copiable dans la barre du
+ * navigateur — ce qui permet de la rejouer au `curl` devant le jury.
+ */
+function CasDeDemonstration() {
+  return (
+    <section className="panel bloc-espace">
+      <p className="eyebrow">DEUX CAS PRÊTS — AUCUNE SAISIE NÉCESSAIRE</p>
+      <div className="cas-demo">
+        {CAS_DEMO.map((c) => (
+          <Link key={c.cle} href={c.href} className="cas">
+            <span className="cas-titre">{c.titre}</span>
+            <span className="cas-detail">{c.detail}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Un acte d'URL mal formé.
+ *
+ * Il serait plus simple de l'ignorer. Ce serait aussi la faute la plus grave
+ * possible ici : une PME qui a déclaré sa sommation et ne la voit nulle part
+ * conclura que son délai n'a pas été interrompu. On dit donc précisément ce
+ * qui n'a pas été compris.
+ */
+function ActesIllisibles({ liste }: { liste: ActeIllisible[] }) {
+  return (
+    <section className="panel bloc-espace bloc-panne" role="alert">
+      <p className="eyebrow" style={{ color: 'var(--danger)' }}>
+        {liste.length} ACTE{liste.length > 1 ? 'S' : ''} NON TRANSMIS AU MOTEUR
+      </p>
+      <h2>Une déclaration d&apos;acte n&apos;a pas pu être lue</h2>
+      <p className="panne-motif">
+        Ce qui suit figurait dans l&apos;adresse mais n&apos;a pas la forme
+        attendue. Ces actes n&apos;ont donc PAS été soumis au moteur : le
+        résultat affiché plus bas ne les prend pas en compte.
+      </p>
+      <ul className="liste-nue bloc-espace">
+        {liste.map((i) => (
+          <li key={i.brut} className="acte-illisible">
+            <code className="acte-illisible-brut">acte={i.brut}</code>
+            <span className="acte-illisible-motif">{i.motif}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

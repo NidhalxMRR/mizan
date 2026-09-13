@@ -15,6 +15,19 @@ const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3000';
 const PAGES = [
   ['/', 'accueil'],
   ['/dossier?montant=9520&date=2024-05-12&activite=menuiserie', 'dossier'],
+  // Les deux écrans d'interruption : celui qui gagne du temps, et le piège.
+  // Le second est le plus exposé au débordement — motif long, pastille
+  // « n'a rien interrompu », citation arabe — donc le plus utile à mesurer.
+  [
+    '/dossier?montant=9520&date=2026-05-12&activite=menuiserie' +
+      '&acte=sommation_huissier%3A2026-07-01%3ASommation%20de%20payer%20signifi%C3%A9e%20%C3%A0%20la%20soci%C3%A9t%C3%A9%20d%C3%A9bitrice',
+    'dossier (interruption retenue)',
+  ],
+  [
+    '/dossier?montant=9520&date=2020-01-15&activite=menuiserie' +
+      '&acte=sommation_huissier%3A2026-01-01%3ASommation%20signifi%C3%A9e%20apr%C3%A8s%20l%27expiration%20du%20d%C3%A9lai',
+    'dossier (acte sans effet)',
+  ],
   ['/corpus?q=%D8%A7%D9%84%D8%AA%D9%82%D8%A7%D8%AF%D9%85', 'corpus (fondé)'],
   ['/corpus?q=recette+de+couscous+au+poisson', 'corpus (abstention)'],
 ];

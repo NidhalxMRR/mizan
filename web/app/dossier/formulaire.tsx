@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { urlDossier } from '@/lib/actes';
+import type { ActeInterruptifEntree } from '@/lib/api';
 
 /**
  * Le formulaire du parcours PME.
@@ -15,6 +17,11 @@ import { useState, useTransition } from 'react';
  * L'état d'attente n'est pas simulé : `useTransition` reste en `pending`
  * pendant tout l'aller-retour serveur, c'est-à-dire pendant l'appel réel à
  * l'API.
+ *
+ * Les actes interruptifs déjà déclarés sont réécrits dans la nouvelle URL.
+ * Sans cela, corriger un montant effacerait une sommation sans prévenir —
+ * et l'échéance changerait sous les yeux de la PME sans qu'elle sache
+ * pourquoi.
  */
 
 const SUGGESTIONS = [
@@ -34,10 +41,12 @@ export function FormulaireDossier({
   montantInitial,
   dateInitiale,
   activiteInitiale,
+  actes,
 }: {
   montantInitial: string;
   dateInitiale: string;
   activiteInitiale: string;
+  actes: ActeInterruptifEntree[];
 }) {
   const router = useRouter();
   const [enCours, demarrer] = useTransition();
@@ -48,13 +57,16 @@ export function FormulaireDossier({
 
   function soumettre(evt: React.FormEvent) {
     evt.preventDefault();
-    const params = new URLSearchParams({
-      montant,
-      date,
-      activite: activite.trim() || 'menuiserie',
-    });
     demarrer(() => {
-      router.push(`/dossier?${params}`, { scroll: false });
+      router.push(
+        urlDossier({
+          montant,
+          date,
+          activite: activite.trim() || 'menuiserie',
+          actes,
+        }),
+        { scroll: false },
+      );
     });
   }
 
