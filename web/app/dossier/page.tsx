@@ -3,6 +3,7 @@ import { analyserDossier, API_URL, type Analyse } from '@/lib/api';
 import { lireActesDepuisUrl, type ActeIllisible } from '@/lib/actes';
 import { PanneApi, TexteArabe } from '../components/etats';
 import { FormulaireDossier } from './formulaire';
+import { DeposerPiece } from './deposer-piece';
 import { DeclarerActes } from './declarer-actes';
 import { BlocInterruption } from './interruption';
 import { Reformulation } from './reformulation';
@@ -115,7 +116,30 @@ export default async function DossierPage(props: PageProps<'/dossier'>) {
 
       <CasDeDemonstration />
 
+      {/*
+        Le dépôt est placé AVANT le formulaire, et non en annexe plus bas.
+        L'API savait lire une facture depuis le début, mais rien à l'écran ne
+        le montrait : une capacité qu'on ne voit pas n'existe pas pour celui
+        qui regarde. Le parcours naturel devient donc « je dépose ma facture,
+        le moteur la lit, les champs se remplissent » — et la saisie manuelle
+        reste possible juste en dessous pour qui n'a pas le PDF sous la main.
+      */}
+      <DeposerPiece activite={activite.trim() || 'menuiserie'} actes={actes} />
+
       <FormulaireDossier
+        /*
+          La `key` force le remontage du formulaire quand l'URL change.
+
+          Sans elle, `useState(montantInitial)` ne se réévalue jamais après la
+          première visite : une navigation côté client (report des valeurs
+          lues dans le PDF, ou clic sur un cas de démonstration) met bien à
+          jour l'URL et le calcul rendu côté serveur, mais les champs, eux,
+          gardent l'ancienne saisie. On affichait alors une analyse du 12 mai
+          2026 au-dessus d'un champ date resté au 3 novembre 2025 — deux
+          dates contradictoires à l'écran, et c'est le formulaire qu'un
+          artisan croit.
+        */
+        key={`${montant}|${date}|${activite}`}
         montantInitial={montant}
         dateInitiale={date}
         activiteInitiale={activite}

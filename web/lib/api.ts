@@ -145,6 +145,136 @@ export type Analyse = {
   origine: 'moteur_deterministe';
 };
 
+// --- /dossiers/deposer-piece ------------------------------------------------
+
+/**
+ * Une pièce déposée, telle que l'API l'a lue.
+ *
+ * Recopié de `api/schemas.py` : `PieceDeposee`. Tous les champs d'extraction
+ * sont optionnels côté serveur, et ils le restent ici — c'est volontaire.
+ * Quand le moteur n'a pas trouvé de montant, `montant_tnd` vaut `null` et
+ * l'écran doit dire « non trouvé », jamais afficher 0.
+ *
+ * Le point important pour un juriste : `sha256` est calculé sur les octets
+ * reçus AVANT toute analyse. L'empreinte ne dépend donc pas du résultat de
+ * la lecture — elle existe même quand la pièce est refusée.
+ */
+export type PieceDeposee = {
+  /** Le moteur a-t-il reconnu une facture ? Un refus n'est pas une panne. */
+  acceptee: boolean;
+  nom_fichier: string;
+  /** 64 caractères hexadécimaux. Calculé avant analyse. */
+  sha256: string;
+  taille_octets: number;
+  /** Comment le texte a été obtenu (« text-layer »…). `null` si aucune. */
+  methode_extraction: string | null;
+  /** Rédigé par le moteur quand `acceptee` est faux. Affiché mot pour mot. */
+  motif_refus: string | null;
+  /** Les marqueurs de facture reconnus dans le document. */
+  indices_trouves: string[];
+  /** Ceux qui manquaient. C'est ce qui justifie un refus. */
+  indices_manquants: string[];
+  /**
+   * La ligne du PDF d'où le montant a été tiré, telle quelle.
+   *
+   * C'est la pièce maîtresse de l'écran : elle prouve que le chiffre est
+   * recopié du document et non produit par un modèle. Elle n'est jamais
+   * reformulée à l'affichage.
+   */
+  ligne_montant: string | null;
+  montant_tnd: number | null;
+  date_facture: string | null;
+  dates_trouvees: string[];
+  numero_facture: string | null;
+  client: string | null;
+  avertissement: string;
+};
+
+/**
+ * Dépose un PDF de facture sur `/dossiers/deposer-piece`.
+ *
+ * N'utilise pas `appeler` : ce point d'entrée attend du `multipart/form-data`
+ * et non du JSON. On ne fixe surtout PAS l'en-tête `Content-Type` — c'est le
+ * navigateur qui doit l'écrire, avec la frontière (`boundary`) qu'il vient de
+ * tirer au sort. L'imposer à la main produit une requête que FastAPI rejette
+ * en 422 sans qu'on comprenne pourquoi.
+ *
+ * Une pièce REFUSÉE n'est pas une erreur de transport : l'API répond 200 avec
+ * `acceptee: false` et un motif. Ce cas remonte donc en `ok: true`, et c'est
+ * l'écran qui affiche le refus. Confondre les deux masquerait le motif.
+ */
+export async function deposerPiece(
+  fichier: File,
+): Promise<Resultat<PieceDeposee>> {
+  const url = `${API_URL}/dossiers/deposer-piece`;
+  const corps = new FormData();
+  // Le nom du champ est imposé par l'API : `fichier`.
+  corps.append('fichier', fichier);
+
+  let reponse: Response;
+  try {
+    reponse = await fetch(url, {
+      method: 'POST',
+      body: corps,
+      cache: 'no-store',
+      // Lire un PDF, en extraire le texte et le hacher prend plus de temps
+      // qu'un calcul de prescription. 45 s laissent la marge d'un poste
+      // chargé sans laisser l'écran figé indéfiniment.
+      signal: AbortSignal.timeout(45000),
+    });
+  } catch (erreur) {
+    const cause = erreur instanceof Error ? erreur.message : String(erreur);
+    const expire =
+      erreur instanceof Error &&
+      (erreur.name === 'TimeoutError' || erreur.name === 'AbortError');
+    return {
+      ok: false,
+      echec: {
+        genre: 'injoignable',
+        url,
+        message: expire
+          ? "L'API n'a pas répondu en moins de 45 s pendant la lecture du PDF."
+          : `L'API est injoignable (${cause}).`,
+      },
+    };
+  }
+
+  if (!reponse.ok) {
+    let corpsErreur: unknown = null;
+    try {
+      corpsErreur = await reponse.json();
+    } catch {
+      // Corps non-JSON : le code HTTP reste une information suffisante.
+    }
+    const refus = reponse.status === 400 || reponse.status === 422;
+    return {
+      ok: false,
+      echec: {
+        genre: refus ? 'refus' : 'panne',
+        statut: reponse.status,
+        url,
+        message: motifDuRefus(corpsErreur, reponse.status),
+      },
+    };
+  }
+
+  try {
+    return { ok: true, valeur: (await reponse.json()) as PieceDeposee };
+  } catch (erreur) {
+    return {
+      ok: false,
+      echec: {
+        genre: 'panne',
+        statut: reponse.status,
+        url,
+        message: `Réponse illisible : ${
+          erreur instanceof Error ? erreur.message : String(erreur)
+        }`,
+      },
+    };
+  }
+}
+
 // --- /corpus/rechercher -----------------------------------------------------
 
 export type ArticleTrouve = {

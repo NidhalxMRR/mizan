@@ -1312,3 +1312,290 @@ h2 {
 	font-size: 14px;
 	line-height: 1.62;
 }
+
+/* ===========================================================================
+   DÉPÔT DE LA FACTURE — /dossier
+
+   Un point d'entrée par fichier, là où tout le reste du parcours passe par
+   l'URL. Le traitement visuel doit donc dire deux choses d'un coup d'œil :
+   la pièce a-t-elle été acceptée, et d'où vient le chiffre affiché.
+
+   Aucune couleur en dur, aucune police distante : les mêmes jetons que le
+   reste de l'application. Les blocs sont déclarés pour tenir dans une
+   fenêtre de 479 px sans défilement horizontal — c'est la largeur du poste
+   sur lequel la démonstration se fait.
+   =========================================================================== */
+
+.depot { margin-top: 16px; }
+
+.depot-label {
+	display: block;
+	margin-bottom: 6px;
+	color: var(--ink);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .02em;
+}
+
+/* Le sélecteur de fichier natif est hétérogène d'un navigateur à l'autre.
+   On habille le conteneur et le bouton interne (`::file-selector-button`)
+   plutôt que de masquer le champ derrière un faux bouton : un champ réel
+   reste utilisable au clavier et annoncé correctement par un lecteur
+   d'écran, ce qu'un `<div>` déguisé ne fait jamais. */
+.depot-champ {
+	width: 100%;
+	min-width: 0;
+	background: var(--panel);
+	border: 1px dashed var(--line);
+	border-radius: 7px;
+	padding: 13px 12px;
+	color: var(--ink);
+	font: inherit;
+	font-size: 13px;
+	cursor: pointer;
+}
+.depot-champ:hover:not(:disabled) { border-color: var(--teal); }
+.depot-champ:focus-visible {
+	outline: 3px solid color-mix(in oklab, var(--teal) 30%, transparent);
+	outline-offset: 1px;
+	border-color: var(--teal);
+}
+.depot-champ:disabled { opacity: .55; cursor: not-allowed; }
+
+.depot-champ::file-selector-button {
+	margin-inline-end: 12px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--teal);
+	color: white;
+	font: inherit;
+	font-size: 11px;
+	font-weight: 700;
+	padding: 9px 14px;
+	cursor: pointer;
+}
+
+.depot-attente { margin-top: 16px; }
+
+/* --- Le résultat de la lecture ------------------------------------------- */
+
+.depot-resultat {
+	margin-top: 20px;
+	border: 1px solid var(--line);
+	border-inline-start: 4px solid var(--line);
+	border-radius: 10px;
+	padding: 18px;
+}
+.depot-acceptee {
+	border-inline-start-color: var(--verified);
+	background: color-mix(in oklab, var(--verified) 4%, var(--panel));
+}
+.depot-refusee {
+	border-inline-start-color: var(--danger);
+	background: color-mix(in oklab, var(--danger) 5%, var(--panel));
+}
+
+.depot-nom {
+	margin: 0;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 17px;
+	font-weight: 400;
+	letter-spacing: -.02em;
+	/* Un nom de fichier n'a pas d'espaces où se couper : sans cette règle il
+	   déborde de la carte à 479 px. */
+	overflow-wrap: anywhere;
+}
+
+.depot-faits { margin-top: 16px; }
+
+/* Une valeur que le moteur n'a pas trouvée ne se dit pas comme une valeur.
+   Gris et non rouge : ne pas trouver n'est pas une faute, c'est une
+   abstention — et c'est la couleur que le projet lui réserve. */
+.fait-valeur-absente {
+	color: var(--abstain);
+	font-size: 12px;
+	font-style: italic;
+	font-weight: 500;
+}
+
+/* --- La preuve : la ligne brute du document ------------------------------ */
+
+.depot-preuve {
+	margin-top: 18px;
+	border: 1px solid color-mix(in oklab, var(--verified) 30%, var(--line));
+	border-radius: 8px;
+	background: color-mix(in oklab, var(--verified) 7%, var(--panel));
+	padding: 14px;
+}
+.depot-preuve-titre {
+	margin: 0 0 9px;
+	color: var(--verified);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+/* La ligne est affichée en chasse fixe et telle quelle, espaces compris :
+   c'est une citation du document, pas une phrase de l'interface.
+
+   `inline-block` et non un bloc pleine largeur : à 1280 px, une boîte de
+   830 px pour « NET A PAYER 9,520.000 » se lit comme un champ vide à
+   remplir. Ajustée à son contenu, elle se lit pour ce qu'elle est — une
+   citation. Elle se replie normalement en fenêtre étroite. */
+.depot-preuve-ligne {
+	display: inline-block;
+	max-width: 100%;
+	margin: 0;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 11px 12px;
+	color: var(--ink);
+	font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.depot-preuve-note {
+	margin: 9px 0 0;
+	max-width: 62ch;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+}
+.depot-preuve-absente {
+	margin: 18px 0 0;
+	max-width: 62ch;
+	color: var(--abstain);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.depot-autres-dates {
+	margin: 14px 0 0;
+	max-width: 62ch;
+	color: var(--declared);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+/* --- Les indices de reconnaissance --------------------------------------- */
+
+.depot-indices { margin-top: 16px; }
+.depot-indices-titre {
+	margin: 0 0 8px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+.depot-indices-liste { display: flex; flex-wrap: wrap; gap: 6px; }
+.depot-indice {
+	border-radius: 5px;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 5px 9px;
+}
+.depot-indice-trouve {
+	background: color-mix(in oklab, var(--verified) 12%, transparent);
+	color: var(--verified);
+}
+.depot-indice-manquant {
+	background: color-mix(in oklab, var(--danger) 12%, transparent);
+	color: var(--danger);
+}
+
+/* --- Le refus ------------------------------------------------------------ */
+
+.depot-refus { margin-top: 16px; }
+.depot-refus-motif {
+	margin: 0;
+	max-width: 62ch;
+	color: var(--ink);
+	font-size: 14px;
+	line-height: 1.62;
+}
+.depot-refus-suite {
+	margin: 14px 0 0;
+	max-width: 62ch;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+/* --- L'empreinte --------------------------------------------------------- */
+
+.depot-empreinte {
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid var(--line);
+}
+.depot-empreinte-titre {
+	margin: 0 0 7px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+}
+.depot-empreinte-valeur { margin: 0; }
+.depot-empreinte-valeur code {
+	display: inline-block;
+	background: color-mix(in oklab, var(--navy) 6%, var(--panel));
+	border: 1px solid var(--line);
+	border-radius: 5px;
+	padding: 6px 9px;
+	color: var(--ink);
+	font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+	font-size: 12px;
+	letter-spacing: .02em;
+	/* L'empreinte complète est dans l'attribut `title`. Le curseur d'aide
+	   signale qu'il y a quelque chose à survoler. */
+	cursor: help;
+	overflow-wrap: anywhere;
+}
+.depot-empreinte-note {
+	margin: 9px 0 0;
+	max-width: 62ch;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+}
+
+.depot-avertissement {
+	margin: 16px 0 0;
+	max-width: 62ch;
+	color: var(--abstain);
+	font-size: 11px;
+	font-style: italic;
+	line-height: 1.6;
+}
+
+/* --- Les suites ---------------------------------------------------------- */
+
+.depot-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 18px;
+}
+.depot-actions-note {
+	margin: 9px 0 0;
+	max-width: 62ch;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+}
+
+/* À 479 px, deux boutons côte à côte se coupent en plein mot. Ils passent
+   l'un sous l'autre et prennent toute la largeur. */
+@media (max-width: 560px) {
+	.depot-resultat { padding: 14px; }
+	.depot-actions { flex-direction: column; align-items: stretch; }
+	.depot-actions .primary-button,
+	.depot-actions .secondary-button { width: 100%; }
+	.depot-champ::file-selector-button { margin-inline-end: 9px; padding: 8px 11px; }
+}
