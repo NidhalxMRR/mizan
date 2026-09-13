@@ -33,6 +33,7 @@ from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from packages.legal import doc_gate, gate, invoice, retrieve
+from packages.legal.interruption import ActeImpossible
 from packages.legal.legal_engine import DateImpossible, assess
 from packages.models.client import ClientLLM, ModeleIndisponible
 
@@ -115,18 +116,30 @@ def _parse_date(valeur: str | None, champ: str) -> date | None:
 
 
 def _analyser(montant: float, date_facture: str, activite: str,
-              aujourdhui: str | None) -> Analyse:
+              aujourdhui: str | None, actes: list | None = None) -> Analyse:
     """Appelle le moteur et traduit ses refus en erreurs HTTP propres.
 
     Le moteur lève `DateImpossible` sur une facture datée de demain. C'est une
     donnée d'entrée invalide, pas une panne du serveur : 400, avec le motif du
     moteur mot pour mot — il est déjà rédigé pour un lecteur non juriste.
+
+    `ActeImpossible` suit la même logique : un acte interruptif antérieur à la
+    facture ou daté du futur est une incohérence de saisie. Le moteur refuse de
+    calculer plutôt que de produire une échéance fausse, et le motif remonte
+    tel quel au client.
     """
     jour = _parse_date(aujourdhui, "aujourdhui")
     _parse_date(date_facture, "date_facture")
+    actes_bruts = [
+        a.model_dump() if hasattr(a, "model_dump") else dict(a)
+        for a in (actes or [])
+    ]
     try:
-        a = assess(montant, date_facture, activite, today=jour)
+        a = assess(montant, date_facture, activite, today=jour,
+                   actes=actes_bruts or None)
     except DateImpossible as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except ActeImpossible as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
     d = a.to_dict()
@@ -144,6 +157,7 @@ def _analyser(montant: float, date_facture: str, activite: str,
         jours_francs=d["grace_days"],
         sources=d["sources"],
         etapes=d["steps"],
+        interruption=d["interruption"],
     )
 
 
@@ -315,9 +329,19 @@ def _charger_index() -> list:
 @app.post("/dossiers/analyser", response_model=Analyse,
           summary="Évaluation déterministe d'un impayé")
 def analyser(demande: DemandeAnalyse) -> Analyse:
+    """Calcule la prescription, interruptions comprises.
+
+    Si `actes_interruptifs` est fourni, le champ `interruption` de la réponse
+    dit si le délai a été interrompu, par quel acte, à quelle date, et de
+    combien de jours la créance a été prolongée — chaque interruption portant
+    les articles 396 ou 397 qui la fondent et l'article 398 qui en règle
+    l'effet. Un acte postérieur à l'expiration apparaît dans
+    `actes_sans_effet`, avec le motif : la créance reste prescrite.
+    """
     return _analyser(
         demande.montant_tnd, demande.date_facture,
         demande.activite, demande.aujourdhui,
+        demande.actes_interruptifs,
     )
 
 

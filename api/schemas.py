@@ -32,6 +32,31 @@ class Sante(BaseModel):
 
 # --- /dossiers/analyser -----------------------------------------------------
 
+class ActeInterruptifEntree(BaseModel):
+    """Un acte invoqué comme ayant interrompu la prescription (COC 396-398)."""
+    type: Literal[
+        "sommation_huissier",
+        "demande_justice",
+        "saisie_conservatoire",
+        "reconnaissance_dette",
+        "paiement_partiel",
+        "arrete_compte",
+    ] = Field(
+        description="Nature de l'acte. Les trois premiers émanent du créancier "
+                    "(COC art. 396), les trois derniers du débiteur "
+                    "(COC art. 397).",
+        json_schema_extra={"example": "sommation_huissier"},
+    )
+    date: str = Field(
+        description="Date de l'acte, au format AAAA-MM-JJ.",
+        json_schema_extra={"example": "2026-09-01"},
+    )
+    description: str = Field(
+        default="",
+        description="Précision libre : nom de l'huissier, référence du reçu…",
+    )
+
+
 class DemandeAnalyse(BaseModel):
     montant_tnd: float = Field(
         gt=0, description="Montant réclamé en dinars tunisiens.",
@@ -49,6 +74,13 @@ class DemandeAnalyse(BaseModel):
         default=None,
         description="Date de référence (AAAA-MM-JJ). Sert aux tests et aux "
                     "démonstrations reproductibles ; par défaut, la date du jour.",
+    )
+    actes_interruptifs: list[ActeInterruptifEntree] = Field(
+        default_factory=list,
+        description="Actes ayant interrompu la prescription (COC art. 396 et "
+                    "397). Chaque interruption valide annule le temps écoulé "
+                    "et fait repartir le délai à zéro (COC art. 398). Un acte "
+                    "postérieur à l'expiration n'interrompt rien.",
     )
 
 
@@ -69,6 +101,53 @@ class Etape(BaseModel):
     article: int
 
 
+class InterruptionRetenue(BaseModel):
+    """Une interruption effectivement retenue par le moteur."""
+    type: str
+    libelle_fr: str
+    date: str
+    description: str = ""
+    article_cause: int = Field(
+        description="396 (acte du créancier) ou 397 (reconnaissance du débiteur)."
+    )
+    fondement_fr: str
+    effet_fr: str
+    nouvelle_echeance: str
+    articles: list[Source]
+
+
+class ActeSansEffet(BaseModel):
+    """Un acte produit mais qui n'a rien interrompu, avec le motif."""
+    type: str
+    libelle_fr: str
+    date: str
+    description: str = ""
+    motif_fr: str
+    articles: list[Source]
+
+
+class Interruption(BaseModel):
+    """Le sort de la prescription : interrompue ou non, par quoi, de combien."""
+    interrompu: bool = Field(
+        description="Le délai a-t-il été interrompu par au moins un acte valide ?"
+    )
+    date_depart_initiale: str
+    date_depart_effective: str = Field(
+        description="Date à partir de laquelle le délai court réellement, "
+                    "après application de COC art. 398."
+    )
+    echeance_initiale: str
+    echeance_effective: str
+    jours_gagnes: int = Field(
+        description="Nombre de jours dont la créance a été prolongée par "
+                    "l'interruption. Zéro si aucun acte n'a produit d'effet."
+    )
+    interruptions: list[InterruptionRetenue]
+    actes_sans_effet: list[ActeSansEffet]
+    sources: list[Source]
+    resume_fr: str
+
+
 class Analyse(BaseModel):
     montant_tnd: float
     date_facture: str
@@ -83,6 +162,12 @@ class Analyse(BaseModel):
     jours_francs: int
     sources: list[Source]
     etapes: list[Etape]
+    interruption: Interruption | None = Field(
+        default=None,
+        description="Renseigné uniquement si des actes interruptifs ont été "
+                    "transmis. Absent sinon : le délai court alors sans "
+                    "interruption depuis la facture.",
+    )
     origine: Literal["moteur_deterministe"] = "moteur_deterministe"
 
 

@@ -7,6 +7,11 @@ a claim, the engine says so instead of guessing.
 from dataclasses import dataclass, field, asdict
 from datetime import date, timedelta
 
+try:  # le moteur s'importe aussi bien comme paquet que par sys.path direct
+    from . import interruption
+except ImportError:  # pragma: no cover
+    import interruption  # type: ignore
+
 # --- Legal constants, each tied to its source article -----------------------
 # COC art. 403: actions for the price of goods delivered by sellers and
 #   workshop owners prescribe after 365 days.
@@ -109,6 +114,10 @@ class Assessment:
     regime_reason_fr: str = ''
     sources: list = field(default_factory=list)
     steps: list = field(default_factory=list)
+    # Interruption de la prescription (COC 396-398). Vaut None quand aucun acte
+    # n'a été produit : le contrat de sortie d'origine est inchangé pour les
+    # appelants qui ne connaissent pas ce champ.
+    interruption: dict | None = None
 
     def to_dict(self):
         d = asdict(self)
@@ -131,8 +140,28 @@ class DateImpossible(ValueError):
     """Une date que le droit ne peut pas traiter comme point de départ."""
 
 
-def assess(amount_tnd, invoice_date, activity='menuiserie', today=None):
-    """Compute where the creditor stands, with a citation behind every claim."""
+def _deadline_from(start, is_goods):
+    """Échéance à partir d'un point de départ, selon le régime.
+
+    Extrait tel quel du calcul d'origine pour être réutilisé par le mécanisme
+    d'interruption : quand le délai repart à zéro (COC art. 398), il repart
+    selon le MÊME régime, simplement depuis une autre date.
+    """
+    if is_goods:
+        return start + timedelta(days=PRESCRIPTION_GOODS_DAYS)
+    return date(start.year + PRESCRIPTION_GENERAL_YEARS,
+                start.month, start.day)
+
+
+def assess(amount_tnd, invoice_date, activity='menuiserie', today=None,
+           actes=None):
+    """Compute where the creditor stands, with a citation behind every claim.
+
+    `actes` est FACULTATIF : sans acte interruptif, le calcul est strictement
+    celui d'avant — même échéance, mêmes sources, même ordre. Avec des actes,
+    la prescription est recalculée à partir de la dernière interruption valide
+    (COC art. 396 à 398) et les articles correspondants s'ajoutent aux sources.
+    """
     today = today or date.today()
     if isinstance(invoice_date, str):
         invoice_date = date.fromisoformat(invoice_date)
@@ -170,13 +199,26 @@ def assess(amount_tnd, invoice_date, activity='menuiserie', today=None):
     is_known = activity.lower() in KNOWN_ACTIVITIES
     if is_goods:
         regime = 'goods_1y'
-        deadline = invoice_date + timedelta(days=PRESCRIPTION_GOODS_DAYS)
         src_presc = SOURCES['prescription_goods']
     else:
         regime = 'general_15y'
-        deadline = date(invoice_date.year + PRESCRIPTION_GENERAL_YEARS,
-                        invoice_date.month, invoice_date.day)
         src_presc = SOURCES['prescription_general']
+    deadline = _deadline_from(invoice_date, is_goods)
+
+    # --- Interruption de la prescription (COC art. 396 à 398) ---------------
+    # Sans acte produit, rien de ce qui suit ne s'exécute et le résultat est
+    # identique au calcul d'origine, au champ `interruption=None` près.
+    interruption_dict = None
+    sources_interruption = []
+    if actes:
+        res = interruption.appliquer(
+            invoice_date, actes,
+            regime_jours=lambda d: _deadline_from(d, is_goods),
+            today=today,
+        )
+        deadline = date.fromisoformat(res.echeance_effective)
+        interruption_dict = res.to_dict()
+        sources_interruption = res.sources
 
     days_left = (deadline - today).days
     needs_bailiff = amount_tnd > BAILIFF_THRESHOLD_TND
@@ -230,6 +272,9 @@ def assess(amount_tnd, invoice_date, activity='menuiserie', today=None):
     if needs_bailiff:
         sources.insert(1, SOURCES['bailiff_notice'])
     sources.append(SOURCES['payment_order'])
+    # Les articles de l'interruption viennent en fin de liste : le régime de
+    # prescription reste la source principale, l'interruption l'amende.
+    sources.extend(sources_interruption)
 
     return Assessment(
         amount_tnd=amount_tnd,
@@ -245,4 +290,5 @@ def assess(amount_tnd, invoice_date, activity='menuiserie', today=None):
         grace_days=NOTICE_GRACE_DAYS,
         sources=sources,
         steps=steps,
+        interruption=interruption_dict,
     )
