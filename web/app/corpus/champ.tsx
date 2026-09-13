@@ -38,7 +38,7 @@ export function ChampRecherche({ requeteInitiale }: { requeteInitiale: string })
 
   return (
     <section className="panel">
-      <p className="eyebrow">RECHERCHE PLEIN TEXTE — BM25</p>
+      <p className="eyebrow">RECHERCHE DANS LE TEXTE DES ARTICLES</p>
       <form
         className="recherche"
         onSubmit={(e) => {

@@ -85,7 +85,7 @@ export default async function CorpusPage(props: PageProps<'/corpus'>) {
 
       <p className="etat-source bloc-espace">
         Recherche servie par <code>{API_URL}/corpus/rechercher</code> — index
-        BM25 local, aucun appel réseau sortant.
+        Recherche effectuée sur ce poste, aucun appel vers l’extérieur.
       </p>
     </>
   );
@@ -227,7 +227,7 @@ function Article({ a, fonde }: { a: ArticleTrouve; fonde: boolean }) {
           </p>
         </div>
         <div className="article-meta">
-          <span className="article-score" title="Score BM25 retourné par l'index">
+          <span className="article-score" title="Force de la correspondance entre votre question et cet article">
             score {a.score.toFixed(2)}
           </span>
           <code className="article-id">{a.id}</code>

@@ -100,7 +100,7 @@ function EtatService({ sante }: { sante: Sante }) {
           valeur={sante.articles_indexes.toLocaleString('fr-FR')}
           detail={
             indexOk
-              ? 'Index BM25 chargé en mémoire'
+              ? 'Corpus chargé et interrogeable'
               : "L'index n'est pas chargé"
           }
           etat={indexOk ? 'verified' : 'abstain'}
