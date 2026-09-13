@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Mizan — architecture applicative",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "components": [
+    {
+      "id": "msme",
+      "type": "external",
+      "label": "Entreprise",
+      "sublabel": "demandeur",
+      "pos": [
+        40,
+        120
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "pro",
+      "type": "external",
+      "label": "Professionnel accrédité",
+      "sublabel": "médiateur · arbitre",
+      "pos": [
+        40,
+        320
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "clerk",
+      "type": "external",
+      "label": "Greffier",
+      "sublabel": "tribunal de commerce",
+      "pos": [
+        40,
+        520
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "huissier",
+      "type": "external",
+      "label": "Huissier de justice",
+      "sublabel": "عدل منفذ",
+      "pos": [
+        40,
+        720
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Next.js 16",
+      "sublabel": "RTL / LTR",
+      "pos": [
+        330,
+        420
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI",
+      "sublabel": "API unique",
+      "pos": [
+        620,
+        420
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "identite",
+      "type": "security",
+      "label": "Identité & signature",
+      "sublabel": "paire de clés",
+      "pos": [
+        910,
+        120
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "moteur",
+      "type": "backend",
+      "label": "Moteur juridique",
+      "sublabel": "déterministe",
+      "pos": [
+        910,
+        320
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "recherche",
+      "type": "backend",
+      "label": "Recherche hybride",
+      "sublabel": "BM25 + bge-m3",
+      "pos": [
+        910,
+        520
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "ecma",
+      "type": "backend",
+      "label": "E-CMA",
+      "sublabel": "صلح · COC 1458",
+      "pos": [
+        910,
+        720
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "corpus",
+      "type": "database",
+      "label": "Corpus juridique",
+      "sublabel": "4 087 articles",
+      "pos": [
+        1150,
+        420
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "isolation par org.",
+      "pos": [
+        1150,
+        120
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "cloud",
+      "label": "Qwen3-8B",
+      "sublabel": "Modal ↔ RTX 4050",
+      "pos": [
+        1150,
+        720
+      ],
+      "size": [
+        150,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Noyau déterministe — aucun modèle de langage",
+      "wraps": [
+        "moteur",
+        "corpus"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "msme",
+      "to": "web"
+    },
+    {
+      "id": "c2",
+      "from": "pro",
+      "to": "web"
+    },
+    {
+      "id": "c3",
+      "from": "clerk",
+      "to": "web"
+    },
+    {
+      "id": "c4",
+      "from": "huissier",
+      "to": "web"
+    },
+    {
+      "id": "c5",
+      "from": "web",
+      "to": "api",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c6",
+      "from": "api",
+      "to": "identite"
+    },
+    {
+      "id": "c7",
+      "from": "api",
+      "to": "moteur"
+    },
+    {
+      "id": "c8",
+      "from": "api",
+      "to": "recherche"
+    },
+    {
+      "id": "c9",
+      "from": "api",
+      "to": "ecma"
+    },
+    {
+      "id": "c10",
+      "from": "identite",
+      "to": "pg"
+    },
+    {
+      "id": "c11",
+      "from": "moteur",
+      "to": "corpus"
+    },
+    {
+      "id": "c12",
+      "from": "recherche",
+      "to": "corpus"
+    },
+    {
+      "id": "c13",
+      "from": "ecma",
+      "to": "llm"
+    },
+    {
+      "id": "c14",
+      "from": "llm",
+      "to": "ecma"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "L'IA propose, le droit dispose",
+      "items": [
+        "Aucun modèle ne calcule un délai ni ne cite un article",
+        "Chaque article est relu dans le corpus avant affichage",
+        "Introuvable : le moteur s'abstient au lieu d'inventer"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Deux hébergements, une interface",
+      "items": [
+        "Qwen3-8B sur Modal via vLLM — 7,3 s pour 150 tokens, mesuré",
+        "RTX 4050 locale via llama.cpp",
+        "API compatible OpenAI des deux côtés : seule l'URL change"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chaque acte à son acteur",
+      "items": [
+        "Seul l'huissier signifie une mise en demeure — CPC art. 5 et 60",
+        "Seul le professionnel accrédité signe un PV de conciliation",
+        "Séparation prouvée par 9 tests, pas par convention"
+      ]
+    }
+  ]
+}

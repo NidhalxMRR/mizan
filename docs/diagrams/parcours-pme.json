@@ -1,0 +1,91 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Mizan — parcours de la PME",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "lanes": [
+    { "id": "pme", "label": "PME demandeuse" },
+    { "id": "relance", "label": "Reprise du dossier", "variant": "exception" },
+    { "id": "amiable", "label": "Voie amiable — E-CMA" },
+    { "id": "mizan", "label": "Plateforme Mizan" },
+    { "id": "formelle", "label": "Voie formelle" }
+  ],
+  "phases": [
+    { "id": "ph_depot", "label": "Dépôt", "fromCol": 0, "toCol": 1 },
+    { "id": "ph_analyse", "label": "Recevabilité", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "ph_issue", "label": "Résolution", "fromCol": 4, "toCol": 5 }
+  ],
+  "groups": [
+    { "id": "g_amiable", "label": "Conciliation en ligne", "lane": "amiable", "fromCol": 4, "toCol": 5, "variant": "dashed" },
+    { "id": "g_formelle", "label": "Exécution", "lane": "formelle", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["connexion", "depot", "analyse", "gate", "session", "pv"],
+  "semanticChecks": {
+    "allowedRoots": ["connexion"],
+    "allowedTerminals": ["pv", "greffe"],
+    "requiredEdges": [
+      { "from": "projet", "to": "huissier" },
+      { "from": "huissier", "to": "greffe" }
+    ],
+    "requiredPaths": [
+      { "from": "session", "to": "huissier" }
+    ]
+  },
+  "nodes": [
+    { "id": "connexion", "lane": "pme", "col": 0, "type": "security", "label": "Connexion PME", "sublabel": "identité · paire de clés", "width": 144 },
+    { "id": "depot", "lane": "pme", "col": 1, "type": "frontend", "label": "Dépôt des pièces", "sublabel": "facture · BL · contrat", "width": 144 },
+    { "id": "manquante", "lane": "relance", "col": 2, "type": "messagebus", "label": "Pièce manquante", "sublabel": "retour au dépôt", "width": 144 },
+    { "id": "analyse", "lane": "mizan", "col": 2, "type": "backend", "label": "Analyse déterministe", "sublabel": "prescription · articles", "width": 144 },
+    { "id": "gate", "lane": "mizan", "col": 3, "type": "security", "label": "Contrôle du dossier", "sublabel": "complet · non prescrit", "tag": "décision", "width": 144 },
+    { "id": "session", "lane": "amiable", "col": 4, "type": "backend", "label": "Session E-CMA", "sublabel": "projet d'accord", "width": 144 },
+    { "id": "pv", "lane": "amiable", "col": 5, "type": "backend", "label": "PV de conciliation", "sublabel": "signé par le pro", "width": 144 },
+    { "id": "projet", "lane": "mizan", "col": 4, "type": "backend", "label": "Projet d'acte", "sublabel": "généré, non signifié", "width": 144 },
+    { "id": "huissier", "lane": "formelle", "col": 4, "type": "external", "label": "Huissier de justice", "sublabel": "contrôle et signifie", "width": 144 },
+    { "id": "greffe", "lane": "formelle", "col": 5, "type": "external", "label": "Greffier du tribunal", "sublabel": "dossier transmis", "width": 144 }
+  ],
+  "edges": [
+    { "id": "e_connexion_depot", "from": "connexion", "to": "depot", "variant": "default" },
+    { "id": "e_depot_analyse", "from": "depot", "to": "analyse", "variant": "emphasis" },
+    { "id": "e_analyse_gate", "from": "analyse", "to": "gate", "variant": "default" },
+    { "id": "e_gate_manquante", "from": "gate", "to": "manquante", "label": "incomplet", "variant": "security", "role": "error" },
+    { "id": "e_manquante_depot", "from": "manquante", "to": "depot", "variant": "dashed", "role": "branch" },
+    { "id": "e_gate_session", "from": "gate", "to": "session", "label": "voie amiable", "variant": "emphasis" },
+    { "id": "e_session_pv", "from": "session", "to": "pv", "label": "accord", "variant": "emphasis" },
+    { "id": "e_gate_projet", "from": "gate", "to": "projet", "label": "voie formelle", "variant": "default" },
+    { "id": "e_session_projet", "from": "session", "to": "projet", "label": "échec", "variant": "dashed", "role": "error" },
+    { "id": "e_projet_huissier", "from": "projet", "to": "huissier", "variant": "emphasis" },
+    { "id": "e_huissier_greffe", "from": "huissier", "to": "greffe", "variant": "default" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "La recevabilité avant tout",
+      "items": [
+        "Le délai de prescription est calculé par un moteur déterministe",
+        "Un dossier incomplet revient au dépôt au lieu d'avancer",
+        "Chaque article cité est relu dans le corpus avant affichage"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "La PME choisit sa voie",
+      "items": [
+        "Voie amiable : conciliation E-CMA avec un professionnel accrédité",
+        "Voie formelle : projet de mise en demeure remis à un huissier",
+        "L'échec de la conciliation bascule vers la voie formelle"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chaque acte à son acteur",
+      "items": [
+        "Mizan génère un projet de mise en demeure, ne le signifie jamais",
+        "Seul l'huissier de justice signifie — CPC art. 5 et 60",
+        "Seul le professionnel accrédité signe le PV de conciliation"
+      ]
+    }
+  ]
+}

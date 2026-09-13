@@ -1,0 +1,33 @@
+# Dépendances
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Artéfacts de contrôle qualité des diagrammes
+# (on versionne la source .json et le rendu .html, pas les captures)
+*.visual-check.*
+
+# Secrets — rien de tout ceci ne doit partir sur GitHub
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_ed25519*
+
+# Modèles (plusieurs Go, jamais dans git)
+*.gguf
+*.safetensors
+
+# Système
+.DS_Store
+Thumbs.db
+*.log
+.tmp/
